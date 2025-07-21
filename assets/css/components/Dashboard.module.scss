@@ -1,0 +1,39 @@
+.dashboard {
+  display: flex;
+  gap: 2rem;
+  min-height: 600px;
+  background: #f9f9f9;
+  padding: 1rem;
+}
+
+.sidebar {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mainContent {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.noTabs {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar {
+    flex: none;
+  }
+}
