@@ -1,3 +1,4 @@
+// assets/js/components/tabs/GeneralMeta.jsx
 import styles from "@css/components/tabs/GeneralMeta.module.scss";
 
 const GeneralMeta = ({ tabId, config }) => {

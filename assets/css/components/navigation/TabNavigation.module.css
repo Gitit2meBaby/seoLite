@@ -36,6 +36,7 @@
   transition: all 0.2s ease;
   text-align: left;
   position: relative;
+  font-size: 14px;
 }
 .tabButton:hover, .tabButton.hovered {
   background: #f5f5f5;

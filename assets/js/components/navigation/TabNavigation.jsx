@@ -1,8 +1,11 @@
+// assets/js/components/navigation/TabNavigation.jsx
 import { useState } from "react";
 import styles from "@css/components/navigation/TabNavigation.module.scss";
 
 const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
   const [hoveredTab, setHoveredTab] = useState(null);
+
+  console.log("TabNavigation rendered with tabs:", Object.keys(tabs));
 
   return (
     <nav className={styles.tabNavigation}>
@@ -20,8 +23,10 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
               onMouseLeave={() => setHoveredTab(null)}
               title={tab.description}
             >
+              {/* WordPress dashicon */}
               <span className={`${styles.icon} ${tab.icon}`}></span>
               <span className={styles.label}>{tab.label}</span>
+              {/* Active indicator dot */}
               {activeTab === tabId && (
                 <span className={styles.activeIndicator}></span>
               )}
@@ -30,6 +35,7 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
         ))}
       </ul>
 
+      {/* Tooltip that shows on hover */}
       {hoveredTab && tabs[hoveredTab] && (
         <div className={styles.tabTooltip}>
           <strong>{tabs[hoveredTab].label}</strong>

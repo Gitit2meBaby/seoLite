@@ -1,17 +1,9 @@
-import { Suspense, lazy } from "react";
-import LoadingSpinner from "../common/LoadingSpinner";
+// assets/js/components/navigation/TabContent.jsx
 import styles from "@css/components/navigation/TabContent.module.scss";
 
-// Lazy load tab components for better performance
-const tabComponents = {
-  GeneralMeta: lazy(() => import("../tabs/GeneralMeta")),
-  SocialMedia: lazy(() => import("../tabs/SocialMedia")),
-  SchemaMarkup: lazy(() => import("../tabs/SchemaMarkup")),
-  Analytics: lazy(() => import("../tabs/Analytics")),
-  TechnicalSEO: lazy(() => import("../tabs/TechnicalSEO")),
-};
-
 const TabContent = ({ activeTab, tabConfig }) => {
+  console.log("TabContent rendered for tab:", activeTab, tabConfig);
+
   if (!activeTab || !tabConfig) {
     return (
       <div className={styles.noContent}>
@@ -21,17 +13,98 @@ const TabContent = ({ activeTab, tabConfig }) => {
     );
   }
 
-  const TabComponent = tabComponents[tabConfig.component];
+  // For now, we'll show placeholder content for each tab
+  // Later we'll replace this with actual React components
+  const getTabContent = (componentName) => {
+    switch (componentName) {
+      case "GeneralMeta":
+        return (
+          <div>
+            <p>This will contain:</p>
+            <ul>
+              <li>Page titles</li>
+              <li>Meta descriptions</li>
+              <li>Meta keywords</li>
+              <li>Robots settings</li>
+            </ul>
+            <p>
+              <em>Forms coming in next step...</em>
+            </p>
+          </div>
+        );
 
-  if (!TabComponent) {
-    return (
-      <div className={styles.error}>
-        <h2>Component Not Found</h2>
-        <p>The component "{tabConfig.component}" could not be loaded.</p>
-        <p>Available components: {Object.keys(tabComponents).join(", ")}</p>
-      </div>
-    );
-  }
+      case "SocialMedia":
+        return (
+          <div>
+            <p>This will contain:</p>
+            <ul>
+              <li>Open Graph tags</li>
+              <li>Twitter Card settings</li>
+              <li>Social media images</li>
+            </ul>
+            <p>
+              <em>Forms coming in next step...</em>
+            </p>
+          </div>
+        );
+
+      case "SchemaMarkup":
+        return (
+          <div>
+            <p>This will contain:</p>
+            <ul>
+              <li>Schema.org markup</li>
+              <li>Business information</li>
+              <li>Article markup</li>
+            </ul>
+            <p>
+              <em>Forms coming in next step...</em>
+            </p>
+          </div>
+        );
+
+      case "Analytics":
+        return (
+          <div>
+            <p>This will contain:</p>
+            <ul>
+              <li>Google Analytics tracking</li>
+              <li>Google Tag Manager</li>
+              <li>Custom tracking codes</li>
+            </ul>
+            <p>
+              <em>Forms coming in next step...</em>
+            </p>
+          </div>
+        );
+
+      case "TechnicalSEO":
+        return (
+          <div>
+            <p>This will contain:</p>
+            <ul>
+              <li>Canonical URLs</li>
+              <li>Robots.txt settings</li>
+              <li>XML sitemaps</li>
+            </ul>
+            <p>
+              <em>Forms coming in next step...</em>
+            </p>
+          </div>
+        );
+
+      default:
+        return (
+          <div>
+            <p>Component "{componentName}" not found.</p>
+            <p>
+              Available components: GeneralMeta, SocialMedia, SchemaMarkup,
+              Analytics, TechnicalSEO
+            </p>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className={styles.tabContent}>
@@ -43,11 +116,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
         <p className={styles.description}>{tabConfig.description}</p>
       </header>
 
-      <div className={styles.tabBody}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <TabComponent tabId={activeTab} config={tabConfig} />
-        </Suspense>
-      </div>
+      <div className={styles.tabBody}>{getTabContent(tabConfig.component)}</div>
     </div>
   );
 };

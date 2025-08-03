@@ -1,3 +1,4 @@
+// assets/js/components/tabs/SocialMedia.jsx
 import styles from "@css/components/tabs/SocialMedia.module.scss";
 
 const SocialMedia = ({ tabId, config }) => {

@@ -1,0 +1,66 @@
+// assets/css/components/navigation/TabContent.module.scss
+.tabContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabHeader {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+    color: #333;
+  }
+}
+
+.icon {
+  margin-right: 0.75rem;
+  font-size: 1.3rem;
+  color: #0073aa;
+
+  &:before {
+    color: inherit;
+  }
+}
+
+.description {
+  margin: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.tabBody {
+  flex: 1;
+  padding: 2rem;
+
+  ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  em {
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+.noContent {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #666;
+
+  h2 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+}
