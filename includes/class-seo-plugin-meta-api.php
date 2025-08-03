@@ -145,13 +145,29 @@ class SEO_Plugin_Meta_API {
         $page_id = $request['page_id'];
         $settings = $request->get_json_params();
         
+        // Debug logging
+        error_log("SEO Plugin: Saving settings for page: {$page_id}");
+        error_log("SEO Plugin: Raw settings: " . print_r($settings, true));
+        
         // Validate and sanitize the settings
         $clean_settings = $this->sanitize_meta_settings($settings);
+        error_log("SEO Plugin: Clean settings: " . print_r($clean_settings, true));
         
         // Save to WordPress options table
-        $result = update_option("seo_plugin_page_{$page_id}", $clean_settings);
+        $option_name = "seo_plugin_page_{$page_id}";
+        $result = update_option($option_name, $clean_settings);
         
-        if ($result !== false) {
+        error_log("SEO Plugin: update_option result: " . ($result ? 'true' : 'false'));
+        error_log("SEO Plugin: Option name: {$option_name}");
+        
+        // Note: update_option returns false if the value is the same as what's already stored
+        // So we should check if the option actually exists now
+        $saved_value = get_option($option_name, null);
+        $actually_saved = ($saved_value !== null);
+        
+        error_log("SEO Plugin: Verification - option exists: " . ($actually_saved ? 'true' : 'false'));
+        
+        if ($actually_saved) {
             return rest_ensure_response([
                 'success' => true,
                 'message' => 'Meta settings saved successfully'
@@ -159,7 +175,7 @@ class SEO_Plugin_Meta_API {
         } else {
             return rest_ensure_response([
                 'success' => false,
-                'message' => 'Failed to save meta settings'
+                'message' => 'Failed to save meta settings - option not created'
             ]);
         }
     }
@@ -203,7 +219,7 @@ class SEO_Plugin_Meta_API {
         $clean = [];
         
         // Text fields that should be sanitized as text
-        $text_fields = ['meta_title', 'meta_description', 'meta_keywords'];
+        $text_fields = ['meta_title', 'meta_description', 'meta_keywords', 'meta_author', 'meta_copyright', 'generator'];
         foreach ($text_fields as $field) {
             if (isset($settings[$field])) {
                 $clean[$field] = sanitize_text_field($settings[$field]);
@@ -226,10 +242,39 @@ class SEO_Plugin_Meta_API {
                 ? $settings['robots_follow'] : 'follow';
         }
         
+        if (isset($settings['robots_advanced'])) {
+            $allowed_robots = ['', 'noarchive', 'nosnippet', 'noimageindex', 'notranslate', 'max-snippet:-1', 'max-image-preview:large'];
+            $clean['robots_advanced'] = in_array($settings['robots_advanced'], $allowed_robots) 
+                ? $settings['robots_advanced'] : '';
+        }
+        
+        // Character encoding
+        if (isset($settings['charset'])) {
+            $allowed_charsets = ['UTF-8', 'ISO-8859-1', 'UTF-16'];
+            $clean['charset'] = in_array($settings['charset'], $allowed_charsets) 
+                ? $settings['charset'] : 'UTF-8';
+        }
+        
+        // Viewport
+        if (isset($settings['viewport'])) {
+            $clean['viewport'] = sanitize_text_field($settings['viewport']);
+        }
+        
         // Language code validation
         if (isset($settings['hreflang'])) {
             $clean['hreflang'] = preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $settings['hreflang']) 
                 ? $settings['hreflang'] : '';
+        }
+        
+        // Color validation
+        if (isset($settings['theme_color'])) {
+            $clean['theme_color'] = preg_match('/^#[0-9A-Fa-f]{6}$/', $settings['theme_color']) 
+                ? $settings['theme_color'] : '';
+        }
+        
+        // Refresh/redirect
+        if (isset($settings['refresh_redirect'])) {
+            $clean['refresh_redirect'] = sanitize_text_field($settings['refresh_redirect']);
         }
         
         // Date fields

@@ -164,8 +164,10 @@ const SettingsProvider = ({ children }) => {
   const savePageSettings = async (pageId, pageSettings) => {
     try {
       setIsSaving(true);
+      console.log("🔄 Saving page settings:", { pageId, pageSettings });
 
       if (!apiUrl) {
+        console.log("📝 Mock save (no API URL)");
         // Mock save for development
         setSettings((prev) => ({
           ...prev,
@@ -173,6 +175,9 @@ const SettingsProvider = ({ children }) => {
         }));
         return { success: true };
       }
+
+      console.log("📡 Making API request to:", `${apiUrl}meta/${pageId}`);
+      console.log("📦 Request payload:", JSON.stringify(pageSettings, null, 2));
 
       const response = await fetch(`${apiUrl}meta/${pageId}`, {
         method: "POST",
@@ -183,7 +188,21 @@ const SettingsProvider = ({ children }) => {
         body: JSON.stringify(pageSettings),
       });
 
+      console.log("📡 Response status:", response.status);
+      console.log("📡 Response headers:", response.headers);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ HTTP Error:", response.status, response.statusText);
+        console.error("❌ Error body:", errorText);
+        return {
+          success: false,
+          message: `HTTP ${response.status}: ${response.statusText}. ${errorText}`,
+        };
+      }
+
       const result = await response.json();
+      console.log("✅ API Response:", result);
 
       if (result.success) {
         // Update local state
@@ -191,12 +210,18 @@ const SettingsProvider = ({ children }) => {
           ...prev,
           [`page_${pageId}`]: pageSettings,
         }));
+        console.log("✅ Local state updated");
+      } else {
+        console.error("❌ API returned error:", result);
       }
 
       return result;
     } catch (error) {
-      console.error("Error saving page settings:", error);
-      return { success: false, message: "Network error" };
+      console.error("❌ Network/Parse error:", error);
+      return {
+        success: false,
+        message: `Network error: ${error.message}`,
+      };
     } finally {
       setIsSaving(false);
     }

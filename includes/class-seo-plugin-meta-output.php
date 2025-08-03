@@ -33,6 +33,11 @@ class SEO_Plugin_Meta_Output {
      * This runs on every page load on the frontend
      */
     public function output_meta_tags() {
+        // Don't output meta tags during REST API requests
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+            return;
+        }
+        
         // Add our plugin identifier comment
         echo "<!-- SEO Plugin Meta Tags -->\n";
         
@@ -51,27 +56,28 @@ class SEO_Plugin_Meta_Output {
     
     /**
      * Get meta settings for the current page
-     * This is where the magic happens - we figure out what page we're on
-     * and get the appropriate settings
+     * This implements true inheritance - global values are always used unless overridden
      */
     private function get_current_page_meta() {
         global $post;
         
-        $meta_settings = [];
+        // Start with global settings as the base
+        $global_settings = get_option('seo_plugin_page_global', []);
+        $meta_settings = $global_settings; // Always start with global values
         
         // Get the page/post ID we're currently viewing
         $current_page_id = $this->get_current_page_id();
         
         if ($current_page_id) {
-            // Try to get specific settings for this page
+            // Get page-specific overrides
             $page_settings = get_option("seo_plugin_page_{$current_page_id}", []);
-            $meta_settings = array_merge($meta_settings, $page_settings);
-        }
-        
-        // If no specific settings, fall back to global defaults
-        if (empty($meta_settings)) {
-            $global_settings = get_option('seo_plugin_page_global', []);
-            $meta_settings = array_merge($meta_settings, $global_settings);
+            
+            // Only override global values where page-specific values exist
+            foreach ($page_settings as $key => $value) {
+                if ($value !== null && $value !== '') {
+                    $meta_settings[$key] = $value;
+                }
+            }
         }
         
         return $meta_settings;

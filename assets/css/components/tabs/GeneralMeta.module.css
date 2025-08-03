@@ -1,6 +1,76 @@
 .generalMeta {
   padding: 1rem;
   background: #fff;
+  position: relative;
+}
+
+.successAlert {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+}
+.successAlert .alertContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-left: 4px solid #28a745;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+}
+.successAlert .alertIcon {
+  font-size: 1.2rem;
+}
+.successAlert .alertText {
+  flex: 1;
+  color: #155724;
+  font-weight: 600;
+}
+.successAlert .alertClose {
+  background: none;
+  border: none;
+  color: #155724;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.successAlert .alertClose:hover {
+  background: rgba(21, 87, 36, 0.1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+.header h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+.header p {
+  margin: 0;
+  color: #666;
 }
 
 .pageSelector {
@@ -74,6 +144,28 @@
   border-radius: 3px;
   border: 1px solid #bee5eb;
 }
+.field .uniqueBadge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  background: #d1f2eb;
+  color: #0c5460;
+  font-size: 0.8rem;
+  font-weight: normal;
+  border-radius: 3px;
+  border: 1px solid #a3e4d7;
+}
+.field .usingGlobalBadge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  background: #e7f3ff;
+  color: #0073aa;
+  font-size: 0.8rem;
+  font-weight: normal;
+  border-radius: 3px;
+  border: 1px solid #b3d9ff;
+}
 .field .description {
   display: block;
   margin-top: 0.25rem;
@@ -111,6 +203,31 @@
 .select.inherited:focus {
   background: #fff;
   color: #333;
+  border-color: #0073aa;
+}
+.input.placeholder,
+.textarea.placeholder,
+.select.placeholder {
+  color: #999;
+  font-style: italic;
+}
+.input.placeholder:focus,
+.textarea.placeholder:focus,
+.select.placeholder:focus {
+  color: #333;
+  font-style: normal;
+}
+.input.usingGlobal,
+.textarea.usingGlobal,
+.select.usingGlobal {
+  background: #f8f9ff;
+  border-color: #d4e3ff;
+  color: #333;
+}
+.input.usingGlobal:focus,
+.textarea.usingGlobal:focus,
+.select.usingGlobal:focus {
+  background: #fff;
   border-color: #0073aa;
 }
 
@@ -170,6 +287,36 @@
   border-radius: 4px;
   font-size: 0.85rem;
   color: #856404;
+}
+
+.placeholderNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-left: 3px solid #6c757d;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.uniqueNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #d1f2eb;
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #155724;
+}
+
+.usingGlobalNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #e7f3ff;
+  border-left: 3px solid #0073aa;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #0073aa;
 }
 
 .actions {

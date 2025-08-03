@@ -43,6 +43,7 @@ class WP_SEO_Plugin {
             $filepath = SEO_PLUGIN_PATH . $file;
             if (file_exists($filepath)) {
                 require_once $filepath;
+                // Removed debug echo to prevent JSON interference
             }
         }
     }

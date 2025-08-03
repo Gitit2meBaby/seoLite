@@ -7,6 +7,10 @@ import styles from "@css/components/tabs/GeneralMeta.module.scss";
 const GeneralMeta = ({ tabId, config }) => {
   console.log("🎯 GeneralMeta component loading!", { tabId, config });
 
+  const settingsContext = useSettings();
+  console.log("🔧 Settings context:", settingsContext);
+  console.log("🔧 Available functions:", Object.keys(settingsContext));
+
   const {
     settings,
     updateSetting,
@@ -14,12 +18,13 @@ const GeneralMeta = ({ tabId, config }) => {
     savePageSettings,
     loadPages,
     isSaving,
-  } = useSettings();
+  } = settingsContext;
   const [selectedPage, setSelectedPage] = useState("global");
   const [pages, setPages] = useState([]);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [showSaveAlert, setShowSaveAlert] = useState(false);
 
   // Meta fields configuration
   const metaFields = [
@@ -240,28 +245,49 @@ const GeneralMeta = ({ tabId, config }) => {
   const getFieldValue = (fieldKey) => {
     const pageKey = `page_${selectedPage}`;
     const pageSettings = settings[pageKey] || {};
+    const globalSettings = settings["page_global"] || {};
 
-    if (pageSettings[fieldKey] !== undefined && pageSettings[fieldKey] !== "") {
-      return pageSettings[fieldKey];
-    }
-
-    if (selectedPage !== "global") {
-      const globalSettings = settings["page_global"] || {};
+    if (selectedPage === "global") {
+      // For global page, just return the global value
       return globalSettings[fieldKey] || "";
+    } else {
+      // For other pages, check if there's a page-specific override
+      if (
+        pageSettings[fieldKey] !== undefined &&
+        pageSettings[fieldKey] !== ""
+      ) {
+        return pageSettings[fieldKey]; // Page-specific value
+      } else {
+        return globalSettings[fieldKey] || ""; // Global fallback
+      }
     }
-
-    return "";
   };
 
-  const isFieldInherited = (fieldKey) => {
-    if (selectedPage === "global") return false;
+  const getFieldStatus = (fieldKey) => {
+    if (selectedPage === "global") return "global";
 
     const pageKey = `page_${selectedPage}`;
     const pageSettings = settings[pageKey] || {};
+    const globalSettings = settings["page_global"] || {};
 
-    return (
-      pageSettings[fieldKey] === undefined || pageSettings[fieldKey] === ""
-    );
+    const pageValue = pageSettings[fieldKey];
+    const globalValue = globalSettings[fieldKey];
+
+    // Check if user has explicitly set a value for this page
+    if (pageValue !== undefined && pageValue !== "") {
+      if (pageValue === globalValue) {
+        return "inherited"; // Explicitly set but same as global
+      } else {
+        return "unique"; // Explicitly set and different from global
+      }
+    }
+
+    // No page-specific value set
+    if (globalValue) {
+      return "using_global"; // Will use global value (this is the key change)
+    }
+
+    return "empty"; // No value at all
   };
 
   const handleFieldChange = (fieldKey, value) => {
@@ -278,14 +304,45 @@ const GeneralMeta = ({ tabId, config }) => {
   };
 
   const handleSave = async () => {
-    const pageSettings = settings[`page_${selectedPage}`] || {};
+    console.log("🔴 Save button clicked!");
+    console.log("📊 Current selectedPage:", selectedPage);
+    console.log("📦 Current settings:", settings);
 
-    const result = await savePageSettings(selectedPage, pageSettings);
-    if (result.success) {
-      setHasChanges(false);
-      console.log(`Settings saved for page: ${selectedPage}`);
-    } else {
-      console.error("Failed to save settings:", result.message);
+    const pageSettings = settings[`page_${selectedPage}`] || {};
+    console.log("💾 Page settings to save:", pageSettings);
+
+    if (Object.keys(pageSettings).length === 0) {
+      console.log("⚠️ No page settings to save - pageSettings is empty");
+      // If no page-specific settings, we might still want to save an empty object
+      // to indicate the user has "touched" this page
+    }
+
+    console.log("🚀 About to call savePageSettings...");
+
+    try {
+      const result = await savePageSettings(selectedPage, pageSettings);
+      console.log("📨 savePageSettings result:", result);
+
+      if (result.success) {
+        setHasChanges(false);
+        setShowSaveAlert(true);
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Hide alert after 3 seconds
+        setTimeout(() => {
+          setShowSaveAlert(false);
+        }, 3000);
+
+        console.log(`✅ Settings saved for page: ${selectedPage}`);
+      } else {
+        console.error("❌ Save failed:", result.message);
+        alert(`Failed to save settings: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("💥 Exception in handleSave:", error);
+      alert(`Error during save: ${error.message}`);
     }
   };
 
@@ -424,11 +481,18 @@ const GeneralMeta = ({ tabId, config }) => {
 
   const renderField = (field) => {
     const currentValue = getFieldValue(field.key);
-    const isInherited = isFieldInherited(field.key);
+    const fieldStatus = getFieldStatus(field.key);
+    const isInherited = fieldStatus === "inherited";
+    const isUsingGlobal = fieldStatus === "using_global";
+    const isUnique = fieldStatus === "unique";
 
     if (field.global && selectedPage !== "global") {
       return null;
     }
+
+    // Get the page title for unique badge
+    const currentPage = pages.find((p) => p.id === selectedPage);
+    const pageSlug = currentPage?.title || selectedPage;
 
     return (
       <div key={field.key} className={styles.field}>
@@ -437,8 +501,14 @@ const GeneralMeta = ({ tabId, config }) => {
           {field.global && (
             <span className={styles.globalBadge}>Global Only</span>
           )}
-          {isInherited && selectedPage !== "global" && !field.global && (
+          {isInherited && (
             <span className={styles.inheritedBadge}>Inherited from Global</span>
+          )}
+          {isUsingGlobal && (
+            <span className={styles.usingGlobalBadge}>Using Global Value</span>
+          )}
+          {isUnique && (
+            <span className={styles.uniqueBadge}>Unique to {pageSlug}</span>
           )}
           {field.description && (
             <span className={styles.description}>{field.description}</span>
@@ -449,15 +519,11 @@ const GeneralMeta = ({ tabId, config }) => {
           <div className={styles.textareaWrapper}>
             <textarea
               className={`${styles.textarea} ${
-                isInherited ? styles.inherited : ""
-              }`}
+                isUsingGlobal ? styles.usingGlobal : ""
+              } ${isInherited ? styles.inherited : ""}`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
-              placeholder={
-                isInherited && currentValue
-                  ? `Global: ${currentValue}`
-                  : field.placeholder
-              }
+              placeholder={field.placeholder}
               maxLength={field.maxLength}
               rows={3}
             />
@@ -470,17 +536,14 @@ const GeneralMeta = ({ tabId, config }) => {
         ) : field.type === "select" ? (
           <select
             className={`${styles.select} ${
-              isInherited ? styles.inherited : ""
-            }`}
+              isUsingGlobal ? styles.usingGlobal : ""
+            } ${isInherited ? styles.inherited : ""}`}
             value={currentValue}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
           >
             {field.options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
-                {isInherited && option.value === currentValue
-                  ? " (Global)"
-                  : ""}
               </option>
             ))}
           </select>
@@ -494,7 +557,9 @@ const GeneralMeta = ({ tabId, config }) => {
             />
             <input
               type="text"
-              className={styles.colorText}
+              className={`${styles.colorText} ${
+                isUsingGlobal ? styles.usingGlobal : ""
+              }`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
               placeholder="#000000"
@@ -505,15 +570,11 @@ const GeneralMeta = ({ tabId, config }) => {
             <input
               type={field.type}
               className={`${styles.input} ${
-                isInherited ? styles.inherited : ""
-              }`}
+                isUsingGlobal ? styles.usingGlobal : ""
+              } ${isInherited ? styles.inherited : ""}`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
-              placeholder={
-                isInherited && currentValue
-                  ? `Global: ${currentValue}`
-                  : field.placeholder
-              }
+              placeholder={field.placeholder}
               maxLength={field.maxLength}
             />
             {field.maxLength && (
@@ -524,15 +585,18 @@ const GeneralMeta = ({ tabId, config }) => {
           </div>
         )}
 
-        {isInherited &&
-          selectedPage !== "global" &&
-          currentValue &&
-          !field.global && (
-            <div className={styles.inheritanceNote}>
-              This value is inherited from Global settings. Start typing to
-              override it for this page.
-            </div>
-          )}
+        {isUsingGlobal && (
+          <div className={styles.usingGlobalNote}>
+            This page will automatically use the global value. Start typing to
+            customize it specifically for this page.
+          </div>
+        )}
+
+        {isUnique && (
+          <div className={styles.uniqueNote}>
+            This value is customized specifically for this page.
+          </div>
+        )}
       </div>
     );
   };
@@ -543,6 +607,29 @@ const GeneralMeta = ({ tabId, config }) => {
 
   return (
     <div className={styles.generalMeta}>
+      {/* Success Alert */}
+      {showSaveAlert && (
+        <div className={styles.successAlert}>
+          <div className={styles.alertContent}>
+            <span className={styles.alertIcon}>✅</span>
+            <span className={styles.alertText}>
+              Changes saved successfully!
+            </span>
+            <button
+              className={styles.alertClose}
+              onClick={() => setShowSaveAlert(false)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.header}>
+        <h3>General Meta Settings</h3>
+        <p>Configure basic meta tags for search engines and social media.</p>
+      </div>
+
       {apiError && (
         <div className={styles.apiError}>
           <h4>⚠️ API Connection Issue</h4>
