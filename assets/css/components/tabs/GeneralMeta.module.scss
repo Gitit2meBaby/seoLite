@@ -1,0 +1,350 @@
+// assets/css/components/tabs/GeneralMeta.module.scss
+
+.generalMeta {
+  padding: 1rem;
+  background: #fff;
+}
+
+.pageSelector {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+
+  .selectorLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .pageSelect {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: #0073aa;
+    }
+  }
+
+  .inheritanceInfo {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: #e7f3ff;
+    border-left: 3px solid #0073aa;
+    border-radius: 4px;
+
+    small {
+      color: #0073aa;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.fieldsContainer {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.field {
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+  }
+
+  .inheritedBadge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background: #fff3cd;
+    color: #856404;
+    font-size: 0.8rem;
+    font-weight: normal;
+    border-radius: 3px;
+    border: 1px solid #ffeaa7;
+  }
+
+  .globalBadge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background: #d1ecf1;
+    color: #0c5460;
+    font-size: 0.8rem;
+    font-weight: normal;
+    border-radius: 3px;
+    border: 1px solid #bee5eb;
+  }
+
+  .description {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: normal;
+    font-style: italic;
+  }
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+  }
+
+  &.inherited {
+    background: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+
+    &:focus {
+      background: #fff;
+      color: #333;
+      border-color: #0073aa;
+    }
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.inputWrapper,
+.textareaWrapper {
+  position: relative;
+}
+
+.charCount {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  font-size: 0.8rem;
+  color: #666;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+}
+
+.colorWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  .colorInput {
+    width: 50px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .colorText {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: monospace;
+
+    &:focus {
+      outline: none;
+      border-color: #0073aa;
+      box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+    }
+  }
+}
+
+.inheritanceNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid #ddd;
+}
+
+.saveButton {
+  padding: 0.75rem 1.5rem;
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #005a87;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.unsavedChanges {
+  color: #d54e21;
+  font-weight: bold;
+}
+
+.previewSection {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+  }
+}
+
+.previewBox {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-bottom: 1.5rem;
+}
+
+.previewTitle {
+  color: #1a0dab;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.previewUrl {
+  color: #006621;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.previewDescription {
+  color: #545454;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.codePreview {
+  position: relative;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .codeBlock {
+    margin: 0;
+    padding: 1rem;
+    background: #282c34;
+    color: #abb2bf;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+
+    code {
+      color: inherit;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .copyButton {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #005a87;
+    }
+  }
+}
+
+.preview {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+  }
+}
+
+.apiError {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-left: 4px solid #f39c12;
+  border-radius: 4px;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: #856404;
+  }
+
+  p {
+    margin: 0.25rem 0;
+    color: #856404;
+  }
+
+  button {
+    background: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+
+    &:hover {
+      background: #e67e22;
+    }
+  }
+}

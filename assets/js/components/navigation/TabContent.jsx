@@ -1,4 +1,6 @@
 // assets/js/components/navigation/TabContent.jsx
+import GeneralMeta from "../tabs/GeneralMeta";
+import SocialMedia from "../tabs/SocialMedia";
 import styles from "@css/components/navigation/TabContent.module.scss";
 
 const TabContent = ({ activeTab, tabConfig }) => {
@@ -13,44 +15,19 @@ const TabContent = ({ activeTab, tabConfig }) => {
     );
   }
 
-  // For now, we'll show placeholder content for each tab
-  // Later we'll replace this with actual React components
-  const getTabContent = (componentName) => {
+  // Import and render actual React components
+  const getTabComponent = (componentName) => {
     switch (componentName) {
       case "GeneralMeta":
-        return (
-          <div>
-            <p>This will contain:</p>
-            <ul>
-              <li>Page titles</li>
-              <li>Meta descriptions</li>
-              <li>Meta keywords</li>
-              <li>Robots settings</li>
-            </ul>
-            <p>
-              <em>Forms coming in next step...</em>
-            </p>
-          </div>
-        );
+        return <GeneralMeta tabId={activeTab} config={tabConfig} />;
 
       case "SocialMedia":
-        return (
-          <div>
-            <p>This will contain:</p>
-            <ul>
-              <li>Open Graph tags</li>
-              <li>Twitter Card settings</li>
-              <li>Social media images</li>
-            </ul>
-            <p>
-              <em>Forms coming in next step...</em>
-            </p>
-          </div>
-        );
+        return <SocialMedia tabId={activeTab} config={tabConfig} />;
 
       case "SchemaMarkup":
         return (
           <div>
+            <h3>Schema Markup Settings</h3>
             <p>This will contain:</p>
             <ul>
               <li>Schema.org markup</li>
@@ -58,7 +35,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
               <li>Article markup</li>
             </ul>
             <p>
-              <em>Forms coming in next step...</em>
+              <em>Component will be implemented in the next phase.</em>
             </p>
           </div>
         );
@@ -66,6 +43,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
       case "Analytics":
         return (
           <div>
+            <h3>Analytics Settings</h3>
             <p>This will contain:</p>
             <ul>
               <li>Google Analytics tracking</li>
@@ -73,7 +51,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
               <li>Custom tracking codes</li>
             </ul>
             <p>
-              <em>Forms coming in next step...</em>
+              <em>Component will be implemented in the next phase.</em>
             </p>
           </div>
         );
@@ -81,6 +59,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
       case "TechnicalSEO":
         return (
           <div>
+            <h3>Technical SEO Settings</h3>
             <p>This will contain:</p>
             <ul>
               <li>Canonical URLs</li>
@@ -88,7 +67,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
               <li>XML sitemaps</li>
             </ul>
             <p>
-              <em>Forms coming in next step...</em>
+              <em>Component will be implemented in the next phase.</em>
             </p>
           </div>
         );
@@ -96,7 +75,8 @@ const TabContent = ({ activeTab, tabConfig }) => {
       default:
         return (
           <div>
-            <p>Component "{componentName}" not found.</p>
+            <h3>Component Not Found</h3>
+            <p>Component "{componentName}" not implemented yet.</p>
             <p>
               Available components: GeneralMeta, SocialMedia, SchemaMarkup,
               Analytics, TechnicalSEO
@@ -116,7 +96,9 @@ const TabContent = ({ activeTab, tabConfig }) => {
         <p className={styles.description}>{tabConfig.description}</p>
       </header>
 
-      <div className={styles.tabBody}>{getTabContent(tabConfig.component)}</div>
+      <div className={styles.tabBody}>
+        {getTabComponent(tabConfig.component)}
+      </div>
     </div>
   );
 };

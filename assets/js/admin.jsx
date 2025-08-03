@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Dashboard from "./components/Dashboard";
+import SettingsProvider from "./providers/SettingsProvider";
 import "../css/admin.scss";
 
 console.log("🚀 SEO Plugin React Dashboard Loading...");
@@ -20,7 +21,9 @@ if (container) {
   const root = createRoot(container);
   root.render(
     <StrictMode>
-      <Dashboard />
+      <SettingsProvider>
+        <Dashboard />
+      </SettingsProvider>
     </StrictMode>
   );
 
