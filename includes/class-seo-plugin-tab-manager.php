@@ -55,10 +55,10 @@ class SEO_Plugin_Tab_Manager {
         ]);
         
         $this->register_tab('analytics', [
-            'label' => __('Analytics', 'seo-plugin'),
-            'description' => __('Connect your site to tools that measure visitor behavior. Google Analytics tracks who comes to your site and what they do, while Google Tag Manager helps you manage tracking scripts without needing to edit code.', 'seo-plugin'),
+            'label' => __('Analytics & Tracking', 'seo-plugin'),
+            'description' => __('Connect your site to analytics platforms and add verification codes. Includes Google Analytics, Tag Manager, Facebook Pixel, and many other tracking services. Most codes work best when set globally.', 'seo-plugin'),
             'icon' => 'dashicons-chart-line',
-            'component' => 'Analytics'
+            'component' => 'TrackingTags'
         ]);
         
         $this->register_tab('technical', [

@@ -1,9 +1,8 @@
 <?php
 /**
- * API Handler for Meta Settings
+ * API Handler for Meta Settings - WITH TRACKING SUPPORT
  * 
- * This class creates REST API endpoints that your React components can call
- * to save and load meta settings for different pages.
+ * This class creates REST API endpoints for meta settings AND tracking codes
  */
 
 class SEO_Plugin_Meta_API {
@@ -127,15 +126,12 @@ class SEO_Plugin_Meta_API {
     public function get_meta_settings($request) {
         $page_id = $request['page_id'];
         
-        // Debug logging
         error_log("SEO Plugin: Getting settings for page: {$page_id}");
         
-        // Get settings from WordPress options table
         $settings = get_option("seo_plugin_page_{$page_id}", []);
         
         error_log("SEO Plugin: Raw settings from DB: " . print_r($settings, true));
         
-        // If no settings exist, return empty array (React will use defaults)
         return rest_ensure_response([
             'success' => true,
             'data' => $settings
@@ -149,12 +145,11 @@ class SEO_Plugin_Meta_API {
         $page_id = $request['page_id'];
         $settings = $request->get_json_params();
         
-        // Debug logging
         error_log("SEO Plugin: === SAVE DEBUG START ===");
         error_log("SEO Plugin: Saving settings for page: {$page_id}");
         error_log("SEO Plugin: Raw input data: " . print_r($settings, true));
         
-        // Enhanced sanitization that preserves all schema fields
+        // Enhanced sanitization that preserves all fields including tracking
         $clean_settings = $this->sanitize_all_settings($settings);
         error_log("SEO Plugin: Clean settings after sanitization: " . print_r($clean_settings, true));
         
@@ -175,18 +170,18 @@ class SEO_Plugin_Meta_API {
         if ($actually_saved) {
             return rest_ensure_response([
                 'success' => true,
-                'message' => 'Meta settings saved successfully'
+                'message' => 'Settings saved successfully'
             ]);
         } else {
             return rest_ensure_response([
                 'success' => false,
-                'message' => 'Failed to save meta settings - option not created'
+                'message' => 'Failed to save settings - option not created'
             ]);
         }
     }
     
     /**
-     * Enhanced sanitization that handles all field types including schema
+     * Enhanced sanitization that handles all field types including tracking codes
      */
     private function sanitize_all_settings($settings) {
         if (!is_array($settings)) {
@@ -202,15 +197,132 @@ class SEO_Plugin_Meta_API {
         return $clean;
     }
     
-    /**
-     * Sanitize individual field based on its type and content
+   /**
+     * FIXED: More permissive sanitization for custom scripts
      */
     private function sanitize_field($key, $value) {
-        // Handle different field types
+        // Handle custom scripts specially
+        if ($key === 'custom_head_scripts' || $key === 'custom_body_scripts') {
+            // For custom scripts, we need to be very permissive
+            // but still safe for admin users
+            
+            // Define allowed tags for custom scripts
+            $allowed_html = array(
+                'script' => array(
+                    'type' => true,
+                    'src' => true,
+                    'async' => true,
+                    'defer' => true,
+                    'crossorigin' => true,
+                    'integrity' => true,
+                    'charset' => true,
+                    'language' => true,
+                ),
+                'noscript' => array(),
+                'meta' => array(
+                    'name' => true,
+                    'content' => true,
+                    'property' => true,
+                    'http-equiv' => true,
+                    'charset' => true,
+                ),
+                'link' => array(
+                    'rel' => true,
+                    'href' => true,
+                    'type' => true,
+                    'media' => true,
+                    'as' => true,
+                    'crossorigin' => true,
+                ),
+                'style' => array(
+                    'type' => true,
+                    'media' => true,
+                ),
+                'img' => array(
+                    'src' => true,
+                    'alt' => true,
+                    'width' => true,
+                    'height' => true,
+                    'style' => true,
+                    'class' => true,
+                ),
+                'iframe' => array(
+                    'src' => true,
+                    'width' => true,
+                    'height' => true,
+                    'style' => true,
+                    'frameborder' => true,
+                    'allowfullscreen' => true,
+                ),
+                // Allow HTML comments
+                '!--...--' => true,
+            );
+            
+            // Use wp_kses with our custom allowed tags
+            $sanitized = wp_kses($value, $allowed_html);
+            
+            // Log for debugging
+            error_log("SEO Plugin: Custom script sanitization:");
+            error_log("  Input length: " . strlen($value));
+            error_log("  Output length: " . strlen($sanitized));
+            error_log("  Input preview: " . substr($value, 0, 100));
+            error_log("  Output preview: " . substr($sanitized, 0, 100));
+            
+            return $sanitized;
+        }
+        
+        // For all other fields, use the existing logic...
         switch ($key) {
+            // Google Services - More permissive patterns
+            case 'google_analytics_id':
+                // GA4 format: G-XXXXXXXXXX (but be more flexible)
+                if (preg_match('/^G-[A-Z0-9]{8,12}$/i', $value)) {
+                    return strtoupper($value);
+                }
+                return sanitize_text_field($value); // Fallback to basic sanitization
+                
+            case 'google_universal_analytics_id':
+                // UA format: UA-XXXXXXXX-X (but be more flexible)
+                if (preg_match('/^UA-[0-9]+-[0-9]+$/i', $value)) {
+                    return strtoupper($value);
+                }
+                return sanitize_text_field($value);
+                
+            case 'google_tag_manager_id':
+                // GTM format: GTM-XXXXXXX (but be more flexible)
+                if (preg_match('/^GTM-[A-Z0-9]{5,10}$/i', $value)) {
+                    return strtoupper($value);
+                }
+                return sanitize_text_field($value);
+                
+            // Verification codes - Just remove dangerous characters
+            case 'google_site_verification':
+            case 'bing_site_verification':
+            case 'facebook_domain_verification':
+            case 'pinterest_site_verification':
+            case 'yandex_verification':
+            case 'baidu_site_verification':
+            case 'ahrefs_site_verification':
+                return preg_replace('/[^a-zA-Z0-9\-_]/', '', $value);
+                
+            // Numeric IDs
+            case 'facebook_pixel_id':
+            case 'linkedin_partner_id':
+            case 'hotjar_site_id':
+            case 'microsoft_ads_uet_id':
+                return preg_replace('/[^0-9]/', '', $value);
+                
+            // Alphanumeric tokens
+            case 'microsoft_clarity_id':
+            case 'tiktok_pixel_id':
+            case 'mixpanel_token':
+            case 'segment_write_key':
+            case 'amplitude_api_key':
+            case 'fullstory_org_id':
+                return preg_replace('/[^a-zA-Z0-9\-_]/', '', $value);
+                
             // Schema fields
             case 'schemaType':
-                // Allow valid schema types
                 $allowed_schemas = [
                     'Organization', 'LocalBusiness', 'Restaurant', 'Store', 
                     'Article', 'NewsArticle', 'Product', 'Service', 'Person', 
@@ -219,7 +331,6 @@ class SEO_Plugin_Meta_API {
                 return in_array($value, $allowed_schemas) ? $value : '';
                 
             case 'offerCatalog':
-                // Handle service catalog array
                 if (is_array($value)) {
                     $clean_services = [];
                     foreach ($value as $service) {
@@ -241,6 +352,10 @@ class SEO_Plugin_Meta_API {
             case 'canonical_url':
             case 'image':
             case 'logo':
+            case 'og_image':
+            case 'twitter_image':
+            case 'social_default_image':
+            case 'social_twitter_image':
                 return esc_url_raw($value);
                 
             // Text fields
@@ -257,6 +372,13 @@ class SEO_Plugin_Meta_API {
             case 'worksFor':
             case 'nationality':
             case 'alumniOf':
+            case 'og_title':
+            case 'og_description':
+            case 'twitter_title':
+            case 'twitter_description':
+            case 'og_site_name':
+            case 'twitter_site':
+            case 'twitter_creator':
                 return sanitize_text_field($value);
                 
             // Textarea fields
@@ -266,7 +388,7 @@ class SEO_Plugin_Meta_API {
             case 'articleBody':
                 return sanitize_textarea_field($value);
                 
-            // Select fields with known values
+            // Select fields
             case 'robots_index':
                 return in_array($value, ['index', 'noindex']) ? $value : 'index';
                 
@@ -287,7 +409,6 @@ class SEO_Plugin_Meta_API {
             case 'dateModified':
             case 'startDate':
             case 'endDate':
-                // Basic date validation
                 return sanitize_text_field($value);
                 
             // Number fields
@@ -299,7 +420,7 @@ class SEO_Plugin_Meta_API {
             case 'totalTime':
                 return is_numeric($value) ? intval($value) : 0;
                 
-            // Object fields (complex data structures)
+            // Object fields
             case 'address':
             case 'author':
             case 'publisher':
@@ -323,29 +444,12 @@ class SEO_Plugin_Meta_API {
                 if (is_array($value)) {
                     return array_map('sanitize_text_field', array_filter($value));
                 } elseif (is_string($value)) {
-                    // Handle newline-separated strings
                     $items = explode("\n", $value);
                     return array_map('sanitize_text_field', array_filter($items));
                 }
                 return [];
                 
-            // Social media fields
-            case 'og_title':
-            case 'og_description':
-            case 'twitter_title':
-            case 'twitter_description':
-            case 'og_site_name':
-            case 'twitter_site':
-            case 'twitter_creator':
-                return sanitize_text_field($value);
-                
-            case 'og_image':
-            case 'twitter_image':
-            case 'social_default_image':
-            case 'social_twitter_image':
-                return esc_url_raw($value);
-                
-            // Default: sanitize as text
+            // Default
             default:
                 if (is_string($value)) {
                     return sanitize_text_field($value);
@@ -384,10 +488,8 @@ class SEO_Plugin_Meta_API {
     public function get_meta_preview($request) {
         $page_id = $request['page_id'];
         
-        // Get the meta settings
         $settings = get_option("seo_plugin_page_{$page_id}", []);
         
-        // Generate preview data
         $preview = [
             'title' => $settings['meta_title'] ?? 'Page title will appear here',
             'description' => $settings['meta_description'] ?? 'Meta description will appear here',
@@ -401,6 +503,12 @@ class SEO_Plugin_Meta_API {
             'dates' => [
                 'published' => $settings['date_published'] ?? null,
                 'modified' => $settings['date_modified'] ?? null
+            ],
+            'tracking' => [
+                'google_analytics' => !empty($settings['google_analytics_id']),
+                'google_tag_manager' => !empty($settings['google_tag_manager_id']),
+                'facebook_pixel' => !empty($settings['facebook_pixel_id']),
+                'custom_scripts' => !empty($settings['custom_head_scripts']) || !empty($settings['custom_body_scripts'])
             ]
         ];
         

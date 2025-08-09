@@ -5,8 +5,6 @@ import styles from "@css/components/navigation/TabNavigation.module.scss";
 const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
   const [hoveredTab, setHoveredTab] = useState(null);
 
-  console.log("TabNavigation rendered with tabs:", Object.keys(tabs));
-
   return (
     <nav className={styles.tabNavigation}>
       <h3 className={styles.title}>SEO Settings</h3>
@@ -24,10 +22,6 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
               title={tab.description}
             >
               <span className={styles.label}>{tab.label}</span>
-              {/* Active indicator dot */}
-              {activeTab === tabId && (
-                <span className={styles.activeIndicator}></span>
-              )}
             </button>
           </li>
         ))}

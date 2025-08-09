@@ -932,37 +932,6 @@ ${JSON.stringify(schema, null, 2)}
               </button>
             </div>
           </div>
-
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              background: "#e7f3ff",
-              borderRadius: "4px",
-            }}
-          >
-            <strong>🔍 Testing Your Schema:</strong>
-            <ul style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
-              <li>
-                <a
-                  href="https://search.google.com/test/rich-results"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Google Rich Results Test
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://validator.schema.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Schema.org Validator
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       )}
 

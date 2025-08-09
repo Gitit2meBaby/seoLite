@@ -2,16 +2,15 @@
 import GeneralMeta from "../tabs/GeneralMeta";
 import SchemaMarkup from "../tabs/SchemaMarkup";
 import SocialMedia from "../tabs/SocialMedia";
+import TrackingTags from "../tabs/TrackingTags";
 import styles from "@css/components/navigation/TabContent.module.scss";
 
 const TabContent = ({ activeTab, tabConfig }) => {
-  console.log("TabContent rendered for tab:", activeTab, tabConfig);
-
   if (!activeTab || !tabConfig) {
     return (
       <div className={styles.noContent}>
         <h2>Welcome to SEO Plugin</h2>
-        <p>Select a tab from the sidebar to configure your SEO settings.</p>
+        <p>Select a tab to configure your SEO settings.</p>
       </div>
     );
   }
@@ -29,20 +28,8 @@ const TabContent = ({ activeTab, tabConfig }) => {
         return <SchemaMarkup tabId={activeTab} config={tabConfig} />;
 
       case "Analytics":
-        return (
-          <div>
-            <h3>Analytics Settings</h3>
-            <p>This will contain:</p>
-            <ul>
-              <li>Google Analytics tracking</li>
-              <li>Google Tag Manager</li>
-              <li>Custom tracking codes</li>
-            </ul>
-            <p>
-              <em>Component will be implemented in the next phase.</em>
-            </p>
-          </div>
-        );
+      case "TrackingTags":
+        return <TrackingTags tabId={activeTab} config={tabConfig} />;
 
       case "TechnicalSEO":
         return (
@@ -67,7 +54,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
             <p>Component "{componentName}" not implemented yet.</p>
             <p>
               Available components: GeneralMeta, SocialMedia, SchemaMarkup,
-              Analytics, TechnicalSEO
+              TrackingTags, TechnicalSEO
             </p>
           </div>
         );

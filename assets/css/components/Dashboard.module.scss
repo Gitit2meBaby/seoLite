@@ -9,10 +9,13 @@
 }
 
 .sidebar {
-  flex: 0 0 280px;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+
+  @media screen and (max-width: 768px) {
+    flex: 0 0 280px;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 }
 
 .mainContent {
