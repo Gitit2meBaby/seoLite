@@ -60,12 +60,12 @@ class SEO_Plugin_Tab_Manager {
             'icon' => 'dashicons-chart-line',
             'component' => 'TrackingTags'
         ]);
-        
-        $this->register_tab('technical', [
-            'label' => __('Technical SEO', 'seo-plugin'),
-            'description' => __('Manage the technical aspects that affect how search engines crawl and index your site. These settings help prevent duplicate content issues, define your site structure, and provide important signals to Google for better indexing.', 'seo-plugin'),
-            'icon' => 'dashicons-admin-tools',
-            'component' => 'TechnicalSEO'
+
+        $this->register_tab('sitemap', [
+            'label' => __('Sitemap & Robots.txt', 'seo-plugin'),
+            'description' => __('Generate and manage your XML sitemap and robots.txt file. The sitemap helps search engines discover all your content, while robots.txt controls which parts of your site search engines can crawl. Both files can be automatically generated and deployed to your website by pressing the deploy button at the bottom of the page.', 'seo-plugin'),
+            'icon' => 'dashicons-admin-site-alt3',
+            'component' => 'SitemapRobots'
         ]);
     }
     

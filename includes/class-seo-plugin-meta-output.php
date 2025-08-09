@@ -28,33 +28,6 @@ class SEO_Plugin_Meta_Output {
         add_filter('pre_get_document_title', [$this, 'filter_page_title'], 10, 1);
     }
     
-    /**
-     * DEBUG: Output what settings we actually have
-     */
-    public function debug_output() {
-        $meta_settings = $this->get_current_page_meta();
-        
-        echo "<!-- SEO Plugin DEBUG START -->\n";
-        echo "<!-- Page ID: " . $this->get_current_page_id() . " -->\n";
-        echo "<!-- Meta Settings Found: " . count($meta_settings) . " -->\n";
-        
-        // Check for tracking codes specifically
-        $tracking_fields = [
-            'google_analytics_id',
-            'google_tag_manager_id', 
-            'facebook_pixel_id',
-            'custom_head_scripts',
-            'custom_body_scripts'
-        ];
-        
-        foreach ($tracking_fields as $field) {
-            $value = $meta_settings[$field] ?? 'NOT_SET';
-            echo "<!-- {$field}: " . (empty($value) ? 'EMPTY' : 'HAS_VALUE') . " -->\n";
-        }
-        
-        echo "<!-- All Settings Keys: " . implode(', ', array_keys($meta_settings)) . " -->\n";
-        echo "<!-- SEO Plugin DEBUG END -->\n";
-    }
     
     /**
      * UPDATE: Add this to your current output_meta_tags function
@@ -88,7 +61,6 @@ class SEO_Plugin_Meta_Output {
     }
     
     /**
-     * ADD: New function for basic meta tags
      * Add this function to your class
      */
     private function output_basic_meta_tags($meta_settings) {

@@ -16,7 +16,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         admin: path.resolve(__dirname, "assets/js/admin.jsx"),
-        frontend: path.resolve(__dirname, "assets/js/frontend.js"),
       },
       output: {
         // Use consistent filenames instead of hashed ones

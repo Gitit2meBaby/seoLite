@@ -52,6 +52,20 @@ class SEO_Plugin_Meta_API {
             'callback' => [$this, 'get_meta_preview'], 
             'permission_callback' => [$this, 'check_permissions']
         ]);
+
+        // Get preview of how meta tags will look
+        register_rest_route('seo-plugin/v1', '/meta/(?P<page_id>[a-zA-Z0-9_-]+)/preview', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_meta_preview'], 
+            'permission_callback' => [$this, 'check_permissions']
+        ]);
+        
+        // Deploy sitemap and robots.txt files
+        register_rest_route('seo-plugin/v1', '/deploy-files', [
+            'methods' => 'POST',
+            'callback' => [$this, 'deploy_files'],
+            'permission_callback' => [$this, 'check_permissions']
+        ]);
     }
     
     /**

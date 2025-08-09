@@ -3,6 +3,8 @@ import GeneralMeta from "../tabs/GeneralMeta";
 import SchemaMarkup from "../tabs/SchemaMarkup";
 import SocialMedia from "../tabs/SocialMedia";
 import TrackingTags from "../tabs/TrackingTags";
+import SitemapRobots from "../tabs/SitemapRobots";
+
 import styles from "@css/components/navigation/TabContent.module.scss";
 
 const TabContent = ({ activeTab, tabConfig }) => {
@@ -31,21 +33,8 @@ const TabContent = ({ activeTab, tabConfig }) => {
       case "TrackingTags":
         return <TrackingTags tabId={activeTab} config={tabConfig} />;
 
-      case "TechnicalSEO":
-        return (
-          <div>
-            <h3>Technical SEO Settings</h3>
-            <p>This will contain:</p>
-            <ul>
-              <li>Canonical URLs</li>
-              <li>Robots.txt settings</li>
-              <li>XML sitemaps</li>
-            </ul>
-            <p>
-              <em>Component will be implemented in the next phase.</em>
-            </p>
-          </div>
-        );
+      case "SitemapRobots":
+        return <SitemapRobots tabId={activeTab} config={tabConfig} />;
 
       default:
         return (
