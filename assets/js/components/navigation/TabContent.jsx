@@ -4,6 +4,7 @@ import SchemaMarkup from "../tabs/SchemaMarkup";
 import SocialMedia from "../tabs/SocialMedia";
 import TrackingTags from "../tabs/TrackingTags";
 import SitemapRobots from "../tabs/SitemapRobots";
+import Breadcrumbs from "../tabs/Breadcrumbs";
 
 import styles from "@css/components/navigation/TabContent.module.scss";
 
@@ -35,6 +36,9 @@ const TabContent = ({ activeTab, tabConfig }) => {
 
       case "SitemapRobots":
         return <SitemapRobots tabId={activeTab} config={tabConfig} />;
+
+      case "Breadcrumbs":
+        return <Breadcrumbs tabId={activeTab} config={tabConfig} />;
 
       default:
         return (

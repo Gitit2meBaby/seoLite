@@ -67,6 +67,13 @@ class SEO_Plugin_Tab_Manager {
             'icon' => 'dashicons-admin-site-alt3',
             'component' => 'SitemapRobots'
         ]);
+        
+        $this->register_tab('breadcrumbs', [
+            'label' => __('Breadcrumbs', 'seo-plugin'),
+            'description' => __('Configure structured breadcrumb navigation for your website. Breadcrumbs help users understand where they are in your site hierarchy and provide rich snippets in search results. This generates proper JSON-LD structured data that search engines love.', 'seo-plugin'),
+            'icon' => 'dashicons-arrow-right-alt2',
+            'component' => 'Breadcrumbs'
+        ]);
     }
     
     /**

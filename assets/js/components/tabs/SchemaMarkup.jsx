@@ -834,8 +834,6 @@ ${JSON.stringify(schema, null, 2)}
           </span>
         )}
       </div>
-
-      {activeSchemaType && <SimpleSchemaTest />}
     </div>
   );
 };

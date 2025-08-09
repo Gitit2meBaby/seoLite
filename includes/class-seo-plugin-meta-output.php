@@ -1,7 +1,7 @@
 <?php
 /**
- * DEBUG VERSION - Meta Output Handler for SEO Plugin
- * Add this temporarily to see what's happening
+ * Meta Output Handler for SEO Plugin
+ * This handles outputting meta tags and tracking codes to the frontend
  */
 
 class SEO_Plugin_Meta_Output {
@@ -18,7 +18,7 @@ class SEO_Plugin_Meta_Output {
     private function __construct() {
         // Hook into wp_head to add our meta tags and tracking codes
         add_action('wp_head', [$this, 'output_meta_tags'], 1);
-        add_action('wp_head', [$this, 'debug_output'], 2);
+        // REMOVED: debug_output hook that was causing the error
         
         // Hook to add tracking codes to body
         add_action('wp_body_open', [$this, 'output_body_tracking_codes'], 1);
@@ -28,12 +28,11 @@ class SEO_Plugin_Meta_Output {
         add_filter('pre_get_document_title', [$this, 'filter_page_title'], 10, 1);
     }
     
-    
     /**
-     * UPDATE: Add this to your current output_meta_tags function
-     * Replace your existing output_meta_tags function with this expanded version
+     * Main function that outputs all meta tags and head tracking codes
      */
     public function output_meta_tags() {
+        // Don't output on REST API requests
         if (defined('REST_REQUEST') && REST_REQUEST) {
             return;
         }
@@ -42,26 +41,20 @@ class SEO_Plugin_Meta_Output {
         
         $meta_settings = $this->get_current_page_meta();
         
-        // ADD: Basic meta tags (charset, viewport, description, etc.)
+        // Output different types of meta tags
         $this->output_basic_meta_tags($meta_settings);
-        
-        // ADD: Robots meta tags
         $this->output_robots_meta($meta_settings);
-        
-        // ADD: Other meta tags
         $this->output_other_meta_tags($meta_settings);
-        
-        // EXISTING: Verification meta tags
         $this->output_verification_meta_tags($meta_settings);
-        
-        // EXISTING: Tracking codes (head section)
+        $this->output_schema_markup($meta_settings);
+        $this->output_breadcrumb_schema($meta_settings);
         $this->output_tracking_codes_head($meta_settings);
         
         echo "<!-- SEO Plugin Meta Tags & Tracking END -->\n";
     }
     
     /**
-     * Add this function to your class
+     * Output basic meta tags like charset, viewport, description
      */
     private function output_basic_meta_tags($meta_settings) {
         // Character encoding (with default)
@@ -114,8 +107,7 @@ class SEO_Plugin_Meta_Output {
     }
     
     /**
-     * ADD: New function for robots meta tags
-     * Add this function to your class
+     * Output robots meta tags (index/noindex, follow/nofollow)
      */
     private function output_robots_meta($meta_settings) {
         $robots_parts = [];
@@ -134,14 +126,13 @@ class SEO_Plugin_Meta_Output {
             $robots_parts[] = $robots_advanced;
         }
         
-        // Always output robots meta tag (so it shows in preview)
+        // Always output robots meta tag
         $robots_content = implode(', ', $robots_parts);
         echo "<meta name=\"robots\" content=\"{$robots_content}\">\n";
     }
     
     /**
-     * ADD: New function for other meta tags
-     * Add this function to your class
+     * Output other meta tags like canonical, hreflang, etc.
      */
     private function output_other_meta_tags($meta_settings) {
         // Canonical URL
@@ -205,6 +196,7 @@ class SEO_Plugin_Meta_Output {
     
     /**
      * Get meta settings for the current page with inheritance
+     * This is the core function that handles the global > page-specific hierarchy
      */
     public function get_current_page_meta() {
         $page_id = $this->get_current_page_id();
@@ -218,8 +210,239 @@ class SEO_Plugin_Meta_Output {
     }
     
     /**
-     * Output verification meta tags
+     * Output schema markup (Organization, Product, etc.)
      */
+    private function output_schema_markup($meta_settings) {
+        $schema_type = $meta_settings['schemaType'] ?? '';
+        
+        if (empty($schema_type)) {
+            return;
+        }
+        
+        // Generate schema based on type and settings
+        $schema = $this->generate_schema_json($meta_settings, $schema_type);
+        
+        if (!empty($schema)) {
+            echo "<!-- Schema Markup -->\n";
+            echo "<script type=\"application/ld+json\">\n";
+            echo json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            echo "\n</script>\n\n";
+        }
+    }
+    
+    /**
+     * Generate schema JSON based on type and settings
+     */
+    private function generate_schema_json($meta_settings, $schema_type) {
+        $schema = [
+            "@context" => "https://schema.org",
+            "@type" => $schema_type
+        ];
+        
+        // Add basic properties that most schemas have
+        if (!empty($meta_settings['name'])) {
+            $schema['name'] = $meta_settings['name'];
+        }
+        
+        if (!empty($meta_settings['description'])) {
+            $schema['description'] = $meta_settings['description'];
+        }
+        
+        if (!empty($meta_settings['url'])) {
+            $schema['url'] = $meta_settings['url'];
+        }
+        
+        if (!empty($meta_settings['image'])) {
+            $schema['image'] = $meta_settings['image'];
+        }
+        
+        // Add type-specific properties
+        switch ($schema_type) {
+            case 'Organization':
+            case 'LocalBusiness':
+                if (!empty($meta_settings['logo'])) {
+                    $schema['logo'] = $meta_settings['logo'];
+                }
+                if (!empty($meta_settings['email'])) {
+                    $schema['email'] = $meta_settings['email'];
+                }
+                if (!empty($meta_settings['telephone'])) {
+                    $schema['telephone'] = $meta_settings['telephone'];
+                }
+                break;
+                
+            case 'Article':
+            case 'NewsArticle':
+                if (!empty($meta_settings['headline'])) {
+                    $schema['headline'] = $meta_settings['headline'];
+                }
+                if (!empty($meta_settings['datePublished'])) {
+                    $schema['datePublished'] = $meta_settings['datePublished'];
+                }
+                if (!empty($meta_settings['dateModified'])) {
+                    $schema['dateModified'] = $meta_settings['dateModified'];
+                }
+                break;
+        }
+        
+        return $schema;
+    }
+    
+    /**
+     * Output breadcrumb schema markup
+     */
+    private function output_breadcrumb_schema($meta_settings) {
+        // Check if breadcrumbs are enabled
+        $breadcrumb_config = $meta_settings['breadcrumb_config'] ?? [];
+        
+        if (empty($breadcrumb_config['enabled'])) {
+            return;
+        }
+        
+        // Don't show on homepage unless specifically enabled
+        if (is_front_page() && empty($breadcrumb_config['showOnHomepage'])) {
+            return;
+        }
+        
+        $breadcrumb_data = $this->generate_breadcrumb_data($breadcrumb_config);
+        
+        if (!empty($breadcrumb_data)) {
+            $schema = [
+                "@context" => "https://schema.org",
+                "@type" => "BreadcrumbList",
+                "itemListElement" => $breadcrumb_data
+            ];
+            
+            echo "<!-- Breadcrumb Schema -->\n";
+            echo "<script type=\"application/ld+json\">\n";
+            echo json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            echo "\n</script>\n\n";
+        }
+    }
+    
+    /**
+     * Generate breadcrumb data for the current page
+     */
+    private function generate_breadcrumb_data($breadcrumb_config) {
+        global $post;
+        
+        $breadcrumbs = [];
+        $position = 1;
+        
+        // Get site URL and name
+        $site_url = home_url();
+        $home_text = $breadcrumb_config['homeText'] ?? get_bloginfo('name');
+        
+        // Always start with home
+        $breadcrumbs[] = [
+            "@type" => "ListItem",
+            "position" => $position++,
+            "name" => $home_text,
+            "item" => $site_url
+        ];
+        
+        // If we're on the homepage, just return home
+        if (is_front_page()) {
+            return $breadcrumbs;
+        }
+        
+        // Handle different page types
+        if (is_single() || is_page()) {
+            if ($post) {
+                $current_page_id = (string) $post->ID;
+                
+                // Check if this page is excluded
+                $excluded_pages = $breadcrumb_config['excludePages'] ?? [];
+                if (in_array($current_page_id, $excluded_pages)) {
+                    return [];
+                }
+                
+                // Get custom label or use post title
+                $custom_labels = $breadcrumb_config['customLabels'] ?? [];
+                $page_title = $custom_labels[$current_page_id] ?? $post->post_title;
+                
+                // Add parent pages if this is a child page
+                if ($post->post_parent) {
+                    $parent_breadcrumbs = $this->get_parent_breadcrumbs($post->post_parent, $breadcrumb_config, $position);
+                    $breadcrumbs = array_merge($breadcrumbs, $parent_breadcrumbs);
+                    $position += count($parent_breadcrumbs);
+                }
+                
+                // Add current page
+                $breadcrumbs[] = [
+                    "@type" => "ListItem",
+                    "position" => $position,
+                    "name" => $page_title,
+                    "item" => get_permalink($post->ID)
+                ];
+            }
+        } elseif (is_category()) {
+            $category = get_queried_object();
+            if ($category) {
+                $breadcrumbs[] = [
+                    "@type" => "ListItem",
+                    "position" => $position,
+                    "name" => $category->name,
+                    "item" => get_category_link($category->term_id)
+                ];
+            }
+        } elseif (is_tag()) {
+            $tag = get_queried_object();
+            if ($tag) {
+                $breadcrumbs[] = [
+                    "@type" => "ListItem",
+                    "position" => $position,
+                    "name" => $tag->name,
+                    "item" => get_tag_link($tag->term_id)
+                ];
+            }
+        } elseif (is_author()) {
+            $author = get_queried_object();
+            if ($author) {
+                $breadcrumbs[] = [
+                    "@type" => "ListItem",
+                    "position" => $position,
+                    "name" => $author->display_name,
+                    "item" => get_author_posts_url($author->ID)
+                ];
+            }
+        }
+        
+        return $breadcrumbs;
+    }
+    
+    /**
+     * Get breadcrumbs for parent pages (recursive)
+     */
+    private function get_parent_breadcrumbs($parent_id, $breadcrumb_config, $start_position) {
+        $breadcrumbs = [];
+        $position = $start_position;
+        
+        $parent_post = get_post($parent_id);
+        if (!$parent_post) {
+            return $breadcrumbs;
+        }
+        
+        // If this parent has a parent, get those first (recursive)
+        if ($parent_post->post_parent) {
+            $grandparent_breadcrumbs = $this->get_parent_breadcrumbs($parent_post->post_parent, $breadcrumb_config, $position);
+            $breadcrumbs = array_merge($breadcrumbs, $grandparent_breadcrumbs);
+            $position += count($grandparent_breadcrumbs);
+        }
+        
+        // Add this parent
+        $custom_labels = $breadcrumb_config['customLabels'] ?? [];
+        $parent_title = $custom_labels[$parent_id] ?? $parent_post->post_title;
+        
+        $breadcrumbs[] = [
+            "@type" => "ListItem",
+            "position" => $position,
+            "name" => $parent_title,
+            "item" => get_permalink($parent_id)
+        ];
+        
+        return $breadcrumbs;
+    }
     private function output_verification_meta_tags($meta_settings) {
         // Google Search Console verification
         if (!empty($meta_settings['google_site_verification'])) {
@@ -237,6 +460,30 @@ class SEO_Plugin_Meta_Output {
         if (!empty($meta_settings['facebook_domain_verification'])) {
             $verification = esc_attr($meta_settings['facebook_domain_verification']);
             echo "<meta name=\"facebook-domain-verification\" content=\"{$verification}\" />\n";
+        }
+        
+        // Pinterest verification
+        if (!empty($meta_settings['pinterest_site_verification'])) {
+            $verification = esc_attr($meta_settings['pinterest_site_verification']);
+            echo "<meta name=\"p:domain_verify\" content=\"{$verification}\" />\n";
+        }
+        
+        // Yandex verification
+        if (!empty($meta_settings['yandex_verification'])) {
+            $verification = esc_attr($meta_settings['yandex_verification']);
+            echo "<meta name=\"yandex-verification\" content=\"{$verification}\" />\n";
+        }
+        
+        // Baidu verification
+        if (!empty($meta_settings['baidu_site_verification'])) {
+            $verification = esc_attr($meta_settings['baidu_site_verification']);
+            echo "<meta name=\"baidu-site-verification\" content=\"{$verification}\" />\n";
+        }
+        
+        // Ahrefs verification
+        if (!empty($meta_settings['ahrefs_site_verification'])) {
+            $verification = esc_attr($meta_settings['ahrefs_site_verification']);
+            echo "<meta name=\"ahrefs-site-verification\" content=\"{$verification}\" />\n";
         }
     }
     
@@ -268,9 +515,45 @@ class SEO_Plugin_Meta_Output {
             echo "})(window,document,'script','dataLayer','{$gtm_id}');</script>\n\n";
         }
         
-        // Custom head scripts - LESS RESTRICTIVE FOR TESTING
+        // Facebook Pixel
+        if (!empty($meta_settings['facebook_pixel_id'])) {
+            $pixel_id = esc_attr($meta_settings['facebook_pixel_id']);
+            echo "<!-- Facebook Pixel -->\n";
+            echo "<script>\n";
+            echo "!function(f,b,e,v,n,t,s)\n";
+            echo "{if(f.fbq)return;n=f.fbq=function(){n.callMethod?\n";
+            echo "n.callMethod.apply(n,arguments):n.queue.push(arguments)};\n";
+            echo "if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';\n";
+            echo "n.queue=[];t=b.createElement(e);t.async=!0;\n";
+            echo "t.src=v;s=b.getElementsByTagName(e)[0];\n";
+            echo "s.parentNode.insertBefore(t,s)}(window,document,'script',\n";
+            echo "'https://connect.facebook.net/en_US/fbevents.js');\n";
+            echo "fbq('init', '{$pixel_id}');\n";
+            echo "fbq('track', 'PageView');\n";
+            echo "</script>\n";
+            echo "<noscript>\n";
+            echo "<img height=\"1\" width=\"1\" style=\"display:none\"\n";
+            echo "src=\"https://www.facebook.com/tr?id={$pixel_id}&ev=PageView&noscript=1\"/>\n";
+            echo "</noscript>\n\n";
+        }
+        
+        // Microsoft Clarity
+        if (!empty($meta_settings['microsoft_clarity_id'])) {
+            $clarity_id = esc_attr($meta_settings['microsoft_clarity_id']);
+            echo "<!-- Microsoft Clarity -->\n";
+            echo "<script type=\"text/javascript\">\n";
+            echo "(function(c,l,a,r,i,t,y){\n";
+            echo "    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n";
+            echo "    t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n";
+            echo "    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n";
+            echo "})(window, document, \"clarity\", \"script\", \"{$clarity_id}\");\n";
+            echo "</script>\n\n";
+        }
+        
+        // Custom head scripts - BE CAREFUL WITH THESE!
         if (!empty($meta_settings['custom_head_scripts'])) {
             echo "<!-- Custom Head Scripts -->\n";
+            // Output custom scripts - these should already be sanitized in the API
             echo $meta_settings['custom_head_scripts'] . "\n\n";
         }
     }
