@@ -71,7 +71,7 @@ const Breadcrumbs = ({ tabId, config }) => {
       const existingBreadcrumbs = existingSettings?.breadcrumb_config || {};
 
       setBreadcrumbConfig({
-        enabled: existingBreadcrumbs.enabled !== false, // Default to true
+        enabled: existingBreadcrumbs.enabled === false,
         homeText: existingBreadcrumbs.homeText || siteName,
         separator: existingBreadcrumbs.separator || "/",
         showOnHomepage: existingBreadcrumbs.showOnHomepage || false,
@@ -220,6 +220,40 @@ ${JSON.stringify(jsonLd, null, 2)}
     setHasChanges(true);
   };
 
+  const handleAutoGenerate = async () => {
+    // Set smart defaults and enable breadcrumbs
+    const autoConfig = {
+      enabled: true,
+      homeText: siteName,
+      separator: "/",
+      showOnHomepage: false,
+      excludePages: [],
+      customLabels: {},
+    };
+
+    setBreadcrumbConfig(autoConfig);
+    setHasChanges(true);
+
+    // Auto-save the settings
+    try {
+      const settings = {
+        breadcrumb_config: autoConfig,
+      };
+
+      const result = await savePageSettings("global", settings);
+
+      if (result.success) {
+        setHasChanges(false);
+        setShowSaveAlert(true);
+        setTimeout(() => setShowSaveAlert(false), 3000);
+      } else {
+        alert(`Failed to save settings: ${result.message}`);
+      }
+    } catch (error) {
+      alert(`Error during save: ${error.message}`);
+    }
+  };
+
   const handleSave = async () => {
     try {
       const settings = {
@@ -238,29 +272,6 @@ ${JSON.stringify(jsonLd, null, 2)}
     } catch (error) {
       alert(`Error during save: ${error.message}`);
     }
-  };
-
-  const renderVisualBreadcrumb = (breadcrumbData) => {
-    return (
-      <div className={styles.visualBreadcrumb}>
-        {breadcrumbData.map((item, index) => (
-          <span key={index} className={styles.breadcrumbItem}>
-            {index > 0 && (
-              <span className={styles.separator}>
-                {breadcrumbConfig.separator}
-              </span>
-            )}
-            <span
-              className={`${styles.breadcrumbLink} ${
-                index === breadcrumbData.length - 1 ? styles.current : ""
-              }`}
-            >
-              {item.name}
-            </span>
-          </span>
-        ))}
-      </div>
-    );
   };
 
   if (isLoadingPages) {
@@ -290,14 +301,36 @@ ${JSON.stringify(jsonLd, null, 2)}
         </div>
       )}
 
+      {/* Quick Action Button */}
+      <div className={styles.quickActions}>
+        <div className={styles.quickActionCard}>
+          <div className={styles.quickActionContent}>
+            <h3>🚀 Quick Setup</h3>
+            <p>
+              Enable breadcrumbs with smart defaults for immediate SEO benefits.
+              This generates structured data that helps search engines
+              understand your site hierarchy.
+            </p>
+            <button
+              className={styles.autoGenerateButton}
+              onClick={handleAutoGenerate}
+              disabled={isSaving}
+            >
+              {breadcrumbConfig.enabled
+                ? "✅ Breadcrumbs Enabled"
+                : "🍞 Auto Generate Breadcrumbs"}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Global Settings */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>🍞 Breadcrumb Configuration</h3>
+          <h3>🔧 Advanced Configuration</h3>
           <p>
-            Configure how breadcrumbs appear on your site and generate proper
-            structured data for search engines. Breadcrumbs improve user
-            navigation and help search engines understand your site structure.
+            Fine-tune your breadcrumb settings. Most sites work great with the
+            default settings above.
           </p>
         </div>
 
