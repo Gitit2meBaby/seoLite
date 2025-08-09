@@ -280,44 +280,57 @@ export const schemaTypes = {
 };
 
 // Service catalog options by business type
+// Enhanced serviceOptions for your schemaTypes.js file
 export const serviceOptions = {
-  // General business services
+  // General business services - enhanced
   general: [
-    "Consulting",
-    "Training",
-    "Support",
-    "Maintenance",
-    "Installation",
-    "Repair",
-    "Delivery",
+    "Professional Consulting",
+    "Project Management",
+    "Strategic Planning",
+    "Training & Development",
+    "Technical Support",
+    "Installation Service",
+    "Maintenance Service",
+    "Repair Service",
+    "Customer Support",
+    "Emergency Service",
     "Custom Solutions",
+    "Advisory Services",
   ],
 
-  // Restaurant services
+  // Restaurant services - enhanced
   restaurant: [
-    "Dine-in",
-    "Takeout",
-    "Delivery",
-    "Catering",
-    "Private Events",
-    "Buffet",
-    "Drive-through",
-    "Outdoor Seating",
+    "Dine-in Service",
+    "Takeout Service",
+    "Delivery Service",
+    "Catering Service",
+    "Private Event Hosting",
+    "Buffet Service",
+    "Drive-through Service",
+    "Outdoor Dining",
+    "Live Entertainment",
+    "Wine Tasting",
+    "Event Planning",
+    "Custom Menu Creation",
   ],
 
-  // Retail store services
+  // Retail store services - enhanced
   store: [
     "In-store Shopping",
     "Online Shopping",
     "Curbside Pickup",
     "Home Delivery",
-    "Personal Shopping",
-    "Gift Wrapping",
+    "Personal Shopping Assistant",
+    "Gift Wrapping Service",
+    "Product Assembly",
     "Returns & Exchanges",
     "Loyalty Program",
+    "Product Consultation",
+    "Custom Orders",
+    "Product Demonstrations",
   ],
 
-  // Professional services
+  // Professional services - enhanced
   professional: [
     "Legal Consultation",
     "Tax Preparation",
@@ -327,22 +340,77 @@ export const serviceOptions = {
     "Design Services",
     "Web Development",
     "Marketing Services",
+    "Accounting Services",
+    "Business Consulting",
+    "IT Support",
+    "Content Creation",
   ],
 
-  // Home services
+  // Home services - enhanced
   home: [
-    "Plumbing",
-    "Electrical",
-    "HVAC",
-    "Cleaning",
-    "Landscaping",
-    "Painting",
-    "Roofing",
+    "Plumbing Services",
+    "Electrical Services",
+    "HVAC Services",
+    "Cleaning Services",
+    "Landscaping Services",
+    "Painting Services",
+    "Roofing Services",
     "Pest Control",
+    "Home Inspection",
+    "Security Installation",
+    "Appliance Repair",
+    "Handyman Services",
+  ],
+
+  // Healthcare services
+  healthcare: [
+    "General Practice",
+    "Specialist Consultation",
+    "Diagnostic Services",
+    "Preventive Care",
+    "Emergency Care",
+    "Mental Health Services",
+    "Physical Therapy",
+    "Laboratory Services",
+    "Imaging Services",
+    "Telemedicine",
+    "Health Screenings",
+    "Wellness Programs",
+  ],
+
+  // Education services
+  education: [
+    "Tutoring Services",
+    "Online Courses",
+    "Workshop Training",
+    "Certification Programs",
+    "Skills Development",
+    "Language Learning",
+    "Test Preparation",
+    "Career Counseling",
+    "Academic Coaching",
+    "Professional Development",
+    "Corporate Training",
+    "Educational Consulting",
+  ],
+
+  // Technology services
+  technology: [
+    "Software Development",
+    "Web Design & Development",
+    "Mobile App Development",
+    "Database Management",
+    "Cloud Solutions",
+    "Cybersecurity Services",
+    "IT Consulting",
+    "System Integration",
+    "Technical Support",
+    "Network Administration",
+    "Data Analytics",
+    "Digital Marketing",
   ],
 };
 
-// Field definitions with dependencies and conditional logic
 // Field definitions with dependencies and conditional logic
 export const fieldDefinitions = {
   // Basic Information

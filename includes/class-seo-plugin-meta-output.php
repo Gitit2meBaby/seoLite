@@ -1,6 +1,6 @@
 <?php
 /**
- * Meta Output Handler for SEO Plugin
+ * Meta Output Handler for SEO Plugin - FIXED INHERITANCE
  * 
  * This class handles outputting meta tags AND schema markup to the website's <head> section.
  */
@@ -80,120 +80,154 @@ class SEO_Plugin_Meta_Output {
         }
     }
     
-   /**
- * Get meta settings for the current page - FIXED INHERITANCE
- */
-public function get_current_page_meta() {
-    // Get the current page identifier
-    $page_id = $this->get_current_page_id();
-    
-    // Get page-specific settings
-    $page_settings = get_option("seo_plugin_page_{$page_id}", []);
-    
-    // Get global settings as fallback
-    $global_settings = get_option('seo_plugin_page_global', []);
-    
-    // Smart merge: global first, then page-specific overrides
-    $merged_settings = array_merge($global_settings, $page_settings);
-    
-    // Special handling for arrays that should be merged, not replaced
-    $array_fields_to_merge = ['offerCatalog', 'sameAs'];
-    
-    foreach ($array_fields_to_merge as $field) {
-        $global_array = $global_settings[$field] ?? [];
-        $page_array = $page_settings[$field] ?? [];
+    /**
+     * Get meta settings for the current page - FIXED INHERITANCE
+     */
+    public function get_current_page_meta() {
+        // Get the current page identifier
+        $page_id = $this->get_current_page_id();
         
-        if (is_array($global_array) && is_array($page_array)) {
-            // Merge arrays instead of replacing
-            $merged_settings[$field] = array_merge($global_array, $page_array);
+        // Get page-specific settings
+        $page_settings = get_option("seo_plugin_page_{$page_id}", []);
+        
+        // Get global settings as fallback
+        $global_settings = get_option('seo_plugin_page_global', []);
+        
+        // Smart merge: global first, then page-specific overrides
+        $merged_settings = array_merge($global_settings, $page_settings);
+        
+        // FIXED: Handle service catalog inheritance properly
+        $merged_settings['offerCatalog'] = $this->merge_service_catalog(
+            $global_settings['offerCatalog'] ?? [],
+            $page_settings['offerCatalog'] ?? [],
+            $page_id === 'global'
+        );
+        
+        return $merged_settings;
+    }
+    
+    /**
+     * Smart service catalog merging with inheritance handling
+     */
+    private function merge_service_catalog($global_services, $page_services, $is_global_page) {
+        // If we're on the global page, just return global services
+        if ($is_global_page) {
+            return $global_services;
         }
-    }
-    
-    return $merged_settings;
-}
-
-/**
- * Output Schema Markup JSON-LD - FIXED INHERITANCE
- */
-public function output_schema_markup($meta_settings) {
-    echo "<!-- SEO Plugin: Schema Debug Start -->\n";
-    
-    // Get current page ID
-    $page_id = $this->get_current_page_id();
-    echo "<!-- DEBUG: Current page ID: '{$page_id}' -->\n";
-    
-    // Get page-specific and global settings separately
-    $page_settings = get_option("seo_plugin_page_{$page_id}", []);
-    $global_settings = get_option('seo_plugin_page_global', []);
-    
-    echo "<!-- DEBUG: Page settings count: " . count($page_settings) . " -->\n";
-    echo "<!-- DEBUG: Global settings count: " . count($global_settings) . " -->\n";
-    
-    // Determine schema type (page-specific first, then global)
-    $schema_type = '';
-    if (!empty($page_settings['schemaType'])) {
-        $schema_type = $page_settings['schemaType'];
-        echo "<!-- DEBUG: Using page-specific schema type: '{$schema_type}' -->\n";
-    } elseif (!empty($global_settings['schemaType'])) {
-        $schema_type = $global_settings['schemaType'];
-        echo "<!-- DEBUG: Using global schema type: '{$schema_type}' -->\n";
-    }
-    
-    if (empty($schema_type)) {
-        echo "<!-- No schema type configured -->\n";
-        echo "<!-- SEO Plugin: Schema Debug End -->\n";
-        return;
-    }
-    
-    // SMART INHERITANCE: Merge settings with page-specific taking priority
-    $merged_settings = array_merge($global_settings, $page_settings);
-    
-    // Special handling for service catalog - merge arrays instead of overriding
-    $final_services = [];
-    
-    // Add global services first
-    if (!empty($global_settings['offerCatalog']) && is_array($global_settings['offerCatalog'])) {
-        $final_services = $global_settings['offerCatalog'];
-        echo "<!-- DEBUG: Added " . count($final_services) . " global services -->\n";
-    }
-    
-    // Add page-specific services (merge, don't replace)
-    if (!empty($page_settings['offerCatalog']) && is_array($page_settings['offerCatalog'])) {
-        $page_services = $page_settings['offerCatalog'];
-        echo "<!-- DEBUG: Found " . count($page_services) . " page-specific services -->\n";
         
-        // Merge page services with global services
-        $final_services = array_merge($final_services, $page_services);
-        echo "<!-- DEBUG: Total services after merge: " . count($final_services) . " -->\n";
+        // For non-global pages, we need to:
+        // 1. Add inherited global services (marked as inherited)
+        // 2. Add page-specific services (not inherited)
+        // 3. Filter out any inherited services that were "deleted" on this page
+        
+        $final_services = [];
+        
+        // Step 1: Add global services as inherited (unless explicitly removed)
+        if (is_array($global_services)) {
+            foreach ($global_services as $index => $global_service) {
+                // Check if this global service was explicitly removed on this page
+                $was_removed = $this->was_global_service_removed($page_services, $global_service, $index);
+                
+                if (!$was_removed) {
+                    $inherited_service = $global_service;
+                    $inherited_service['isInherited'] = true;
+                    $inherited_service['globalIndex'] = $index; // Track which global service this is
+                    $final_services[] = $inherited_service;
+                }
+            }
+        }
+        
+        // Step 2: Add page-specific services (non-inherited only)
+        if (is_array($page_services)) {
+            foreach ($page_services as $page_service) {
+                // Only add if it's not marked as inherited (i.e., it's a genuine page-specific service)
+                if (!isset($page_service['isInherited']) || $page_service['isInherited'] === false) {
+                    $final_services[] = $page_service;
+                }
+            }
+        }
+        
+        return $final_services;
     }
     
-    // Update merged settings with combined services
-    if (!empty($final_services)) {
-        $merged_settings['offerCatalog'] = $final_services;
+    /**
+     * Check if a global service was explicitly removed on this page
+     * This prevents deleted inherited services from reappearing
+     */
+    private function was_global_service_removed($page_services, $global_service, $global_index) {
+        if (!is_array($page_services)) {
+            return false;
+        }
+        
+        // Look for a "removal marker" in page services
+        // This could be stored as a special array of removed global service indices
+        // For now, we'll use a simple approach: if page has any inherited services,
+        // we assume the user has actively managed the inheritance
+        
+        foreach ($page_services as $page_service) {
+            if (isset($page_service['isInherited']) && 
+                isset($page_service['globalIndex']) && 
+                $page_service['globalIndex'] === $global_index &&
+                isset($page_service['_removed']) && 
+                $page_service['_removed'] === true) {
+                return true;
+            }
+        }
+        
+        return false;
     }
-    
-    echo "<!-- DEBUG: Final merged settings has " . count($merged_settings) . " fields -->\n";
-    echo "<!-- DEBUG: Final schema type: '{$schema_type}' -->\n";
-    echo "<!-- DEBUG: Final service count: " . (isset($merged_settings['offerCatalog']) ? count($merged_settings['offerCatalog']) : 0) . " -->\n";
-    
-    // Generate the schema JSON
-    $schema = $this->generate_schema_json($merged_settings, $schema_type);
-    
-    if (empty($schema) || !is_array($schema)) {
-        echo "<!-- DEBUG: Schema generation failed -->\n";
+
+    /**
+     * Output Schema Markup JSON-LD - USES FIXED INHERITANCE
+     */
+    public function output_schema_markup($meta_settings) {
+        echo "<!-- SEO Plugin: Schema Debug Start -->\n";
+        
+        // Get current page ID
+        $page_id = $this->get_current_page_id();
+        echo "<!-- DEBUG: Current page ID: '{$page_id}' -->\n";
+        
+        // Determine schema type (page-specific first, then global)
+        $page_settings = get_option("seo_plugin_page_{$page_id}", []);
+        $global_settings = get_option('seo_plugin_page_global', []);
+        
+        $schema_type = '';
+        if (!empty($page_settings['schemaType'])) {
+            $schema_type = $page_settings['schemaType'];
+            echo "<!-- DEBUG: Using page-specific schema type: '{$schema_type}' -->\n";
+        } elseif (!empty($global_settings['schemaType'])) {
+            $schema_type = $global_settings['schemaType'];
+            echo "<!-- DEBUG: Using global schema type: '{$schema_type}' -->\n";
+        }
+        
+        if (empty($schema_type)) {
+            echo "<!-- No schema type configured -->\n";
+            echo "<!-- SEO Plugin: Schema Debug End -->\n";
+            return;
+        }
+        
+        // Use the merged settings which already have proper service inheritance
+        echo "<!-- DEBUG: Using merged settings with smart service inheritance -->\n";
+        echo "<!-- DEBUG: Final service count: " . (isset($meta_settings['offerCatalog']) ? count($meta_settings['offerCatalog']) : 0) . " -->\n";
+        
+        // Generate the schema JSON
+        $schema = $this->generate_schema_json($meta_settings, $schema_type);
+        
+        if (empty($schema) || !is_array($schema)) {
+            echo "<!-- DEBUG: Schema generation failed -->\n";
+            echo "<!-- SEO Plugin: Schema Debug End -->\n";
+            return;
+        }
+        
+        echo "<!-- DEBUG: Schema generated successfully with " . count($schema) . " properties -->\n";
+        
+        // Output the schema JSON-LD
+        echo "<script type=\"application/ld+json\">\n";
+        echo wp_json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        echo "\n</script>\n";
+        
         echo "<!-- SEO Plugin: Schema Debug End -->\n";
-        return;
     }
-    
-    echo "<!-- DEBUG: Schema generated successfully with " . count($schema) . " properties -->\n";
-    
-    // Output the schema JSON-LD
-    echo "<script type=\"application/ld+json\">\n";
-    echo wp_json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    echo "\n</script>\n";
-    
-    echo "<!-- SEO Plugin: Schema Debug End -->\n";
-}
     
     /**
      * Generate Schema JSON from user settings
@@ -249,12 +283,63 @@ public function output_schema_markup($meta_settings) {
                 break;
         }
         
-        // Handle service catalog (offerCatalog)
+        // Handle service catalog (offerCatalog) - now with proper inheritance
         if (!empty($meta_settings['offerCatalog']) && is_array($meta_settings['offerCatalog'])) {
             $this->add_service_catalog($schema, $meta_settings['offerCatalog']);
         }
         
         return $schema;
+    }
+    
+    /**
+     * Add service catalog to schema - CLEANED UP VERSION
+     */
+    private function add_service_catalog(&$schema, $services) {
+        if (empty($services) || !is_array($services)) {
+            return;
+        }
+        
+        $catalog_items = [];
+        
+        foreach ($services as $index => $service) {
+            if (empty($service['name'])) continue;
+            
+            // Skip services marked for removal
+            if (isset($service['_removed']) && $service['_removed'] === true) {
+                continue;
+            }
+            
+            $offer = [
+                '@type' => 'Offer',
+                '@id' => '#service-' . ($index + 1),
+                'itemOffered' => [
+                    '@type' => 'Service',
+                    'name' => $service['name']
+                ]
+            ];
+            
+            if (!empty($service['description'])) {
+                $offer['itemOffered']['description'] = $service['description'];
+            }
+            
+            if (!empty($service['serviceType'])) {
+                $offer['itemOffered']['serviceType'] = $service['serviceType'];
+            }
+            
+            if (!empty($service['areaServed'])) {
+                $offer['itemOffered']['areaServed'] = $service['areaServed'];
+            }
+            
+            $catalog_items[] = $offer;
+        }
+        
+        if (!empty($catalog_items)) {
+            $schema['hasOfferCatalog'] = [
+                '@type' => 'OfferCatalog',
+                'name' => 'Our Services',
+                'itemListElement' => $catalog_items
+            ];
+        }
     }
     
     /**
@@ -310,52 +395,6 @@ public function output_schema_markup($meta_settings) {
         // Price range
         if (!empty($meta_settings['priceRange'])) {
             $schema['priceRange'] = $meta_settings['priceRange'];
-        }
-    }
-    
-    /**
-     * Add service catalog to schema
-     */
-    private function add_service_catalog(&$schema, $services) {
-        if (empty($services) || !is_array($services)) {
-            return;
-        }
-        
-        $catalog_items = [];
-        
-        foreach ($services as $index => $service) {
-            if (empty($service['name'])) continue;
-            
-            $offer = [
-                '@type' => 'Offer',
-                '@id' => '#service-' . ($index + 1),
-                'itemOffered' => [
-                    '@type' => 'Service',
-                    'name' => $service['name']
-                ]
-            ];
-            
-            if (!empty($service['description'])) {
-                $offer['itemOffered']['description'] = $service['description'];
-            }
-            
-            if (!empty($service['serviceType'])) {
-                $offer['itemOffered']['serviceType'] = $service['serviceType'];
-            }
-            
-            if (!empty($service['areaServed'])) {
-                $offer['itemOffered']['areaServed'] = $service['areaServed'];
-            }
-            
-            $catalog_items[] = $offer;
-        }
-        
-        if (!empty($catalog_items)) {
-            $schema['hasOfferCatalog'] = [
-                '@type' => 'OfferCatalog',
-                'name' => 'Our Services',
-                'itemListElement' => $catalog_items
-            ];
         }
     }
     
