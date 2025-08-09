@@ -57,7 +57,8 @@ class SEO_Plugin_Meta_Output {
     }
     
     /**
-     * Main function that outputs all meta tags AND tracking codes
+     * UPDATE: Add this to your current output_meta_tags function
+     * Replace your existing output_meta_tags function with this expanded version
      */
     public function output_meta_tags() {
         if (defined('REST_REQUEST') && REST_REQUEST) {
@@ -68,13 +69,145 @@ class SEO_Plugin_Meta_Output {
         
         $meta_settings = $this->get_current_page_meta();
         
-        // Output verification meta tags
+        // ADD: Basic meta tags (charset, viewport, description, etc.)
+        $this->output_basic_meta_tags($meta_settings);
+        
+        // ADD: Robots meta tags
+        $this->output_robots_meta($meta_settings);
+        
+        // ADD: Other meta tags
+        $this->output_other_meta_tags($meta_settings);
+        
+        // EXISTING: Verification meta tags
         $this->output_verification_meta_tags($meta_settings);
         
-        // Output tracking codes (head section)
+        // EXISTING: Tracking codes (head section)
         $this->output_tracking_codes_head($meta_settings);
         
         echo "<!-- SEO Plugin Meta Tags & Tracking END -->\n";
+    }
+    
+    /**
+     * ADD: New function for basic meta tags
+     * Add this function to your class
+     */
+    private function output_basic_meta_tags($meta_settings) {
+        // Character encoding (with default)
+        $charset = $meta_settings['charset'] ?? 'UTF-8';
+        if ($charset) {
+            echo "<meta charset=\"{$charset}\">\n";
+        }
+
+        // Viewport (with default)
+        $viewport = $meta_settings['viewport'] ?? 'width=device-width, initial-scale=1';
+        if ($viewport) {
+            echo "<meta name=\"viewport\" content=\"{$viewport}\">\n";
+        }
+
+        // Meta description
+        if (!empty($meta_settings['meta_description'])) {
+            $description = esc_attr($meta_settings['meta_description']);
+            echo "<meta name=\"description\" content=\"{$description}\">\n";
+        }
+        
+        // Meta keywords
+        if (!empty($meta_settings['meta_keywords'])) {
+            $keywords = esc_attr($meta_settings['meta_keywords']);
+            echo "<meta name=\"keywords\" content=\"{$keywords}\">\n";
+        }
+
+        // Author
+        if (!empty($meta_settings['meta_author'])) {
+            $author = esc_attr($meta_settings['meta_author']);
+            echo "<meta name=\"author\" content=\"{$author}\">\n";
+        }
+
+        // Copyright
+        if (!empty($meta_settings['meta_copyright'])) {
+            $copyright = esc_attr($meta_settings['meta_copyright']);
+            echo "<meta name=\"copyright\" content=\"{$copyright}\">\n";
+        }
+
+        // Generator
+        if (!empty($meta_settings['generator'])) {
+            $generator = esc_attr($meta_settings['generator']);
+            echo "<meta name=\"generator\" content=\"{$generator}\">\n";
+        }
+
+        // Theme color
+        if (!empty($meta_settings['theme_color'])) {
+            $theme_color = esc_attr($meta_settings['theme_color']);
+            echo "<meta name=\"theme-color\" content=\"{$theme_color}\">\n";
+        }
+    }
+    
+    /**
+     * ADD: New function for robots meta tags
+     * Add this function to your class
+     */
+    private function output_robots_meta($meta_settings) {
+        $robots_parts = [];
+        
+        // Use defaults if not set
+        $robots_index = $meta_settings['robots_index'] ?? 'index';
+        $robots_follow = $meta_settings['robots_follow'] ?? 'follow';
+        $robots_advanced = $meta_settings['robots_advanced'] ?? '';
+        
+        // Always include index and follow directives
+        $robots_parts[] = $robots_index;
+        $robots_parts[] = $robots_follow;
+        
+        // Add advanced directive if set
+        if (!empty($robots_advanced)) {
+            $robots_parts[] = $robots_advanced;
+        }
+        
+        // Always output robots meta tag (so it shows in preview)
+        $robots_content = implode(', ', $robots_parts);
+        echo "<meta name=\"robots\" content=\"{$robots_content}\">\n";
+    }
+    
+    /**
+     * ADD: New function for other meta tags
+     * Add this function to your class
+     */
+    private function output_other_meta_tags($meta_settings) {
+        // Canonical URL
+        $canonical_url = '';
+        if (!empty($meta_settings['canonical_url'])) {
+            $canonical_url = $meta_settings['canonical_url'];
+        } else {
+            $canonical_url = get_permalink();
+        }
+        
+        if ($canonical_url) {
+            $canonical_url = esc_url($canonical_url);
+            echo "<link rel=\"canonical\" href=\"{$canonical_url}\">\n";
+        }
+        
+        // Hreflang
+        if (!empty($meta_settings['hreflang'])) {
+            $hreflang = esc_attr($meta_settings['hreflang']);
+            $current_url = esc_url(get_permalink());
+            echo "<link rel=\"alternate\" hreflang=\"{$hreflang}\" href=\"{$current_url}\">\n";
+        }
+        
+        // Refresh/redirect
+        if (!empty($meta_settings['refresh_redirect'])) {
+            $refresh = esc_attr($meta_settings['refresh_redirect']);
+            echo "<meta http-equiv=\"refresh\" content=\"{$refresh}\">\n";
+        }
+        
+        // Date meta tags
+        if (!empty($meta_settings['date_published'])) {
+            $published_date = esc_attr($meta_settings['date_published']);
+            echo "<meta property=\"article:published_time\" content=\"{$published_date}\">\n";
+        }
+        
+        if (!empty($meta_settings['date_modified'])) {
+            $modified_date = esc_attr($meta_settings['date_modified']);
+            echo "<meta property=\"article:modified_time\" content=\"{$modified_date}\">\n";
+        }
     }
     
     /**

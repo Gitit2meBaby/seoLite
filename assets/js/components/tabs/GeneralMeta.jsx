@@ -5,12 +5,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import styles from "@css/components/tabs/GeneralMeta.module.scss";
 
 const GeneralMeta = ({ tabId, config }) => {
-  console.log("🎯 GeneralMeta component loading!", { tabId, config });
-
   const settingsContext = useSettings();
-  console.log("🔧 Settings context:", settingsContext);
-  console.log("🔧 Available functions:", Object.keys(settingsContext));
-
   const {
     settings,
     updateSetting,
@@ -19,6 +14,7 @@ const GeneralMeta = ({ tabId, config }) => {
     loadPages,
     isSaving,
   } = settingsContext;
+
   const [selectedPage, setSelectedPage] = useState("global");
   const [pages, setPages] = useState([]);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
@@ -26,7 +22,7 @@ const GeneralMeta = ({ tabId, config }) => {
   const [apiError, setApiError] = useState(null);
   const [showSaveAlert, setShowSaveAlert] = useState(false);
 
-  // Meta fields configuration
+  // Meta fields configuration with FIXED defaults
   const metaFields = [
     {
       key: "meta_title",
@@ -63,6 +59,7 @@ const GeneralMeta = ({ tabId, config }) => {
         { value: "UTF-16", label: "UTF-16" },
       ],
       description: "Character encoding for the webpage",
+      defaultValue: "UTF-8",
       global: true,
     },
     {
@@ -82,6 +79,7 @@ const GeneralMeta = ({ tabId, config }) => {
         { value: "", label: "No viewport tag" },
       ],
       description: "Controls layout on mobile browsers",
+      defaultValue: "width=device-width, initial-scale=1",
       global: true,
     },
     {
@@ -115,6 +113,7 @@ const GeneralMeta = ({ tabId, config }) => {
         { value: "noindex", label: "No Index (hide from search engines)" },
       ],
       description: "Whether search engines should index this page",
+      defaultValue: "index",
     },
     {
       key: "robots_follow",
@@ -125,6 +124,7 @@ const GeneralMeta = ({ tabId, config }) => {
         { value: "nofollow", label: "No Follow (don't crawl links)" },
       ],
       description: "Whether search engines should follow links on this page",
+      defaultValue: "follow",
     },
     {
       key: "robots_advanced",
@@ -215,26 +215,16 @@ const GeneralMeta = ({ tabId, config }) => {
     try {
       setIsLoadingPages(true);
       setApiError(null);
-      console.log("🔍 Starting to load pages...");
-
       const fetchedPages = await loadPages();
-      console.log("📦 API Response:", fetchedPages);
-
       if (fetchedPages && fetchedPages.length > 0) {
-        console.log(
-          "✅ Successfully loaded pages from WordPress:",
-          fetchedPages
-        );
         setPages(fetchedPages);
       } else {
-        console.warn("⚠️ No pages returned from API");
         setApiError(
           "No pages found. The WordPress API might not be working properly."
         );
         setPages([{ id: "global", title: "(All pages)", type: "global" }]);
       }
     } catch (error) {
-      console.error("❌ Error loading pages:", error);
       setApiError(`API Error: ${error.message}`);
       setPages([{ id: "global", title: "(All pages)", type: "global" }]);
     } finally {
@@ -247,18 +237,27 @@ const GeneralMeta = ({ tabId, config }) => {
     const pageSettings = settings[pageKey] || {};
     const globalSettings = settings["page_global"] || {};
 
+    // Get the field definition to check for default values
+    const fieldDef = metaFields.find((field) => field.key === fieldKey);
+    const defaultValue = fieldDef?.defaultValue || "";
+
     if (selectedPage === "global") {
-      // For global page, just return the global value
-      return globalSettings[fieldKey] || "";
+      // For global page, return the setting or default
+      return globalSettings[fieldKey] || defaultValue;
     } else {
-      // For other pages, check if there's a page-specific override
+      // For other pages, check page-specific first, then global, then default
       if (
         pageSettings[fieldKey] !== undefined &&
         pageSettings[fieldKey] !== ""
       ) {
         return pageSettings[fieldKey]; // Page-specific value
+      } else if (
+        globalSettings[fieldKey] !== undefined &&
+        globalSettings[fieldKey] !== ""
+      ) {
+        return globalSettings[fieldKey]; // Global value
       } else {
-        return globalSettings[fieldKey] || ""; // Global fallback
+        return defaultValue; // Field default
       }
     }
   };
@@ -273,6 +272,10 @@ const GeneralMeta = ({ tabId, config }) => {
     const pageValue = pageSettings[fieldKey];
     const globalValue = globalSettings[fieldKey];
 
+    // Get field default
+    const fieldDef = metaFields.find((field) => field.key === fieldKey);
+    const defaultValue = fieldDef?.defaultValue || "";
+
     // Check if user has explicitly set a value for this page
     if (pageValue !== undefined && pageValue !== "") {
       if (pageValue === globalValue) {
@@ -283,11 +286,11 @@ const GeneralMeta = ({ tabId, config }) => {
     }
 
     // No page-specific value set
-    if (globalValue) {
-      return "using_global"; // Will use global value (this is the key change)
+    if (globalValue && globalValue !== defaultValue) {
+      return "using_global"; // Will use global value
     }
 
-    return "empty"; // No value at all
+    return "using_default"; // Using field default
   };
 
   const handleFieldChange = (fieldKey, value) => {
@@ -304,44 +307,20 @@ const GeneralMeta = ({ tabId, config }) => {
   };
 
   const handleSave = async () => {
-    console.log("🔴 Save button clicked!");
-    console.log("📊 Current selectedPage:", selectedPage);
-    console.log("📦 Current settings:", settings);
-
     const pageSettings = settings[`page_${selectedPage}`] || {};
-    console.log("💾 Page settings to save:", pageSettings);
-
-    if (Object.keys(pageSettings).length === 0) {
-      console.log("⚠️ No page settings to save - pageSettings is empty");
-      // If no page-specific settings, we might still want to save an empty object
-      // to indicate the user has "touched" this page
-    }
-
-    console.log("🚀 About to call savePageSettings...");
 
     try {
       const result = await savePageSettings(selectedPage, pageSettings);
-      console.log("📨 savePageSettings result:", result);
 
       if (result.success) {
         setHasChanges(false);
         setShowSaveAlert(true);
-
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: "smooth" });
-
-        // Hide alert after 3 seconds
-        setTimeout(() => {
-          setShowSaveAlert(false);
-        }, 3000);
-
-        console.log(`✅ Settings saved for page: ${selectedPage}`);
+        setTimeout(() => setShowSaveAlert(false), 3000);
       } else {
-        console.error("❌ Save failed:", result.message);
         alert(`Failed to save settings: ${result.message}`);
       }
     } catch (error) {
-      console.error("💥 Exception in handleSave:", error);
       alert(`Error during save: ${error.message}`);
     }
   };
@@ -351,7 +330,6 @@ const GeneralMeta = ({ tabId, config }) => {
     let siteUrl = wpData.siteUrl || window.location.origin;
     let domain = "";
 
-    // Extract clean domain name
     if (siteUrl) {
       try {
         const url = new URL(siteUrl);
@@ -364,14 +342,10 @@ const GeneralMeta = ({ tabId, config }) => {
     }
 
     if (selectedPage === "global") {
-      // For global settings, just show the domain
       return domain;
     } else {
-      // For specific pages, show domain + page path
       const page = pages.find((p) => p.id === selectedPage);
       const pagePath = page?.url || "/page-url";
-
-      // Combine domain with page path
       return `${domain}${pagePath}`;
     }
   };
@@ -381,20 +355,36 @@ const GeneralMeta = ({ tabId, config }) => {
     const globalSettings = settings["page_global"] || {};
 
     const getValue = (key) => {
-      if (pageSettings[key] !== undefined && pageSettings[key] !== "") {
-        return pageSettings[key];
+      // Use the same logic as getFieldValue for consistency
+      const fieldDef = metaFields.find((field) => field.key === key);
+      const defaultValue = fieldDef?.defaultValue || "";
+
+      if (selectedPage === "global") {
+        return globalSettings[key] || defaultValue;
+      } else {
+        if (pageSettings[key] !== undefined && pageSettings[key] !== "") {
+          return pageSettings[key];
+        } else if (
+          globalSettings[key] !== undefined &&
+          globalSettings[key] !== ""
+        ) {
+          return globalSettings[key];
+        } else {
+          return defaultValue;
+        }
       }
-      return globalSettings[key] || "";
     };
 
     let code = "";
 
-    const charset = getValue("charset") || "UTF-8";
+    // Always include global settings in preview (charset, viewport)
+    const charset = globalSettings["charset"] || "UTF-8";
     if (charset) {
       code += `<meta charset="${charset}">\n`;
     }
 
-    const viewport = getValue("viewport");
+    const viewport =
+      globalSettings["viewport"] || "width=device-width, initial-scale=1";
     if (viewport) {
       code += `<meta name="viewport" content="${viewport}">\n`;
     }
@@ -424,25 +414,26 @@ const GeneralMeta = ({ tabId, config }) => {
       code += `<meta name="copyright" content="${copyright}">\n`;
     }
 
-    const generator = getValue("generator");
+    // Always include global generator if set
+    const generator = globalSettings["generator"] || "";
     if (generator) {
       code += `<meta name="generator" content="${generator}">\n`;
     }
 
-    const robotsIndex = getValue("robots_index") || "index";
-    const robotsFollow = getValue("robots_follow") || "follow";
+    // FIXED: Always show robots meta tag with current values
+    const robotsIndex = getValue("robots_index");
+    const robotsFollow = getValue("robots_follow");
     const robotsAdvanced = getValue("robots_advanced");
 
     let robotsContent = [];
-    if (robotsIndex !== "index" || robotsFollow !== "follow") {
-      robotsContent.push(robotsIndex, robotsFollow);
-    }
+    robotsContent.push(robotsIndex, robotsFollow);
+
     if (robotsAdvanced) {
       robotsContent.push(robotsAdvanced);
     }
-    if (robotsContent.length > 0) {
-      code += `<meta name="robots" content="${robotsContent.join(", ")}">\n`;
-    }
+
+    // Always output robots meta tag since we have defaults
+    code += `<meta name="robots" content="${robotsContent.join(", ")}">\n`;
 
     const canonical = getValue("canonical_url");
     if (canonical) {
@@ -461,7 +452,8 @@ const GeneralMeta = ({ tabId, config }) => {
       code += `<meta http-equiv="refresh" content="${refresh}">\n`;
     }
 
-    const themeColor = getValue("theme_color");
+    // Always include global theme color if set
+    const themeColor = globalSettings["theme_color"] || "";
     if (themeColor) {
       code += `<meta name="theme-color" content="${themeColor}">\n`;
     }
@@ -484,13 +476,14 @@ const GeneralMeta = ({ tabId, config }) => {
     const fieldStatus = getFieldStatus(field.key);
     const isInherited = fieldStatus === "inherited";
     const isUsingGlobal = fieldStatus === "using_global";
+    const isUsingDefault = fieldStatus === "using_default";
     const isUnique = fieldStatus === "unique";
 
+    // Hide global-only fields when not on global page
     if (field.global && selectedPage !== "global") {
       return null;
     }
 
-    // Get the page title for unique badge
     const currentPage = pages.find((p) => p.id === selectedPage);
     const pageSlug = currentPage?.title || selectedPage;
 
@@ -507,6 +500,9 @@ const GeneralMeta = ({ tabId, config }) => {
           {isUsingGlobal && (
             <span className={styles.usingGlobalBadge}>Using Global Value</span>
           )}
+          {isUsingDefault && (
+            <span className={styles.usingGlobalBadge}>Using Default Value</span>
+          )}
           {isUnique && (
             <span className={styles.uniqueBadge}>Unique to {pageSlug}</span>
           )}
@@ -519,7 +515,7 @@ const GeneralMeta = ({ tabId, config }) => {
           <div className={styles.textareaWrapper}>
             <textarea
               className={`${styles.textarea} ${
-                isUsingGlobal ? styles.usingGlobal : ""
+                isUsingGlobal || isUsingDefault ? styles.usingGlobal : ""
               } ${isInherited ? styles.inherited : ""}`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
@@ -536,7 +532,7 @@ const GeneralMeta = ({ tabId, config }) => {
         ) : field.type === "select" ? (
           <select
             className={`${styles.select} ${
-              isUsingGlobal ? styles.usingGlobal : ""
+              isUsingGlobal || isUsingDefault ? styles.usingGlobal : ""
             } ${isInherited ? styles.inherited : ""}`}
             value={currentValue}
             onChange={(e) => handleFieldChange(field.key, e.target.value)}
@@ -558,7 +554,7 @@ const GeneralMeta = ({ tabId, config }) => {
             <input
               type="text"
               className={`${styles.colorText} ${
-                isUsingGlobal ? styles.usingGlobal : ""
+                isUsingGlobal || isUsingDefault ? styles.usingGlobal : ""
               }`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
@@ -570,7 +566,7 @@ const GeneralMeta = ({ tabId, config }) => {
             <input
               type={field.type}
               className={`${styles.input} ${
-                isUsingGlobal ? styles.usingGlobal : ""
+                isUsingGlobal || isUsingDefault ? styles.usingGlobal : ""
               } ${isInherited ? styles.inherited : ""}`}
               value={currentValue}
               onChange={(e) => handleFieldChange(field.key, e.target.value)}
@@ -585,10 +581,11 @@ const GeneralMeta = ({ tabId, config }) => {
           </div>
         )}
 
-        {isUsingGlobal && (
+        {(isUsingGlobal || isUsingDefault) && (
           <div className={styles.usingGlobalNote}>
-            This page will automatically use the global value. Start typing to
-            customize it specifically for this page.
+            {isUsingDefault
+              ? "This page is using the recommended default value. Start typing to customize it."
+              : "This page will automatically use the global value. Start typing to customize it specifically for this page."}
           </div>
         )}
 
@@ -680,7 +677,18 @@ const GeneralMeta = ({ tabId, config }) => {
           <div className={styles.inheritanceInfo}>
             <small>
               💡 This page inherits settings from Global. Override any field to
-              customize it specifically for this page.
+              customize it specifically for this page. Global-only settings
+              (Character Encoding, Viewport, Theme Color, Generator) are managed
+              in the Global section.
+            </small>
+          </div>
+        )}
+
+        {selectedPage === "global" && (
+          <div className={styles.inheritanceInfo}>
+            <small>
+              🌐 These are your global default settings. Individual pages will
+              inherit these values unless you override them on specific pages.
             </small>
           </div>
         )}
@@ -716,7 +724,15 @@ const GeneralMeta = ({ tabId, config }) => {
       </div>
 
       <div className={styles.fieldsContainer}>
-        {metaFields.map(renderField)}
+        {metaFields
+          .filter((field) => {
+            // Filter out global-only fields when not on global page
+            if (field.global && selectedPage !== "global") {
+              return false;
+            }
+            return true;
+          })
+          .map(renderField)}
       </div>
 
       <div className={styles.actions}>

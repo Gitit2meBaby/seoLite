@@ -5,8 +5,6 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import styles from "@css/components/tabs/GeneralMeta.module.scss";
 
 const TrackingTags = ({ tabId, config }) => {
-  console.log("🎯 TrackingTags component loading!", { tabId, config });
-
   const {
     settings,
     updateSetting,

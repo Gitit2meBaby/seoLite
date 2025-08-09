@@ -7,8 +7,6 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
 
   return (
     <nav className={styles.tabNavigation}>
-      <h3 className={styles.title}>SEO Settings</h3>
-
       <ul className={styles.tabList}>
         {Object.entries(tabs).map(([tabId, tab]) => (
           <li key={tabId} className={styles.tabItem}>

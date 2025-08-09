@@ -9,8 +9,6 @@ import { socialFields } from "./socialFields";
 import styles from "@css/components/tabs/GeneralMeta.module.scss"; // Reusing existing styles
 
 const SocialMedia = ({ tabId, config }) => {
-  console.log("🎯 SocialMedia component loading!", { tabId, config });
-
   const {
     settings,
     updateSetting,

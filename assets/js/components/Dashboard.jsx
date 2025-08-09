@@ -14,14 +14,10 @@ const Dashboard = () => {
   const strings = wpData.strings || {};
   const tabKeys = Object.keys(tabs);
 
-  console.log("Dashboard mounted with data:", wpData);
-  console.log("Available tabs:", tabKeys);
-
   useEffect(() => {
     // Set first available tab as active on load
     if (tabKeys.length > 0 && !activeTab) {
       setActiveTab(tabKeys[0]);
-      console.log("Set active tab to:", tabKeys[0]);
     }
     setIsLoading(false);
   }, [tabKeys, activeTab]);
@@ -54,7 +50,6 @@ const Dashboard = () => {
   }
 
   const handleTabChange = (tabId) => {
-    console.log("Tab changed to:", tabId);
     setActiveTab(tabId);
   };
 

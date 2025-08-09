@@ -106,60 +106,6 @@ public function init() {
         echo '<div class="wrap">';
         echo '<h1>SEO Plugin Dashboard</h1>';
         
-        // DEBUG SECTION - Remove this once you find the issue
-        // if (isset($_GET['debug']) && current_user_can('manage_options')) {
-        //     echo '<div style="background: #f0f0f0; padding: 20px; margin: 20px 0; border-left: 4px solid #0073aa;">';
-        //     echo '<h3>🔍 Debug Information</h3>';
-            
-        //     echo '<h4>Global Settings:</h4>';
-        //     $global_settings = get_option('seo_plugin_page_global', []);
-        //     if (empty($global_settings)) {
-        //         echo '<p style="color: red;">❌ No global settings found!</p>';
-        //     } else {
-        //         echo '<pre style="background: white; padding: 10px; overflow: auto;">';
-        //         print_r($global_settings);
-        //         echo '</pre>';
-        //     }
-            
-        //     echo '<h4>Home Page Settings:</h4>';
-        //     $home_settings = get_option('seo_plugin_page_home', []);
-        //     if (empty($home_settings)) {
-        //         echo '<p style="color: orange;">⚠️ No home page settings found</p>';
-        //     } else {
-        //         echo '<pre style="background: white; padding: 10px; overflow: auto;">';
-        //         print_r($home_settings);
-        //         echo '</pre>';
-        //     }
-            
-        //     echo '<h4>All SEO Plugin Options:</h4>';
-        //     global $wpdb;
-        //     $all_options = $wpdb->get_results(
-        //         "SELECT option_name, option_value FROM {$wpdb->options} 
-        //          WHERE option_name LIKE 'seo_plugin_%' 
-        //          ORDER BY option_name"
-        //     );
-            
-        //     if (empty($all_options)) {
-        //         echo '<p style="color: red;">❌ No SEO plugin options found in database!</p>';
-        //     } else {
-        //         echo '<table style="width: 100%; border-collapse: collapse;">';
-        //         echo '<tr><th style="border: 1px solid #ddd; padding: 8px; background: #f9f9f9;">Option Name</th><th style="border: 1px solid #ddd; padding: 8px; background: #f9f9f9;">Value</th></tr>';
-        //         foreach ($all_options as $option) {
-        //             echo '<tr>';
-        //             echo '<td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">' . esc_html($option->option_name) . '</td>';
-        //             echo '<td style="border: 1px solid #ddd; padding: 8px;"><pre style="margin: 0; white-space: pre-wrap;">' . esc_html(print_r(maybe_unserialize($option->option_value), true)) . '</pre></td>';
-        //             echo '</tr>';
-        //         }
-        //         echo '</table>';
-        //     }
-            
-        //     echo '<p><strong>To test schema output, visit your homepage and view page source (Ctrl+U)</strong></p>';
-        //     echo '<p><strong>Look for &lt;script type="application/ld+json"&gt; tags</strong></p>';
-        //     echo '</div>';
-        // } else {
-        //     echo '<p><a href="?page=seo-plugin&debug=1" style="background: #0073aa; color: white; padding: 10px 15px; text-decoration: none; border-radius: 3px;">🔍 Enable Debug Mode</a></p>';
-        // }
-        
         // React container
         echo '<div id="seo-plugin-admin">';
         echo '<p>Loading React dashboard...</p>';
@@ -241,25 +187,53 @@ public function init() {
         flush_rewrite_rules();
     }
     
-    /**
-     * Set up default global settings
+   /**
+     * Set up default global settings with proper meta defaults
      */
     private function set_default_settings() {
         $defaults = [
+            // Basic meta defaults
             'meta_title' => get_bloginfo('name'),
             'meta_description' => get_bloginfo('description'),
+            
+            // Technical defaults - IMPORTANT
+            'charset' => 'UTF-8',
+            'viewport' => 'width=device-width, initial-scale=1',
+            
+            // Robots defaults
             'robots_index' => 'index',
             'robots_follow' => 'follow',
+            'robots_advanced' => '',
+            
+            // Other defaults
             'hreflang' => '',
             'canonical_url' => '',
             'meta_keywords' => '',
+            'meta_author' => '',
+            'meta_copyright' => '',
+            'generator' => 'WordPress',
+            'theme_color' => '',
             'date_published' => '',
-            'date_modified' => ''
+            'date_modified' => '',
+            'refresh_redirect' => '',
         ];
         
-        // Only set if not already exists
-        if (!get_option('seo_plugin_page_global')) {
-            update_option('seo_plugin_page_global', $defaults);
+        // Get existing global settings
+        $existing_global = get_option('seo_plugin_page_global', []);
+        
+        // Only set defaults for fields that don't exist or are empty
+        $updated = false;
+        foreach ($defaults as $key => $value) {
+            if (!isset($existing_global[$key]) || 
+                (empty($existing_global[$key]) && $existing_global[$key] !== '0')) {
+                $existing_global[$key] = $value;
+                $updated = true;
+            }
+        }
+        
+        // Save if we made changes
+        if ($updated) {
+            update_option('seo_plugin_page_global', $existing_global);
         }
     }
 }
