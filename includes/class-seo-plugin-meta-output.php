@@ -3,10 +3,6 @@
  * Meta Output Handler for SEO Plugin
  * 
  * This class handles outputting meta tags AND schema markup to the website's <head> section.
- * It works by:
- * 1. Detecting what page/post we're on
- * 2. Getting the saved meta settings for that page
- * 3. Outputting the appropriate meta tags AND schema JSON-LD
  */
 
 class SEO_Plugin_Meta_Output {
@@ -21,7 +17,7 @@ class SEO_Plugin_Meta_Output {
     }
     
     private function __construct() {
-        // Hook into wp_head with high priority (1) so our meta tags come first
+        // Hook into wp_head to add our meta tags
         add_action('wp_head', [$this, 'output_meta_tags'], 1);
         
         // Hook to modify page title
@@ -41,8 +37,8 @@ class SEO_Plugin_Meta_Output {
         // Add our plugin identifier comment
         echo "<!-- SEO Plugin Meta Tags -->\n";
         
-        // Get current page settings WITH DEBUG
-        $meta_settings = $this->debug_current_page_meta();
+        // Get current page settings
+        $meta_settings = $this->get_current_page_meta();
         
         // Output each type of meta tag
         $this->output_basic_meta_tags($meta_settings);
@@ -52,587 +48,467 @@ class SEO_Plugin_Meta_Output {
         $this->output_date_meta($meta_settings);
         $this->output_social_media_meta($meta_settings);
         
-        // 🌟 Schema Markup with debug
+        // Schema Markup
         $this->output_schema_markup($meta_settings);
         
         echo "<!-- /SEO Plugin Meta Tags -->\n";
     }
     
     /**
-     * 🆕 Output Schema Markup JSON-LD
-     * This automatically generates and injects schema based on user settings
+     * Get the current page ID for meta lookup - DEBUG VERSION
      */
-   // Replace the output_schema_markup method in your class-seo-plugin-meta-output.php file
-// Find this method and replace it entirely with this debug version:
-
-// Replace the output_schema_markup method in class-seo-plugin-meta-output.php with this debug version:
-
-// Replace ONLY the output_schema_markup method in class-seo-plugin-meta-output.php
-// Don't add the other debug methods I mentioned - just replace this one method:
-
-public function output_schema_markup($meta_settings) {
-    echo "<!-- SEO Plugin: === SIMPLE SCHEMA DEBUG === -->\n";
-    
-    // 1. Check what we received
-    if (!is_array($meta_settings)) {
-        echo "<!-- 1. Meta settings is not an array: " . gettype($meta_settings) . " -->\n";
-        $meta_settings = [];
-    } else {
-        echo "<!-- 1. Meta settings keys: " . implode(', ', array_keys($meta_settings)) . " -->\n";
-    }
-    
-    // 2. Check database directly for ANY saved schema data
-    global $wpdb;
-    $all_options = $wpdb->get_results(
-        "SELECT option_name, option_value FROM {$wpdb->options} 
-         WHERE option_name LIKE 'seo_plugin_page_%' 
-         ORDER BY option_name"
-    );
-    
-    echo "<!-- 2. Found " . count($all_options) . " seo_plugin_page options in database -->\n";
-    
-    foreach ($all_options as $option) {
-        $value = maybe_unserialize($option->option_value);
-        if (is_array($value)) {
-            $has_schema = false;
-            foreach (array_keys($value) as $key) {
-                if (strpos(strtolower($key), 'schema') !== false) {
-                    $has_schema = true;
-                    break;
-                }
-            }
-            echo "<!-- 2. {$option->option_name}: " . count($value) . " fields" . ($has_schema ? " (HAS SCHEMA)" : "") . " -->\n";
-        }
-    }
-    
-    // 3. Try to find schema data in ANY of these options
-    $schema_found = false;
-    $schema_type = '';
-    $schema_data = [];
-    
-    foreach ($all_options as $option) {
-        $value = maybe_unserialize($option->option_value);
-        if (is_array($value) && !empty($value['schemaType'])) {
-            $schema_type = $value['schemaType'];
-            $schema_data = $value;
-            $schema_found = true;
-            echo "<!-- 3. FOUND SCHEMA in {$option->option_name}: type = {$schema_type} -->\n";
-            break;
-        }
-    }
-    
-    if (!$schema_found) {
-        echo "<!-- 3. NO SCHEMA DATA found in any database option -->\n";
-    }
-    
-    // 4. ALWAYS output a test schema so we can verify the mechanism works
-    echo "<!-- 4. Force outputting test schema -->\n";
-    
-    $test_schema = [
-        '@context' => 'https://schema.org',
-        '@type' => 'WebSite',
-        'name' => get_bloginfo('name'),
-        'url' => home_url(),
-        'description' => get_bloginfo('description'),
-        'dateModified' => current_time('c'),
-        'debug_info' => [
-            'schema_found_in_db' => $schema_found,
-            'schema_type_if_found' => $schema_type,
-            'timestamp' => current_time('c')
-        ]
-    ];
-    
-    echo "<script type=\"application/ld+json\">\n";
-    echo wp_json_encode($test_schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    echo "\n</script>\n";
-    
-    // 5. If we found real schema data, try to output that too
-    if ($schema_found && !empty($schema_data)) {
-        echo "<!-- 5. Attempting to generate real schema -->\n";
-        $real_schema = $this->generate_schema_json($schema_data, $schema_type);
+    private function get_current_page_id() {
+        global $post;
         
-        if (!empty($real_schema)) {
-            echo "<script type=\"application/ld+json\">\n";
-            echo wp_json_encode($real_schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            echo "\n</script>\n";
-            echo "<!-- 5. Real schema generated successfully -->\n";
+        if (is_front_page()) {
+            echo "<!-- DEBUG: Detected as front page, returning 'home' -->\n";
+            return 'home';
+        } elseif (is_home()) {
+            echo "<!-- DEBUG: Detected as blog home, returning 'home' -->\n";
+            return 'home';
+        } elseif (is_page() || is_single()) {
+            if ($post) {
+                echo "<!-- DEBUG: Detected as page/post, returning post ID: {$post->ID} -->\n";
+                return (string) $post->ID;
+            } else {
+                echo "<!-- DEBUG: is_page/is_single but no post object, returning 'global' -->\n";
+                return 'global';
+            }
         } else {
-            echo "<!-- 5. Real schema generation failed -->\n";
+            echo "<!-- DEBUG: No specific page detected, returning 'global' -->\n";
+            return 'global';
         }
     }
     
-    echo "<!-- SEO Plugin: === END SIMPLE SCHEMA DEBUG === -->\n";
+   /**
+ * Get meta settings for the current page - FIXED INHERITANCE
+ */
+public function get_current_page_meta() {
+    // Get the current page identifier
+    $page_id = $this->get_current_page_id();
+    
+    // Get page-specific settings
+    $page_settings = get_option("seo_plugin_page_{$page_id}", []);
+    
+    // Get global settings as fallback
+    $global_settings = get_option('seo_plugin_page_global', []);
+    
+    // Smart merge: global first, then page-specific overrides
+    $merged_settings = array_merge($global_settings, $page_settings);
+    
+    // Special handling for arrays that should be merged, not replaced
+    $array_fields_to_merge = ['offerCatalog', 'sameAs'];
+    
+    foreach ($array_fields_to_merge as $field) {
+        $global_array = $global_settings[$field] ?? [];
+        $page_array = $page_settings[$field] ?? [];
+        
+        if (is_array($global_array) && is_array($page_array)) {
+            // Merge arrays instead of replacing
+            $merged_settings[$field] = array_merge($global_array, $page_array);
+        }
+    }
+    
+    return $merged_settings;
 }
 
+/**
+ * Output Schema Markup JSON-LD - FIXED INHERITANCE
+ */
+public function output_schema_markup($meta_settings) {
+    echo "<!-- SEO Plugin: Schema Debug Start -->\n";
+    
+    // Get current page ID
+    $page_id = $this->get_current_page_id();
+    echo "<!-- DEBUG: Current page ID: '{$page_id}' -->\n";
+    
+    // Get page-specific and global settings separately
+    $page_settings = get_option("seo_plugin_page_{$page_id}", []);
+    $global_settings = get_option('seo_plugin_page_global', []);
+    
+    echo "<!-- DEBUG: Page settings count: " . count($page_settings) . " -->\n";
+    echo "<!-- DEBUG: Global settings count: " . count($global_settings) . " -->\n";
+    
+    // Determine schema type (page-specific first, then global)
+    $schema_type = '';
+    if (!empty($page_settings['schemaType'])) {
+        $schema_type = $page_settings['schemaType'];
+        echo "<!-- DEBUG: Using page-specific schema type: '{$schema_type}' -->\n";
+    } elseif (!empty($global_settings['schemaType'])) {
+        $schema_type = $global_settings['schemaType'];
+        echo "<!-- DEBUG: Using global schema type: '{$schema_type}' -->\n";
+    }
+    
+    if (empty($schema_type)) {
+        echo "<!-- No schema type configured -->\n";
+        echo "<!-- SEO Plugin: Schema Debug End -->\n";
+        return;
+    }
+    
+    // SMART INHERITANCE: Merge settings with page-specific taking priority
+    $merged_settings = array_merge($global_settings, $page_settings);
+    
+    // Special handling for service catalog - merge arrays instead of overriding
+    $final_services = [];
+    
+    // Add global services first
+    if (!empty($global_settings['offerCatalog']) && is_array($global_settings['offerCatalog'])) {
+        $final_services = $global_settings['offerCatalog'];
+        echo "<!-- DEBUG: Added " . count($final_services) . " global services -->\n";
+    }
+    
+    // Add page-specific services (merge, don't replace)
+    if (!empty($page_settings['offerCatalog']) && is_array($page_settings['offerCatalog'])) {
+        $page_services = $page_settings['offerCatalog'];
+        echo "<!-- DEBUG: Found " . count($page_services) . " page-specific services -->\n";
+        
+        // Merge page services with global services
+        $final_services = array_merge($final_services, $page_services);
+        echo "<!-- DEBUG: Total services after merge: " . count($final_services) . " -->\n";
+    }
+    
+    // Update merged settings with combined services
+    if (!empty($final_services)) {
+        $merged_settings['offerCatalog'] = $final_services;
+    }
+    
+    echo "<!-- DEBUG: Final merged settings has " . count($merged_settings) . " fields -->\n";
+    echo "<!-- DEBUG: Final schema type: '{$schema_type}' -->\n";
+    echo "<!-- DEBUG: Final service count: " . (isset($merged_settings['offerCatalog']) ? count($merged_settings['offerCatalog']) : 0) . " -->\n";
+    
+    // Generate the schema JSON
+    $schema = $this->generate_schema_json($merged_settings, $schema_type);
+    
+    if (empty($schema) || !is_array($schema)) {
+        echo "<!-- DEBUG: Schema generation failed -->\n";
+        echo "<!-- SEO Plugin: Schema Debug End -->\n";
+        return;
+    }
+    
+    echo "<!-- DEBUG: Schema generated successfully with " . count($schema) . " properties -->\n";
+    
+    // Output the schema JSON-LD
+    echo "<script type=\"application/ld+json\">\n";
+    echo wp_json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    echo "\n</script>\n";
+    
+    echo "<!-- SEO Plugin: Schema Debug End -->\n";
+}
+    
     /**
-     * 🆕 Generate Schema JSON from user settings
-     * This converts the form data into proper Schema.org structure
+     * Generate Schema JSON from user settings
      */
     private function generate_schema_json($meta_settings, $schema_type) {
-        // Schema type definitions with their available fields
-        $schema_types = [
-            'Organization' => [
-                'fields' => ['name', 'url', 'logo', 'description', 'email', 'telephone', 'address', 'sameAs', 'foundingDate', 'numberOfEmployees', 'areaServed', 'openingHours', 'hasOfferCatalog', 'paymentAccepted', 'priceRange']
-            ],
-            'LocalBusiness' => [
-                'extends' => 'Organization',
-                'fields' => ['name', 'url', 'logo', 'description', 'email', 'telephone', 'address', 'sameAs', 'openingHours', 'hasOfferCatalog', 'paymentAccepted', 'priceRange', 'servesCuisine', 'acceptsReservations', 'menuUrl']
-            ],
-            'Restaurant' => [
-                'extends' => 'LocalBusiness', 
-                'fields' => ['name', 'url', 'logo', 'description', 'email', 'telephone', 'address', 'sameAs', 'openingHours', 'servesCuisine', 'acceptsReservations', 'menuUrl', 'paymentAccepted', 'priceRange']
-            ],
-            'Store' => [
-                'extends' => 'LocalBusiness',
-                'fields' => ['name', 'url', 'logo', 'description', 'email', 'telephone', 'address', 'sameAs', 'openingHours', 'hasOfferCatalog', 'paymentAccepted', 'priceRange']
-            ],
-            'Article' => [
-                'fields' => ['headline', 'description', 'author', 'publisher', 'datePublished', 'dateModified', 'image', 'articleSection', 'wordCount', 'articleBody']
-            ],
-            'NewsArticle' => [
-                'extends' => 'Article',
-                'fields' => ['headline', 'description', 'author', 'publisher', 'datePublished', 'dateModified', 'image', 'articleSection', 'wordCount', 'dateline']
-            ],
-            'Product' => [
-                'fields' => ['name', 'description', 'image', 'brand', 'manufacturer', 'model', 'sku', 'gtin', 'offers', 'aggregateRating', 'review']
-            ],
-            'Service' => [
-                'fields' => ['name', 'description', 'provider', 'serviceType', 'areaServed', 'hasOfferCatalog', 'offers', 'aggregateRating', 'review']
-            ],
-            'Person' => [
-                'fields' => ['name', 'url', 'image', 'description', 'email', 'jobTitle', 'worksFor', 'sameAs', 'birthDate', 'nationality', 'alumniOf']
-            ],
-            'Event' => [
-                'fields' => ['name', 'description', 'startDate', 'endDate', 'location', 'organizer', 'performer', 'offers', 'eventStatus', 'eventAttendanceMode', 'image']
-            ],
-            'Recipe' => [
-                'fields' => ['name', 'description', 'image', 'author', 'datePublished', 'prepTime', 'cookTime', 'totalTime', 'recipeYield', 'recipeCategory', 'recipeCuisine', 'recipeIngredient', 'recipeInstructions', 'nutrition', 'aggregateRating']
-            ],
-            'Book' => [
-                'fields' => ['name', 'description', 'author', 'publisher', 'datePublished', 'isbn', 'numberOfPages', 'bookFormat', 'genre', 'image', 'aggregateRating']
-            ],
-            'Course' => [
-                'fields' => ['name', 'description', 'provider', 'courseCode', 'educationalLevel', 'timeRequired', 'coursePrerequisites', 'competencyRequired', 'offers']
-            ],
-            'WebSite' => [
-                'fields' => ['name', 'url', 'description', 'publisher', 'potentialAction', 'sameAs']
-            ],
-            'WebPage' => [
-                'fields' => ['name', 'description', 'url', 'isPartOf', 'primaryImageOfPage', 'datePublished', 'dateModified', 'author']
-            ]
-        ];
-        
-        // Start building the schema
+        // Start with basic schema structure
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => $schema_type
         ];
         
-        // Get the field configuration for this schema type
-        $type_config = $schema_types[$schema_type] ?? null;
-        if (!$type_config) {
-            return $schema; // Return basic schema if type not found
+        // Add basic fields that most schema types have
+        if (!empty($meta_settings['name'])) {
+            $schema['name'] = $meta_settings['name'];
         }
         
-        $fields_to_include = $type_config['fields'] ?? [];
-        
-        // Process each field
-        foreach ($fields_to_include as $field_key) {
-            $value = $meta_settings[$field_key] ?? null;
-            
-            if (empty($value)) {
-                continue; // Skip empty values
-            }
-            
-            // Handle different field types and convert them to proper schema format
-            $schema_value = $this->convert_field_to_schema($field_key, $value, $meta_settings);
-            
-            if ($schema_value !== null) {
-                $schema[$field_key] = $schema_value;
-            }
+        if (!empty($meta_settings['description'])) {
+            $schema['description'] = $meta_settings['description'];
         }
         
-        // Add computed fields and special cases
-        $schema = $this->add_computed_schema_fields($schema, $schema_type, $meta_settings);
-        
-        return $schema;
-    }
-    
-    /**
-     * 🆕 Convert individual field values to proper schema format
-     */
-    private function convert_field_to_schema($field_key, $value, $meta_settings) {
-        // Handle different field types
-        switch ($field_key) {
-            case 'address':
-                // Convert address object to PostalAddress schema
-                if (is_array($value) || is_object($value)) {
-                    $address_array = (array) $value;
-                    $address_schema = ['@type' => 'PostalAddress'];
-                    
-                    $address_mapping = [
-                        'streetAddress' => 'streetAddress',
-                        'addressLocality' => 'addressLocality', 
-                        'addressRegion' => 'addressRegion',
-                        'postalCode' => 'postalCode',
-                        'addressCountry' => 'addressCountry'
-                    ];
-                    
-                    foreach ($address_mapping as $key => $schema_key) {
-                        if (!empty($address_array[$key])) {
-                            $address_schema[$schema_key] = $address_array[$key];
-                        }
-                    }
-                    
-                    return count($address_schema) > 1 ? $address_schema : null;
-                }
-                break;
-                
-            case 'author':
-            case 'publisher':
-                // Convert author/publisher object to Person/Organization schema
-                if (is_array($value) || is_object($value)) {
-                    $obj_array = (array) $value;
-                    $obj_schema = ['@type' => $field_key === 'publisher' ? 'Organization' : 'Person'];
-                    
-                    if (!empty($obj_array['name'])) {
-                        $obj_schema['name'] = $obj_array['name'];
-                    }
-                    if (!empty($obj_array['url'])) {
-                        $obj_schema['url'] = $obj_array['url'];
-                    }
-                    if (!empty($obj_array['logo']) && $field_key === 'publisher') {
-                        $obj_schema['logo'] = $obj_array['logo'];
-                    }
-                    if (!empty($obj_array['image']) && $field_key === 'author') {
-                        $obj_schema['image'] = $obj_array['image'];
-                    }
-                    
-                    return count($obj_schema) > 1 ? $obj_schema : null;
-                }
-                break;
-                
-            case 'location':
-                // Convert location object to Place schema
-                if (is_array($value) || is_object($value)) {
-                    $loc_array = (array) $value;
-                    $loc_schema = ['@type' => 'Place'];
-                    
-                    if (!empty($loc_array['name'])) {
-                        $loc_schema['name'] = $loc_array['name'];
-                    }
-                    if (!empty($loc_array['address'])) {
-                        $loc_schema['address'] = $loc_array['address'];
-                    }
-                    
-                    return count($loc_schema) > 1 ? $loc_schema : null;
-                }
-                break;
-                
-            case 'offers':
-                // Convert offers object to Offer schema
-                if (is_array($value) || is_object($value)) {
-                    $offer_array = (array) $value;
-                    $offer_schema = ['@type' => 'Offer'];
-                    
-                    if (!empty($offer_array['price'])) {
-                        $offer_schema['price'] = $offer_array['price'];
-                    }
-                    if (!empty($offer_array['priceCurrency'])) {
-                        $offer_schema['priceCurrency'] = $offer_array['priceCurrency'];
-                    }
-                    if (!empty($offer_array['availability'])) {
-                        $offer_schema['availability'] = 'https://schema.org/' . $offer_array['availability'];
-                    }
-                    if (!empty($offer_array['validFrom'])) {
-                        $offer_schema['validFrom'] = $offer_array['validFrom'];
-                    }
-                    if (!empty($offer_array['validThrough'])) {
-                        $offer_schema['validThrough'] = $offer_array['validThrough'];
-                    }
-                    
-                    return count($offer_schema) > 1 ? $offer_schema : null;
-                }
-                break;
-                
-            case 'aggregateRating':
-                // Convert rating object to AggregateRating schema
-                if (is_array($value) || is_object($value)) {
-                    $rating_array = (array) $value;
-                    $rating_schema = ['@type' => 'AggregateRating'];
-                    
-                    if (!empty($rating_array['ratingValue'])) {
-                        $rating_schema['ratingValue'] = $rating_array['ratingValue'];
-                    }
-                    if (!empty($rating_array['reviewCount'])) {
-                        $rating_schema['reviewCount'] = $rating_array['reviewCount'];
-                    }
-                    if (!empty($rating_array['bestRating'])) {
-                        $rating_schema['bestRating'] = $rating_array['bestRating'];
-                    }
-                    if (!empty($rating_array['worstRating'])) {
-                        $rating_schema['worstRating'] = $rating_array['worstRating'];
-                    }
-                    
-                    return count($rating_schema) > 1 ? $rating_schema : null;
-                }
-                break;
-                
-            case 'openingHours':
-                // Convert opening hours object to proper format
-                if (is_array($value) || is_object($value)) {
-                    $hours_array = (array) $value;
-                    $opening_hours = [];
-                    
-                    $day_mapping = [
-                        'monday' => 'Mo',
-                        'tuesday' => 'Tu', 
-                        'wednesday' => 'We',
-                        'thursday' => 'Th',
-                        'friday' => 'Fr',
-                        'saturday' => 'Sa',
-                        'sunday' => 'Su'
-                    ];
-                    
-                    foreach ($day_mapping as $day => $abbrev) {
-                        if (!empty($hours_array[$day]) && strtolower($hours_array[$day]) !== 'closed') {
-                            $opening_hours[] = $abbrev . ' ' . $hours_array[$day];
-                        }
-                    }
-                    
-                    return !empty($opening_hours) ? $opening_hours : null;
-                }
-                break;
-                
-            case 'sameAs':
-            case 'recipeIngredient':
-            case 'recipeInstructions':
-            case 'paymentAccepted':
-            case 'servesCuisine':
-                // Handle arrays - could be stored as JSON string or actual array
-                if (is_string($value)) {
-                    // Try to decode JSON first
-                    $decoded = json_decode($value, true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        return array_filter($decoded); // Remove empty values
-                    }
-                    // If not JSON, split by newlines
-                    $array_value = array_filter(array_map('trim', explode("\n", $value)));
-                    return !empty($array_value) ? $array_value : null;
-                } elseif (is_array($value)) {
-                    return array_filter($value); // Remove empty values
-                }
-                break;
-                
-            case 'prepTime':
-            case 'cookTime': 
-            case 'totalTime':
-                // Convert minutes to ISO 8601 duration format (PT15M)
-                if (is_numeric($value)) {
-                    return 'PT' . intval($value) . 'M';
-                }
-                break;
-                
-            case 'acceptsReservations':
-            case 'hasOfferCatalog':
-                // Convert string boolean to actual boolean
-                if ($value === 'true') {
-                    return true;
-                } elseif ($value === 'false') {
-                    return false;
-                }
-                break;
-                
-            default:
-                // For simple fields, return as-is if not empty
-                if (is_string($value)) {
-                    return trim($value) !== '' ? trim($value) : null;
-                }
-                return $value;
+        if (!empty($meta_settings['url'])) {
+            $schema['url'] = $meta_settings['url'];
         }
         
-        return $value;
-    }
-    
-    /**
-     * 🆕 Add computed fields and special schema enhancements
-     */
-    private function add_computed_schema_fields($schema, $schema_type, $meta_settings) {
-        // Add current page URL
-        $schema['url'] = $this->get_current_page_url();
+        if (!empty($meta_settings['image'])) {
+            $schema['image'] = $meta_settings['image'];
+        }
         
-        // Add specific enhancements based on schema type
+        // Handle specific schema types
         switch ($schema_type) {
-            case 'WebSite':
-                // Add search action for websites
-                if (!empty($schema['url'])) {
-                    $schema['potentialAction'] = [
-                        '@type' => 'SearchAction',
-                        'target' => [
-                            '@type' => 'EntryPoint',
-                            'urlTemplate' => $schema['url'] . '?s={search_term_string}'
-                        ],
-                        'query-input' => 'required name=search_term_string'
-                    ];
-                }
-                break;
-                
-            case 'Article':
-            case 'NewsArticle':
-                // Auto-fill article data from WordPress post if available
-                global $post;
-                if ($post) {
-                    if (empty($schema['headline'])) {
-                        $schema['headline'] = get_the_title($post);
-                    }
-                    if (empty($schema['datePublished'])) {
-                        $schema['datePublished'] = get_the_date('c', $post);
-                    }
-                    if (empty($schema['dateModified'])) {
-                        $schema['dateModified'] = get_the_modified_date('c', $post);
-                    }
-                    if (empty($schema['wordCount'])) {
-                        $schema['wordCount'] = str_word_count(strip_tags(get_the_content()));
-                    }
-                    if (empty($schema['image'])) {
-                        $featured_image = get_the_post_thumbnail_url($post, 'large');
-                        if ($featured_image) {
-                            $schema['image'] = $featured_image;
-                        }
-                    }
-                }
-                break;
-                
             case 'Organization':
             case 'LocalBusiness':
             case 'Restaurant':
             case 'Store':
-                // Add mainEntityOfPage for business schemas
-                $schema['mainEntityOfPage'] = [
-                    '@type' => 'WebPage',
-                    '@id' => $this->get_current_page_url()
-                ];
+                $this->add_business_schema_fields($schema, $meta_settings);
                 break;
+                
+            case 'Article':
+            case 'NewsArticle':
+                $this->add_article_schema_fields($schema, $meta_settings);
+                break;
+                
+            case 'Product':
+                $this->add_product_schema_fields($schema, $meta_settings);
+                break;
+                
+            case 'Person':
+                $this->add_person_schema_fields($schema, $meta_settings);
+                break;
+                
+            case 'Event':
+                $this->add_event_schema_fields($schema, $meta_settings);
+                break;
+        }
+        
+        // Handle service catalog (offerCatalog)
+        if (!empty($meta_settings['offerCatalog']) && is_array($meta_settings['offerCatalog'])) {
+            $this->add_service_catalog($schema, $meta_settings['offerCatalog']);
         }
         
         return $schema;
     }
     
     /**
-     * 🆕 Get current page URL for schema markup
+     * Add business-specific schema fields
      */
-    private function get_current_page_url() {
-        global $wp;
-        return home_url(add_query_arg([], $wp->request));
-    }
-    
-    /**
-     * 🆕 Output Social Media Meta Tags (Open Graph, Twitter Cards)
-     * This handles the social media tab data
-     */
-    private function output_social_media_meta($meta_settings) {
-        // Open Graph tags
-        $og_title = $meta_settings['og_title'] ?? $meta_settings['meta_title'] ?? '';
-        if ($og_title) {
-            echo '<meta property="og:title" content="' . esc_attr($og_title) . '">' . "\n";
+    private function add_business_schema_fields(&$schema, $meta_settings) {
+        // Contact information
+        if (!empty($meta_settings['email'])) {
+            $schema['email'] = $meta_settings['email'];
         }
         
-        $og_description = $meta_settings['og_description'] ?? $meta_settings['meta_description'] ?? '';
-        if ($og_description) {
-            echo '<meta property="og:description" content="' . esc_attr($og_description) . '">' . "\n";
+        if (!empty($meta_settings['telephone'])) {
+            $schema['telephone'] = $meta_settings['telephone'];
         }
         
-        $og_image = $meta_settings['og_image'] ?? $meta_settings['social_default_image'] ?? '';
-        if ($og_image) {
-            echo '<meta property="og:image" content="' . esc_url($og_image) . '">' . "\n";
+        // Address
+        if (!empty($meta_settings['address']) && is_array($meta_settings['address'])) {
+            $address = $meta_settings['address'];
+            $schema['address'] = [
+                '@type' => 'PostalAddress'
+            ];
+            
+            if (!empty($address['streetAddress'])) $schema['address']['streetAddress'] = $address['streetAddress'];
+            if (!empty($address['addressLocality'])) $schema['address']['addressLocality'] = $address['addressLocality'];
+            if (!empty($address['addressRegion'])) $schema['address']['addressRegion'] = $address['addressRegion'];
+            if (!empty($address['postalCode'])) $schema['address']['postalCode'] = $address['postalCode'];
+            if (!empty($address['addressCountry'])) $schema['address']['addressCountry'] = $address['addressCountry'];
         }
         
-        $og_image_alt = $meta_settings['og_image_alt'] ?? '';
-        if ($og_image_alt) {
-            echo '<meta property="og:image:alt" content="' . esc_attr($og_image_alt) . '">' . "\n";
+        // Social media profiles (sameAs)
+        if (!empty($meta_settings['sameAs']) && is_array($meta_settings['sameAs'])) {
+            $schema['sameAs'] = array_filter($meta_settings['sameAs']);
         }
         
-        $og_type = $meta_settings['og_type'] ?? 'website';
-        echo '<meta property="og:type" content="' . esc_attr($og_type) . '">' . "\n";
-        
-        $og_url = $this->get_current_page_url();
-        echo '<meta property="og:url" content="' . esc_url($og_url) . '">' . "\n";
-        
-        $og_site_name = $meta_settings['og_site_name'] ?? get_bloginfo('name');
-        if ($og_site_name) {
-            echo '<meta property="og:site_name" content="' . esc_attr($og_site_name) . '">' . "\n";
+        // Opening hours
+        if (!empty($meta_settings['openingHours']) && is_array($meta_settings['openingHours'])) {
+            $opening_hours = [];
+            $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            $day_abbrev = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+            
+            foreach ($days as $index => $day) {
+                if (!empty($meta_settings['openingHours'][$day]) && 
+                    strtolower($meta_settings['openingHours'][$day]) !== 'closed') {
+                    $opening_hours[] = $day_abbrev[$index] . ' ' . $meta_settings['openingHours'][$day];
+                }
+            }
+            
+            if (!empty($opening_hours)) {
+                $schema['openingHours'] = $opening_hours;
+            }
         }
         
-        $og_locale = $meta_settings['og_locale'] ?? '';
-        if ($og_locale) {
-            echo '<meta property="og:locale" content="' . esc_attr($og_locale) . '">' . "\n";
-        }
-        
-        // Twitter Card tags
-        $twitter_card = $meta_settings['twitter_card_type'] ?? 'summary_large_image';
-        echo '<meta name="twitter:card" content="' . esc_attr($twitter_card) . '">' . "\n";
-        
-        $twitter_site = $meta_settings['twitter_site'] ?? '';
-        if ($twitter_site) {
-            echo '<meta name="twitter:site" content="' . esc_attr($twitter_site) . '">' . "\n";
-        }
-        
-        $twitter_creator = $meta_settings['twitter_creator'] ?? '';
-        if ($twitter_creator) {
-            echo '<meta name="twitter:creator" content="' . esc_attr($twitter_creator) . '">' . "\n";
-        }
-        
-        $twitter_title = $meta_settings['twitter_title'] ?? $og_title;
-        if ($twitter_title) {
-            echo '<meta name="twitter:title" content="' . esc_attr($twitter_title) . '">' . "\n";
-        }
-        
-        $twitter_description = $meta_settings['twitter_description'] ?? $og_description;
-        if ($twitter_description) {
-            echo '<meta name="twitter:description" content="' . esc_attr($twitter_description) . '">' . "\n";
-        }
-        
-        $twitter_image = $meta_settings['twitter_image'] ?? $meta_settings['social_twitter_image'] ?? $og_image;
-        if ($twitter_image) {
-            echo '<meta name="twitter:image" content="' . esc_url($twitter_image) . '">' . "\n";
-        }
-        
-        // Facebook specific
-        $fb_app_id = $meta_settings['fb_app_id'] ?? '';
-        if ($fb_app_id) {
-            echo '<meta property="fb:app_id" content="' . esc_attr($fb_app_id) . '">' . "\n";
-        }
-        
-        $fb_admins = $meta_settings['fb_admins'] ?? '';
-        if ($fb_admins) {
-            echo '<meta property="fb:admins" content="' . esc_attr($fb_admins) . '">' . "\n";
+        // Price range
+        if (!empty($meta_settings['priceRange'])) {
+            $schema['priceRange'] = $meta_settings['priceRange'];
         }
     }
     
     /**
-     * Get meta settings for the current page
+     * Add service catalog to schema
      */
-    public function debug_current_page_meta() {
-        echo "<!-- DEBUG: get_current_page_meta() trace -->\n";
+    private function add_service_catalog(&$schema, $services) {
+        if (empty($services) || !is_array($services)) {
+            return;
+        }
         
+        $catalog_items = [];
+        
+        foreach ($services as $index => $service) {
+            if (empty($service['name'])) continue;
+            
+            $offer = [
+                '@type' => 'Offer',
+                '@id' => '#service-' . ($index + 1),
+                'itemOffered' => [
+                    '@type' => 'Service',
+                    'name' => $service['name']
+                ]
+            ];
+            
+            if (!empty($service['description'])) {
+                $offer['itemOffered']['description'] = $service['description'];
+            }
+            
+            if (!empty($service['serviceType'])) {
+                $offer['itemOffered']['serviceType'] = $service['serviceType'];
+            }
+            
+            if (!empty($service['areaServed'])) {
+                $offer['itemOffered']['areaServed'] = $service['areaServed'];
+            }
+            
+            $catalog_items[] = $offer;
+        }
+        
+        if (!empty($catalog_items)) {
+            $schema['hasOfferCatalog'] = [
+                '@type' => 'OfferCatalog',
+                'name' => 'Our Services',
+                'itemListElement' => $catalog_items
+            ];
+        }
+    }
+    
+    /**
+     * Add article-specific schema fields
+     */
+    private function add_article_schema_fields(&$schema, $meta_settings) {
         global $post;
-        echo "<!-- Global post object: " . (is_object($post) ? "ID {$post->ID}, Type {$post->post_type}" : 'NULL') . " -->\n";
         
-        // Check what page detection returns
-        $current_page_id = $this->get_current_page_id();
-        echo "<!-- get_current_page_id() returned: " . var_export($current_page_id, true) . " -->\n";
+        // Use headline instead of name for articles
+        if (!empty($meta_settings['headline'])) {
+            $schema['headline'] = $meta_settings['headline'];
+            unset($schema['name']); // Articles use headline, not name
+        } elseif ($post) {
+            $schema['headline'] = get_the_title($post);
+            unset($schema['name']);
+        }
         
-        // Check WordPress conditional functions
-        echo "<!-- is_front_page(): " . (is_front_page() ? 'true' : 'false') . " -->\n";
-        echo "<!-- is_home(): " . (is_home() ? 'true' : 'false') . " -->\n";
-        echo "<!-- is_page(): " . (is_page() ? 'true' : 'false') . " -->\n";
-        echo "<!-- is_single(): " . (is_single() ? 'true' : 'false') . " -->\n";
+        // Author
+        if (!empty($meta_settings['author']) && is_array($meta_settings['author'])) {
+            $schema['author'] = [
+                '@type' => 'Person',
+                'name' => $meta_settings['author']['name'] ?? ''
+            ];
+            
+            if (!empty($meta_settings['author']['url'])) {
+                $schema['author']['url'] = $meta_settings['author']['url'];
+            }
+        } elseif ($post) {
+            $author_id = $post->post_author;
+            $schema['author'] = [
+                '@type' => 'Person',
+                'name' => get_the_author_meta('display_name', $author_id)
+            ];
+        }
         
-        // Call the actual method
-        $meta_settings = $this->get_current_page_meta();
-        echo "<!-- get_current_page_meta() returned: " . gettype($meta_settings) . " with " . (is_array($meta_settings) ? count($meta_settings) : '0') . " items -->\n";
+        // Publisher
+        if (!empty($meta_settings['publisher']) && is_array($meta_settings['publisher'])) {
+            $schema['publisher'] = [
+                '@type' => 'Organization',
+                'name' => $meta_settings['publisher']['name'] ?? get_bloginfo('name')
+            ];
+            
+            if (!empty($meta_settings['publisher']['logo'])) {
+                $schema['publisher']['logo'] = $meta_settings['publisher']['logo'];
+            }
+        } else {
+            $schema['publisher'] = [
+                '@type' => 'Organization',
+                'name' => get_bloginfo('name')
+            ];
+        }
         
-        return $meta_settings;
+        // Dates
+        if (!empty($meta_settings['datePublished'])) {
+            $schema['datePublished'] = $meta_settings['datePublished'];
+        } elseif ($post) {
+            $schema['datePublished'] = get_the_date('c', $post);
+        }
+        
+        if (!empty($meta_settings['dateModified'])) {
+            $schema['dateModified'] = $meta_settings['dateModified'];
+        } elseif ($post) {
+            $schema['dateModified'] = get_the_modified_date('c', $post);
+        }
+    }
+    
+    /**
+     * Add product-specific schema fields
+     */
+    private function add_product_schema_fields(&$schema, $meta_settings) {
+        // Brand
+        if (!empty($meta_settings['brand'])) {
+            $schema['brand'] = $meta_settings['brand'];
+        }
+        
+        // SKU
+        if (!empty($meta_settings['sku'])) {
+            $schema['sku'] = $meta_settings['sku'];
+        }
+        
+        // Offers
+        if (!empty($meta_settings['offers']) && is_array($meta_settings['offers'])) {
+            $offers = $meta_settings['offers'];
+            $schema['offers'] = [
+                '@type' => 'Offer'
+            ];
+            
+            if (!empty($offers['price'])) {
+                $schema['offers']['price'] = $offers['price'];
+            }
+            
+            if (!empty($offers['priceCurrency'])) {
+                $schema['offers']['priceCurrency'] = $offers['priceCurrency'];
+            }
+            
+            if (!empty($offers['availability'])) {
+                $schema['offers']['availability'] = 'https://schema.org/' . $offers['availability'];
+            }
+        }
+    }
+    
+    /**
+     * Add person-specific schema fields
+     */
+    private function add_person_schema_fields(&$schema, $meta_settings) {
+        // Job title
+        if (!empty($meta_settings['jobTitle'])) {
+            $schema['jobTitle'] = $meta_settings['jobTitle'];
+        }
+        
+        // Works for
+        if (!empty($meta_settings['worksFor'])) {
+            $schema['worksFor'] = [
+                '@type' => 'Organization',
+                'name' => $meta_settings['worksFor']
+            ];
+        }
+        
+        // Social profiles
+        if (!empty($meta_settings['sameAs']) && is_array($meta_settings['sameAs'])) {
+            $schema['sameAs'] = array_filter($meta_settings['sameAs']);
+        }
+    }
+    
+    /**
+     * Add event-specific schema fields
+     */
+    private function add_event_schema_fields(&$schema, $meta_settings) {
+        // Start and end dates
+        if (!empty($meta_settings['startDate'])) {
+            $schema['startDate'] = $meta_settings['startDate'];
+        }
+        
+        if (!empty($meta_settings['endDate'])) {
+            $schema['endDate'] = $meta_settings['endDate'];
+        }
+        
+        // Location
+        if (!empty($meta_settings['location']) && is_array($meta_settings['location'])) {
+            $location = $meta_settings['location'];
+            $schema['location'] = [
+                '@type' => 'Place'
+            ];
+            
+            if (!empty($location['name'])) {
+                $schema['location']['name'] = $location['name'];
+            }
+            
+            if (!empty($location['address'])) {
+                $schema['location']['address'] = $location['address'];
+            }
+        }
     }
     
     /**
@@ -710,6 +586,50 @@ public function output_schema_markup($meta_settings) {
             $modified_date = esc_attr($meta_settings['date_modified']);
             echo "<meta property=\"article:modified_time\" content=\"{$modified_date}\">\n";
         }
+    }
+    
+    /**
+     * Output Social Media Meta Tags (Open Graph, Twitter Cards)
+     */
+    private function output_social_media_meta($meta_settings) {
+        // Open Graph tags
+        $og_title = $meta_settings['og_title'] ?? $meta_settings['meta_title'] ?? '';
+        if ($og_title) {
+            echo '<meta property="og:title" content="' . esc_attr($og_title) . '">' . "\n";
+        }
+        
+        $og_description = $meta_settings['og_description'] ?? $meta_settings['meta_description'] ?? '';
+        if ($og_description) {
+            echo '<meta property="og:description" content="' . esc_attr($og_description) . '">' . "\n";
+        }
+        
+        $og_image = $meta_settings['og_image'] ?? $meta_settings['social_default_image'] ?? '';
+        if ($og_image) {
+            echo '<meta property="og:image" content="' . esc_url($og_image) . '">' . "\n";
+        }
+        
+        $og_type = $meta_settings['og_type'] ?? 'website';
+        echo '<meta property="og:type" content="' . esc_attr($og_type) . '">' . "\n";
+        
+        $og_url = $this->get_current_page_url();
+        echo '<meta property="og:url" content="' . esc_url($og_url) . '">' . "\n";
+        
+        // Twitter Card tags
+        $twitter_card = $meta_settings['twitter_card_type'] ?? 'summary_large_image';
+        echo '<meta name="twitter:card" content="' . esc_attr($twitter_card) . '">' . "\n";
+        
+        $twitter_site = $meta_settings['twitter_site'] ?? '';
+        if ($twitter_site) {
+            echo '<meta name="twitter:site" content="' . esc_attr($twitter_site) . '">' . "\n";
+        }
+    }
+    
+    /**
+     * Get current page URL for schema markup
+     */
+    private function get_current_page_url() {
+        global $wp;
+        return home_url(add_query_arg([], $wp->request));
     }
     
     /**

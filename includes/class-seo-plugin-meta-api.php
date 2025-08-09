@@ -64,7 +64,6 @@ class SEO_Plugin_Meta_API {
     
     /**
      * Get all pages and posts for the dropdown selector
-     * This returns a list of all content that can have meta tags
      */
     public function get_pages($request) {
         $pages = [];
@@ -80,7 +79,7 @@ class SEO_Plugin_Meta_API {
         // Get all published pages
         $wp_pages = get_pages([
             'post_status' => 'publish',
-            'number' => 100  // Limit to avoid performance issues
+            'number' => 100
         ]);
         
         foreach ($wp_pages as $page) {
@@ -96,7 +95,7 @@ class SEO_Plugin_Meta_API {
         $wp_posts = get_posts([
             'post_status' => 'publish',
             'post_type' => 'post',
-            'numberposts' => 50  // Limit to recent posts
+            'numberposts' => 50
         ]);
         
         foreach ($wp_posts as $post) {
@@ -128,8 +127,13 @@ class SEO_Plugin_Meta_API {
     public function get_meta_settings($request) {
         $page_id = $request['page_id'];
         
+        // Debug logging
+        error_log("SEO Plugin: Getting settings for page: {$page_id}");
+        
         // Get settings from WordPress options table
         $settings = get_option("seo_plugin_page_{$page_id}", []);
+        
+        error_log("SEO Plugin: Raw settings from DB: " . print_r($settings, true));
         
         // If no settings exist, return empty array (React will use defaults)
         return rest_ensure_response([
@@ -146,26 +150,27 @@ class SEO_Plugin_Meta_API {
         $settings = $request->get_json_params();
         
         // Debug logging
+        error_log("SEO Plugin: === SAVE DEBUG START ===");
         error_log("SEO Plugin: Saving settings for page: {$page_id}");
-        error_log("SEO Plugin: Raw settings: " . print_r($settings, true));
+        error_log("SEO Plugin: Raw input data: " . print_r($settings, true));
         
-        // Validate and sanitize the settings
-        $clean_settings = $this->sanitize_meta_settings($settings);
-        error_log("SEO Plugin: Clean settings: " . print_r($clean_settings, true));
+        // Enhanced sanitization that preserves all schema fields
+        $clean_settings = $this->sanitize_all_settings($settings);
+        error_log("SEO Plugin: Clean settings after sanitization: " . print_r($clean_settings, true));
         
         // Save to WordPress options table
         $option_name = "seo_plugin_page_{$page_id}";
         $result = update_option($option_name, $clean_settings);
         
-        error_log("SEO Plugin: update_option result: " . ($result ? 'true' : 'false'));
-        error_log("SEO Plugin: Option name: {$option_name}");
+        error_log("SEO Plugin: update_option({$option_name}) result: " . ($result ? 'true' : 'false'));
         
-        // Note: update_option returns false if the value is the same as what's already stored
-        // So we should check if the option actually exists now
+        // Verify the save worked
         $saved_value = get_option($option_name, null);
-        $actually_saved = ($saved_value !== null);
+        error_log("SEO Plugin: Verification - saved value: " . print_r($saved_value, true));
         
-        error_log("SEO Plugin: Verification - option exists: " . ($actually_saved ? 'true' : 'false'));
+        $actually_saved = ($saved_value !== null);
+        error_log("SEO Plugin: Actually saved: " . ($actually_saved ? 'true' : 'false'));
+        error_log("SEO Plugin: === SAVE DEBUG END ===");
         
         if ($actually_saved) {
             return rest_ensure_response([
@@ -178,6 +183,199 @@ class SEO_Plugin_Meta_API {
                 'message' => 'Failed to save meta settings - option not created'
             ]);
         }
+    }
+    
+    /**
+     * Enhanced sanitization that handles all field types including schema
+     */
+    private function sanitize_all_settings($settings) {
+        if (!is_array($settings)) {
+            return [];
+        }
+        
+        $clean = [];
+        
+        foreach ($settings as $key => $value) {
+            $clean[$key] = $this->sanitize_field($key, $value);
+        }
+        
+        return $clean;
+    }
+    
+    /**
+     * Sanitize individual field based on its type and content
+     */
+    private function sanitize_field($key, $value) {
+        // Handle different field types
+        switch ($key) {
+            // Schema fields
+            case 'schemaType':
+                // Allow valid schema types
+                $allowed_schemas = [
+                    'Organization', 'LocalBusiness', 'Restaurant', 'Store', 
+                    'Article', 'NewsArticle', 'Product', 'Service', 'Person', 
+                    'Event', 'Recipe', 'Book', 'Course', 'WebSite', 'WebPage'
+                ];
+                return in_array($value, $allowed_schemas) ? $value : '';
+                
+            case 'offerCatalog':
+                // Handle service catalog array
+                if (is_array($value)) {
+                    $clean_services = [];
+                    foreach ($value as $service) {
+                        if (is_array($service) && !empty($service['name'])) {
+                            $clean_services[] = [
+                                'name' => sanitize_text_field($service['name']),
+                                'description' => sanitize_textarea_field($service['description'] ?? ''),
+                                'serviceType' => sanitize_text_field($service['serviceType'] ?? ''),
+                                'areaServed' => sanitize_text_field($service['areaServed'] ?? '')
+                            ];
+                        }
+                    }
+                    return $clean_services;
+                }
+                return [];
+                
+            // URL fields
+            case 'url':
+            case 'canonical_url':
+            case 'image':
+            case 'logo':
+                return esc_url_raw($value);
+                
+            // Text fields
+            case 'name':
+            case 'meta_title':
+            case 'meta_author':
+            case 'meta_copyright':
+            case 'generator':
+            case 'headline':
+            case 'brand':
+            case 'model':
+            case 'sku':
+            case 'jobTitle':
+            case 'worksFor':
+            case 'nationality':
+            case 'alumniOf':
+                return sanitize_text_field($value);
+                
+            // Textarea fields
+            case 'description':
+            case 'meta_description':
+            case 'meta_keywords':
+            case 'articleBody':
+                return sanitize_textarea_field($value);
+                
+            // Select fields with known values
+            case 'robots_index':
+                return in_array($value, ['index', 'noindex']) ? $value : 'index';
+                
+            case 'robots_follow':
+                return in_array($value, ['follow', 'nofollow']) ? $value : 'follow';
+                
+            case 'charset':
+                return in_array($value, ['UTF-8', 'ISO-8859-1', 'UTF-16']) ? $value : 'UTF-8';
+                
+            // Color fields
+            case 'theme_color':
+                return preg_match('/^#[0-9A-Fa-f]{6}$/', $value) ? $value : '';
+                
+            // Date fields
+            case 'date_published':
+            case 'date_modified':
+            case 'datePublished':
+            case 'dateModified':
+            case 'startDate':
+            case 'endDate':
+                // Basic date validation
+                return sanitize_text_field($value);
+                
+            // Number fields
+            case 'wordCount':
+            case 'numberOfEmployees':
+            case 'numberOfPages':
+            case 'prepTime':
+            case 'cookTime':
+            case 'totalTime':
+                return is_numeric($value) ? intval($value) : 0;
+                
+            // Object fields (complex data structures)
+            case 'address':
+            case 'author':
+            case 'publisher':
+            case 'organizer':
+            case 'location':
+            case 'offers':
+            case 'aggregateRating':
+            case 'review':
+            case 'openingHours':
+                if (is_array($value)) {
+                    return $this->sanitize_object_field($value);
+                }
+                return [];
+                
+            // Array fields
+            case 'sameAs':
+            case 'recipeIngredient':
+            case 'recipeInstructions':
+            case 'paymentAccepted':
+            case 'servesCuisine':
+                if (is_array($value)) {
+                    return array_map('sanitize_text_field', array_filter($value));
+                } elseif (is_string($value)) {
+                    // Handle newline-separated strings
+                    $items = explode("\n", $value);
+                    return array_map('sanitize_text_field', array_filter($items));
+                }
+                return [];
+                
+            // Social media fields
+            case 'og_title':
+            case 'og_description':
+            case 'twitter_title':
+            case 'twitter_description':
+            case 'og_site_name':
+            case 'twitter_site':
+            case 'twitter_creator':
+                return sanitize_text_field($value);
+                
+            case 'og_image':
+            case 'twitter_image':
+            case 'social_default_image':
+            case 'social_twitter_image':
+                return esc_url_raw($value);
+                
+            // Default: sanitize as text
+            default:
+                if (is_string($value)) {
+                    return sanitize_text_field($value);
+                } elseif (is_array($value)) {
+                    return $this->sanitize_object_field($value);
+                }
+                return $value;
+        }
+    }
+    
+    /**
+     * Sanitize object/array fields recursively
+     */
+    private function sanitize_object_field($data) {
+        if (!is_array($data)) {
+            return [];
+        }
+        
+        $clean = [];
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                $clean[sanitize_key($key)] = sanitize_text_field($value);
+            } elseif (is_array($value)) {
+                $clean[sanitize_key($key)] = $this->sanitize_object_field($value);
+            } else {
+                $clean[sanitize_key($key)] = $value;
+            }
+        }
+        
+        return $clean;
     }
     
     /**
@@ -210,86 +408,6 @@ class SEO_Plugin_Meta_API {
             'success' => true,
             'data' => $preview
         ]);
-    }
-    
-    /**
-     * Sanitize meta settings to prevent XSS and ensure data integrity
-     */
-    private function sanitize_meta_settings($settings) {
-        $clean = [];
-        
-        // Text fields that should be sanitized as text
-        $text_fields = ['meta_title', 'meta_description', 'meta_keywords', 'meta_author', 'meta_copyright', 'generator'];
-        foreach ($text_fields as $field) {
-            if (isset($settings[$field])) {
-                $clean[$field] = sanitize_text_field($settings[$field]);
-            }
-        }
-        
-        // URL fields
-        if (isset($settings['canonical_url'])) {
-            $clean['canonical_url'] = esc_url_raw($settings['canonical_url']);
-        }
-        
-        // Select fields with allowed values
-        if (isset($settings['robots_index'])) {
-            $clean['robots_index'] = in_array($settings['robots_index'], ['index', 'noindex']) 
-                ? $settings['robots_index'] : 'index';
-        }
-        
-        if (isset($settings['robots_follow'])) {
-            $clean['robots_follow'] = in_array($settings['robots_follow'], ['follow', 'nofollow']) 
-                ? $settings['robots_follow'] : 'follow';
-        }
-        
-        if (isset($settings['robots_advanced'])) {
-            $allowed_robots = ['', 'noarchive', 'nosnippet', 'noimageindex', 'notranslate', 'max-snippet:-1', 'max-image-preview:large'];
-            $clean['robots_advanced'] = in_array($settings['robots_advanced'], $allowed_robots) 
-                ? $settings['robots_advanced'] : '';
-        }
-        
-        // Character encoding
-        if (isset($settings['charset'])) {
-            $allowed_charsets = ['UTF-8', 'ISO-8859-1', 'UTF-16'];
-            $clean['charset'] = in_array($settings['charset'], $allowed_charsets) 
-                ? $settings['charset'] : 'UTF-8';
-        }
-        
-        // Viewport
-        if (isset($settings['viewport'])) {
-            $clean['viewport'] = sanitize_text_field($settings['viewport']);
-        }
-        
-        // Language code validation
-        if (isset($settings['hreflang'])) {
-            $clean['hreflang'] = preg_match('/^[a-z]{2}(-[A-Z]{2})?$/', $settings['hreflang']) 
-                ? $settings['hreflang'] : '';
-        }
-        
-        // Color validation
-        if (isset($settings['theme_color'])) {
-            $clean['theme_color'] = preg_match('/^#[0-9A-Fa-f]{6}$/', $settings['theme_color']) 
-                ? $settings['theme_color'] : '';
-        }
-        
-        // Refresh/redirect
-        if (isset($settings['refresh_redirect'])) {
-            $clean['refresh_redirect'] = sanitize_text_field($settings['refresh_redirect']);
-        }
-        
-        // Date fields
-        $date_fields = ['date_published', 'date_modified'];
-        foreach ($date_fields as $field) {
-            if (isset($settings[$field]) && !empty($settings[$field])) {
-                // Validate date format
-                $date = DateTime::createFromFormat('Y-m-d\TH:i', $settings[$field]);
-                if ($date !== false) {
-                    $clean[$field] = $settings[$field];
-                }
-            }
-        }
-        
-        return $clean;
     }
     
     /**

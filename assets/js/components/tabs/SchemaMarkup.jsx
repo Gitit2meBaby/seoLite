@@ -45,6 +45,110 @@ const SchemaMarkup = ({ tabId, config }) => {
     setActiveSchemaType(currentSchemaType);
   }, [settings, selectedPage]);
 
+  // DEBUG
+  useEffect(() => {
+    console.log("⚡ Settings changed for page:", selectedPage);
+    const pageSettings = settings[`page_${selectedPage}`] || {};
+    console.log("  - Page settings:", pageSettings);
+    console.log("  - schemaType in settings:", pageSettings.schemaType);
+    console.log("  - activeSchemaType state:", activeSchemaType);
+  }, [settings, selectedPage, activeSchemaType]);
+
+  // TEMPORARY: Add this simple test component to your Schema tab to isolate the issue
+
+  const SimpleSchemaTest = () => {
+    const { savePageSettings, loadPageSettings } = useSettings();
+    const [testSchema, setTestSchema] = useState("");
+    const [testResult, setTestResult] = useState("");
+
+    const testSave = async () => {
+      console.log("🧪 Testing direct schema save...");
+
+      const testData = {
+        schemaType: testSchema,
+        name: "Test Organization",
+        description: "Test description",
+      };
+
+      console.log("📦 Test data:", testData);
+
+      try {
+        const result = await savePageSettings("global", testData);
+        console.log("📡 Save result:", result);
+        setTestResult(`Save: ${result.success ? "✅ Success" : "❌ Failed"}`);
+
+        // Verify by reloading
+        const reloaded = await loadPageSettings("global");
+        console.log("🔄 Reloaded data:", reloaded);
+        setTestResult(
+          (prev) =>
+            prev + ` | Reload schemaType: ${reloaded.schemaType || "MISSING"}`
+        );
+      } catch (error) {
+        console.error("💥 Test error:", error);
+        setTestResult(`❌ Error: ${error.message}`);
+      }
+    };
+
+    return (
+      <div
+        style={{
+          background: "#fff3cd",
+          padding: "20px",
+          margin: "20px 0",
+          borderRadius: "8px",
+          border: "2px solid #ffc107",
+        }}
+      >
+        <h3>🧪 Schema Type Save Test</h3>
+
+        <div style={{ marginBottom: "16px" }}>
+          <label>Test Schema Type:</label>
+          <select
+            value={testSchema}
+            onChange={(e) => setTestSchema(e.target.value)}
+            style={{ marginLeft: "8px", padding: "4px" }}
+          >
+            <option value="">Select...</option>
+            <option value="Organization">Organization</option>
+            <option value="WebSite">WebSite</option>
+            <option value="Article">Article</option>
+          </select>
+
+          <button
+            onClick={testSave}
+            disabled={!testSchema}
+            style={{
+              marginLeft: "8px",
+              background: "#007cba",
+              color: "white",
+              border: "none",
+              padding: "4px 12px",
+              borderRadius: "4px",
+              cursor: testSchema ? "pointer" : "not-allowed",
+            }}
+          >
+            🧪 Test Save
+          </button>
+        </div>
+
+        {testResult && (
+          <div
+            style={{
+              padding: "10px",
+              background: "#f8f9fa",
+              borderRadius: "4px",
+              fontFamily: "monospace",
+              fontSize: "12px",
+            }}
+          >
+            {testResult}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const loadPagesFromWordPress = async () => {
     try {
       setIsLoadingPages(true);
@@ -111,11 +215,20 @@ const SchemaMarkup = ({ tabId, config }) => {
   };
 
   const handleFieldChange = (fieldKey, value) => {
+    console.log("🔄 Field Change Debug:");
+    console.log("  - fieldKey:", fieldKey);
+    console.log("  - value:", value);
+    console.log("  - selectedPage:", selectedPage);
+
     const pageKey = `page_${selectedPage}`;
     const currentPageSettings = settings[pageKey] || {};
 
+    console.log("  - currentPageSettings before:", currentPageSettings);
+
     // Handle schema type change specially
     if (fieldKey === "schemaType") {
+      console.log("🎯 SCHEMA TYPE CHANGE DETECTED!");
+      console.log("  - Setting activeSchemaType to:", value);
       setActiveSchemaType(value);
     }
 
@@ -124,24 +237,66 @@ const SchemaMarkup = ({ tabId, config }) => {
       [fieldKey]: value,
     };
 
+    console.log("  - updatedPageSettings after:", updatedPageSettings);
+    console.log(
+      "  - schemaType in updated settings:",
+      updatedPageSettings.schemaType
+    );
+
     updateSetting(pageKey, updatedPageSettings);
     setHasChanges(true);
+
+    // Double-check what's in settings after update
+    setTimeout(() => {
+      const checkSettings = settings[pageKey] || {};
+      console.log("  - Settings after updateSetting:", checkSettings);
+      console.log(
+        "  - schemaType after updateSetting:",
+        checkSettings.schemaType
+      );
+    }, 100);
   };
 
   const handleSave = async () => {
     const pageSettings = settings[`page_${selectedPage}`] || {};
 
+    console.log("🐛 SAVE DEBUG:");
+    console.log("  - selectedPage:", selectedPage);
+    console.log("  - activeSchemaType:", activeSchemaType);
+    console.log("  - pageSettings:", pageSettings);
+    console.log("  - schemaType in pageSettings:", pageSettings.schemaType);
+
+    // Check if we have a schema type
+    if (!pageSettings.schemaType) {
+      console.log("⚠️ WARNING: No schemaType in pageSettings!");
+      console.log("  - Available settings keys:", Object.keys(pageSettings));
+    }
+
+    // Check for service catalog data
+    if (pageSettings.offerCatalog) {
+      console.log("  - offerCatalog found:", pageSettings.offerCatalog);
+    }
+
     try {
       const result = await savePageSettings(selectedPage, pageSettings);
+      console.log("📡 SAVE RESULT:", result);
+
       if (result.success) {
         setHasChanges(false);
         setShowSaveAlert(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => setShowSaveAlert(false), 3000);
+
+        // Verify what was actually saved by re-loading
+        console.log("🔍 Verifying save by re-loading settings...");
+        const reloadedSettings = await loadPageSettings(selectedPage);
+        console.log("📦 Reloaded settings:", reloadedSettings);
       } else {
+        console.error("❌ Save failed:", result.message);
         alert(`Failed to save settings: ${result.message}`);
       }
     } catch (error) {
+      console.error("💥 Exception in handleSave:", error);
       alert(`Error during save: ${error.message}`);
     }
   };
@@ -690,7 +845,19 @@ ${JSON.stringify(schema, null, 2)}
         <select
           className={styles.select}
           value={activeSchemaType}
-          onChange={(e) => handleFieldChange("schemaType", e.target.value)}
+          onChange={(e) => {
+            console.log("📋 Schema Type Selector Changed:");
+            console.log("  - New value:", e.target.value);
+            console.log("  - Current activeSchemaType:", activeSchemaType);
+
+            handleFieldChange("schemaType", e.target.value);
+
+            // Log immediately after
+            console.log(
+              "  - After handleFieldChange, activeSchemaType should be:",
+              e.target.value
+            );
+          }}
           style={{ fontSize: "1rem", padding: "0.75rem" }}
         >
           {Object.entries(schemaTypes).map(([value, config]) => (
@@ -859,6 +1026,8 @@ ${JSON.stringify(schema, null, 2)}
           </span>
         )}
       </div>
+
+      {activeSchemaType && <SimpleSchemaTest />}
     </div>
   );
 };
