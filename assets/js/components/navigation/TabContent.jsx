@@ -1,5 +1,6 @@
 // assets/js/components/navigation/TabContent.jsx
 import GeneralMeta from "../tabs/GeneralMeta";
+import SchemaMarkup from "../tabs/SchemaMarkup";
 import SocialMedia from "../tabs/SocialMedia";
 import styles from "@css/components/navigation/TabContent.module.scss";
 
@@ -25,20 +26,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
         return <SocialMedia tabId={activeTab} config={tabConfig} />;
 
       case "SchemaMarkup":
-        return (
-          <div>
-            <h3>Schema Markup Settings</h3>
-            <p>This will contain:</p>
-            <ul>
-              <li>Schema.org markup</li>
-              <li>Business information</li>
-              <li>Article markup</li>
-            </ul>
-            <p>
-              <em>Component will be implemented in the next phase.</em>
-            </p>
-          </div>
-        );
+        return <SchemaMarkup tabId={activeTab} config={tabConfig} />;
 
       case "Analytics":
         return (
@@ -89,10 +77,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
   return (
     <div className={styles.tabContent}>
       <header className={styles.tabHeader}>
-        <h2>
-          <span className={`${styles.icon} ${tabConfig.icon}`}></span>
-          {tabConfig.label}
-        </h2>
+        <h2>{tabConfig.label}</h2>
         <p className={styles.description}>{tabConfig.description}</p>
       </header>
 

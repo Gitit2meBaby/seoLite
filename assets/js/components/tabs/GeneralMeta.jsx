@@ -231,12 +231,12 @@ const GeneralMeta = ({ tabId, config }) => {
         setApiError(
           "No pages found. The WordPress API might not be working properly."
         );
-        setPages([{ id: "global", title: "Global Defaults", type: "global" }]);
+        setPages([{ id: "global", title: "(All pages)", type: "global" }]);
       }
     } catch (error) {
       console.error("❌ Error loading pages:", error);
       setApiError(`API Error: ${error.message}`);
-      setPages([{ id: "global", title: "Global Defaults", type: "global" }]);
+      setPages([{ id: "global", title: "(All pages)", type: "global" }]);
     } finally {
       setIsLoadingPages(false);
     }
@@ -624,11 +624,6 @@ const GeneralMeta = ({ tabId, config }) => {
           </div>
         </div>
       )}
-
-      <div className={styles.header}>
-        <h3>General Meta Settings</h3>
-        <p>Configure basic meta tags for search engines and social media.</p>
-      </div>
 
       {apiError && (
         <div className={styles.apiError}>

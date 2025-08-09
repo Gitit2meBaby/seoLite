@@ -23,7 +23,7 @@ class SEO_Plugin_Tab_Manager {
         $this->register_default_tabs();
     }
     
-    /**
+   /**
      * Register default plugin tabs
      * Each tab has:
      * - label: What shows in the navigation
@@ -34,36 +34,36 @@ class SEO_Plugin_Tab_Manager {
     private function register_default_tabs() {
         
         $this->register_tab('general', [
-            'label' => __('General Meta', 'seo-plugin'),
-            'description' => __('Basic meta tags, titles, descriptions', 'seo-plugin'),
+            'label' => __('Essential Meta Tags', 'seo-plugin'),
+            'description' => __('These settings control the core information Google and other search engines see for your pages. A well-crafted title and description can significantly increase the click-through rate from search results.', 'seo-plugin'),
             'icon' => 'dashicons-admin-generic',
             'component' => 'GeneralMeta'
         ]);
         
         $this->register_tab('social', [
             'label' => __('Social Media', 'seo-plugin'),
-            'description' => __('Twitter Cards and Open Graph tags', 'seo-plugin'),
+            'description' => __('Control how your content appears when shared on social media platforms like Facebook and Twitter. Using Open Graph and Twitter Cards ensures your links have attractive images, titles, and descriptions, leading to more engagement.', 'seo-plugin'),
             'icon' => 'dashicons-share',
             'component' => 'SocialMedia'
         ]);
         
         $this->register_tab('schema', [
             'label' => __('Schema Markup', 'seo-plugin'),
-            'description' => __('Structured data for search engines', 'seo-plugin'),
+            'description' => __('Add structured data to help search engines understand the context of your content. Schema can power rich results like star ratings, product information, and event details directly in Google search, making your content stand out.', 'seo-plugin'),
             'icon' => 'dashicons-code-standards',
             'component' => 'SchemaMarkup'
         ]);
         
         $this->register_tab('analytics', [
             'label' => __('Analytics', 'seo-plugin'),
-            'description' => __('Google Analytics and Tag Manager', 'seo-plugin'),
+            'description' => __('Connect your site to tools that measure visitor behavior. Google Analytics tracks who comes to your site and what they do, while Google Tag Manager helps you manage tracking scripts without needing to edit code.', 'seo-plugin'),
             'icon' => 'dashicons-chart-line',
             'component' => 'Analytics'
         ]);
         
         $this->register_tab('technical', [
             'label' => __('Technical SEO', 'seo-plugin'),
-            'description' => __('Canonicals, robots, technical settings', 'seo-plugin'),
+            'description' => __('Manage the technical aspects that affect how search engines crawl and index your site. These settings help prevent duplicate content issues, define your site structure, and provide important signals to Google for better indexing.', 'seo-plugin'),
             'icon' => 'dashicons-admin-tools',
             'component' => 'TechnicalSEO'
         ]);

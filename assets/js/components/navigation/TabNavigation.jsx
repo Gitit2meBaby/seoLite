@@ -23,8 +23,6 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
               onMouseLeave={() => setHoveredTab(null)}
               title={tab.description}
             >
-              {/* WordPress dashicon */}
-              <span className={`${styles.icon} ${tab.icon}`}></span>
               <span className={styles.label}>{tab.label}</span>
               {/* Active indicator dot */}
               {activeTab === tabId && (

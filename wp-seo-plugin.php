@@ -28,6 +28,24 @@ class WP_SEO_Plugin {
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
     }
+
+    // Replace the inject_schema_into_head method in your wp-seo-plugin.php file:
+
+public function inject_schema_into_head() {
+    // Don't output schema in admin area
+    if (is_admin()) {
+        return;
+    }
+    
+    // The meta_output class has its own method to get current page settings
+    // We should let it handle this instead of trying to get settings here
+    if ($this->meta_output && method_exists($this->meta_output, 'output_meta_tags')) {
+        // The output_meta_tags method already includes schema output
+        // and it properly gets the current page settings
+        // So we don't need this separate inject method
+        return;
+    }
+}
     
     /**
      * Load all the PHP classes our plugin needs
@@ -48,24 +66,29 @@ class WP_SEO_Plugin {
         }
     }
     
-    public function init() {
-        // Initialize all our classes
-        if (class_exists('SEO_Plugin_Tab_Manager')) {
-            $this->tab_manager = SEO_Plugin_Tab_Manager::get_instance();
-        }
-        
-        if (class_exists('SEO_Plugin_Meta_Output')) {
-            $this->meta_output = SEO_Plugin_Meta_Output::get_instance();
-        }
-        
-        if (class_exists('SEO_Plugin_Meta_API')) {
-            $this->meta_api = SEO_Plugin_Meta_API::get_instance();
-        }
-        
-        // WordPress hooks
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+   // Also update the init() method to remove the duplicate wp_head hook:
+
+public function init() {
+    // Initialize all our classes
+    if (class_exists('SEO_Plugin_Tab_Manager')) {
+        $this->tab_manager = SEO_Plugin_Tab_Manager::get_instance();
     }
+    
+    if (class_exists('SEO_Plugin_Meta_Output')) {
+        $this->meta_output = SEO_Plugin_Meta_Output::get_instance();
+    }
+    
+    if (class_exists('SEO_Plugin_Meta_API')) {
+        $this->meta_api = SEO_Plugin_Meta_API::get_instance();
+    }
+    
+    // WordPress hooks
+    add_action('admin_menu', array($this, 'add_admin_menu'));
+    add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+    
+    // Remove this line - the meta_output class already hooks into wp_head
+    // add_action('wp_head', [$this, 'inject_schema_into_head']);
+}
     
     public function add_admin_menu() {
         add_menu_page(
@@ -83,13 +106,59 @@ class WP_SEO_Plugin {
         echo '<div class="wrap">';
         echo '<h1>SEO Plugin Dashboard</h1>';
         
-        // Success indicator
-        echo '<div style="background: #28a745; color: white; padding: 15px; margin: 15px 0; border-radius: 6px;">';
-        echo '<h3>✅ SEO Plugin Active</h3>';
-        echo '<p>Meta output system: ' . (class_exists('SEO_Plugin_Meta_Output') ? 'Loaded' : 'Not loaded') . '</p>';
-        echo '<p>API endpoints: ' . (class_exists('SEO_Plugin_Meta_API') ? 'Loaded' : 'Not loaded') . '</p>';
-        echo '<p>Deployment time: ' . date('Y-m-d H:i:s') . '</p>';
-        echo '</div>';
+        // DEBUG SECTION - Remove this once you find the issue
+        // if (isset($_GET['debug']) && current_user_can('manage_options')) {
+        //     echo '<div style="background: #f0f0f0; padding: 20px; margin: 20px 0; border-left: 4px solid #0073aa;">';
+        //     echo '<h3>🔍 Debug Information</h3>';
+            
+        //     echo '<h4>Global Settings:</h4>';
+        //     $global_settings = get_option('seo_plugin_page_global', []);
+        //     if (empty($global_settings)) {
+        //         echo '<p style="color: red;">❌ No global settings found!</p>';
+        //     } else {
+        //         echo '<pre style="background: white; padding: 10px; overflow: auto;">';
+        //         print_r($global_settings);
+        //         echo '</pre>';
+        //     }
+            
+        //     echo '<h4>Home Page Settings:</h4>';
+        //     $home_settings = get_option('seo_plugin_page_home', []);
+        //     if (empty($home_settings)) {
+        //         echo '<p style="color: orange;">⚠️ No home page settings found</p>';
+        //     } else {
+        //         echo '<pre style="background: white; padding: 10px; overflow: auto;">';
+        //         print_r($home_settings);
+        //         echo '</pre>';
+        //     }
+            
+        //     echo '<h4>All SEO Plugin Options:</h4>';
+        //     global $wpdb;
+        //     $all_options = $wpdb->get_results(
+        //         "SELECT option_name, option_value FROM {$wpdb->options} 
+        //          WHERE option_name LIKE 'seo_plugin_%' 
+        //          ORDER BY option_name"
+        //     );
+            
+        //     if (empty($all_options)) {
+        //         echo '<p style="color: red;">❌ No SEO plugin options found in database!</p>';
+        //     } else {
+        //         echo '<table style="width: 100%; border-collapse: collapse;">';
+        //         echo '<tr><th style="border: 1px solid #ddd; padding: 8px; background: #f9f9f9;">Option Name</th><th style="border: 1px solid #ddd; padding: 8px; background: #f9f9f9;">Value</th></tr>';
+        //         foreach ($all_options as $option) {
+        //             echo '<tr>';
+        //             echo '<td style="border: 1px solid #ddd; padding: 8px; font-family: monospace;">' . esc_html($option->option_name) . '</td>';
+        //             echo '<td style="border: 1px solid #ddd; padding: 8px;"><pre style="margin: 0; white-space: pre-wrap;">' . esc_html(print_r(maybe_unserialize($option->option_value), true)) . '</pre></td>';
+        //             echo '</tr>';
+        //         }
+        //         echo '</table>';
+        //     }
+            
+        //     echo '<p><strong>To test schema output, visit your homepage and view page source (Ctrl+U)</strong></p>';
+        //     echo '<p><strong>Look for &lt;script type="application/ld+json"&gt; tags</strong></p>';
+        //     echo '</div>';
+        // } else {
+        //     echo '<p><a href="?page=seo-plugin&debug=1" style="background: #0073aa; color: white; padding: 10px 15px; text-decoration: none; border-radius: 3px;">🔍 Enable Debug Mode</a></p>';
+        // }
         
         // React container
         echo '<div id="seo-plugin-admin">';
@@ -129,7 +198,7 @@ class WP_SEO_Plugin {
                 SEO_PLUGIN_VERSION . '-' . filemtime($dist_path . $admin_css_file)
             );
         }
-        
+
         // Pass data to JavaScript
         $tab_data = $this->tab_manager ? $this->tab_manager->get_tabs_for_frontend() : [];
         

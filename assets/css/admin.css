@@ -1,5 +1,7 @@
 #seo-plugin-admin * {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 #seo-plugin-admin h1,
 #seo-plugin-admin h2,
