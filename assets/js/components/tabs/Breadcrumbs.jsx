@@ -301,25 +301,43 @@ ${JSON.stringify(jsonLd, null, 2)}
         </div>
       )}
 
-      {/* Quick Action Button */}
+      {/* Quick Action Button - Enhanced */}
       <div className={styles.quickActions}>
         <div className={styles.quickActionCard}>
           <div className={styles.quickActionContent}>
-            <h3>🚀 Quick Setup</h3>
+            <h3>🚀 One-Click Setup</h3>
             <p>
-              Enable breadcrumbs with smart defaults for immediate SEO benefits.
-              This generates structured data that helps search engines
-              understand your site hierarchy.
+              <strong>Enable breadcrumbs instantly with smart defaults.</strong>{" "}
+              This automatically configures everything for you - no technical
+              setup required! Just click the button below and breadcrumb
+              structured data will be added to all your pages for immediate SEO
+              benefits.
             </p>
+            <div className={styles.benefitsList}>
+              <div className={styles.benefit}>
+                ✅ Helps search engines understand your site structure
+              </div>
+              <div className={styles.benefit}>
+                ✅ Creates rich snippets in Google search results
+              </div>
+              <div className={styles.benefit}>
+                ✅ Zero configuration needed - everything is done for you
+              </div>
+            </div>
             <button
               className={styles.autoGenerateButton}
               onClick={handleAutoGenerate}
               disabled={isSaving}
             >
               {breadcrumbConfig.enabled
-                ? "✅ Breadcrumbs Enabled"
-                : "🍞 Auto Generate Breadcrumbs"}
+                ? "✅ Breadcrumbs Are Active"
+                : "🍞 Enable Breadcrumbs Now"}
             </button>
+            <p className={styles.buttonSubtext}>
+              {breadcrumbConfig.enabled
+                ? "Breadcrumbs are working! Structured data is being added to all your pages."
+                : "Click once and you're done - breadcrumbs will work automatically on all pages."}
+            </p>
           </div>
         </div>
       </div>

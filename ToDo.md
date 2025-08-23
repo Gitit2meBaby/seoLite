@@ -1,0 +1,24 @@
+- Change tabs from vertical to nice
+- Change global only inputs variable css to be more subtle.
+- add informative tooltips throughout
+- increase spacing on socials
+- unique css class for theme color input
+- Change page input - add a title etc
+- social media preview should not include serps, try to include an open Graph tag preview instead, fix the twitter preview
+- change layout of tracking code to put disclaimers at bottom
+- increase spacing on tracking codes, change the how to find sections to Tooltips
+- Get custom scripts back into all the other pages that are not the global page
+- fix sitemap css tables to something much nicer for the UI
+- put sitemap preview at top like others
+- fix css on breadcrumbs enabling button, have it show the rest of the advanced content only when selected
+- remove all the excess debugging code
+- create a README.MD with AI
+- comment the code correctly
+- change details in the main plugin description
+- Create a website for the plugin
+- remove debug paths plugin, watch for dependencies, possibly also find-path.js, ask AI for any other useless files hanging around.
+- English spell check throughout
+- Is Wp config doing anything?
+- set up github auto deploys
+- Find out how to upload it to the marketplace
+- VEX diagram for easy to use, has all the features, not bloated?

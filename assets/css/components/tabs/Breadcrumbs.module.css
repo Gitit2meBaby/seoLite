@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .breadcrumbs {
   padding: 1rem;
   background: #fff;
@@ -57,6 +58,147 @@
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+.quickActions {
+  margin-bottom: 3rem;
+}
+
+.quickActionCard {
+  background: linear-gradient(135deg, #e7f3ff 0%, #f8f9ff 100%);
+  border: 2px solid #bee5eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 115, 170, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.quickActionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 115, 170, 0.15);
+}
+
+.quickActionContent {
+  padding: 2rem;
+  text-align: center;
+}
+.quickActionContent h3 {
+  margin: 0 0 1rem 0;
+  color: #0073aa;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.quickActionContent > p {
+  margin: 0 0 1.5rem 0;
+  color: #495057;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.quickActionContent > p strong {
+  color: #0073aa;
+  font-weight: 600;
+}
+
+.benefitsList {
+  margin: 1.5rem 0 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  color: #495057;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid rgba(0, 115, 170, 0.1);
+  text-align: left;
+}
+
+.autoGenerateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 115, 170, 0.3);
+  text-transform: none;
+  letter-spacing: 0.3px;
+  min-width: 220px;
+  margin-bottom: 1rem;
+}
+.autoGenerateButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #005a87 0%, #004666 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 115, 170, 0.4);
+}
+.autoGenerateButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(0, 115, 170, 0.3);
+}
+.autoGenerateButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+}
+.autoGenerateButton:has-text("✅") {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+.autoGenerateButton:has-text("✅"):hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+}
+
+.buttonSubtext {
+  margin: 0 !important;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+  line-height: 1.4;
+  max-width: 500px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+@media (max-width: 768px) {
+  .quickActionContent {
+    padding: 1.5rem;
+  }
+  .quickActionContent h3 {
+    font-size: 1.3rem;
+  }
+  .quickActionContent > p {
+    font-size: 1rem;
+  }
+  .benefitsList {
+    gap: 0.5rem;
+  }
+  .benefit {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  .autoGenerateButton {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    min-width: 200px;
   }
 }
 .sectionHeader {

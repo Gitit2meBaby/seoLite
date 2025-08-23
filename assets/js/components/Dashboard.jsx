@@ -55,8 +55,8 @@ const Dashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      {/* Left sidebar with tab navigation */}
-      <div className={styles.sidebar}>
+      {/* Horizontal tab navigation at the top */}
+      <div className={styles.navigationWrapper}>
         <TabNavigation
           tabs={tabs}
           activeTab={activeTab}
@@ -64,7 +64,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Main content area */}
+      {/* Main content area below tabs */}
       <main className={styles.mainContent}>
         <TabContent activeTab={activeTab} tabConfig={tabs[activeTab]} />
       </main>

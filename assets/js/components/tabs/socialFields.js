@@ -1,4 +1,4 @@
-// Social Media fields configuration
+// assets/js/components/tabs/socialFields.js
 export const socialFields = [
   // === SOCIAL MEDIA PROFILES ===
   {
@@ -9,42 +9,36 @@ export const socialFields = [
         label: "Facebook Page URL",
         type: "url",
         placeholder: "https://www.facebook.com/yourpage",
-        description: "Your Facebook business page URL",
       },
       {
         key: "social_twitter_url",
         label: "Twitter/X Profile URL",
         type: "url",
         placeholder: "https://twitter.com/yourusername",
-        description: "Your Twitter/X profile URL",
       },
       {
         key: "social_instagram_url",
         label: "Instagram Profile URL",
         type: "url",
         placeholder: "https://www.instagram.com/yourusername",
-        description: "Your Instagram profile URL",
       },
       {
         key: "social_linkedin_url",
         label: "LinkedIn Profile/Company URL",
         type: "url",
         placeholder: "https://www.linkedin.com/company/yourcompany",
-        description: "Your LinkedIn profile or company page URL",
       },
       {
         key: "social_youtube_url",
         label: "YouTube Channel URL",
         type: "url",
         placeholder: "https://www.youtube.com/c/yourchannel",
-        description: "Your YouTube channel URL",
       },
       {
         key: "social_tiktok_url",
         label: "TikTok Profile URL",
         type: "url",
         placeholder: "https://www.tiktok.com/@yourusername",
-        description: "Your TikTok profile URL",
       },
     ],
   },
@@ -59,9 +53,9 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/social-image.jpg",
-        description:
-          "Default image when content is shared (1200x630px recommended)",
         hasMediaHelper: true,
+        tooltipText:
+          "Default image when content is shared (1200x630px recommended)",
       },
       {
         key: "social_twitter_image",
@@ -69,9 +63,9 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/twitter-card.jpg",
-        description:
-          "Specific image for Twitter cards (1200x675px recommended)",
         hasMediaHelper: true,
+        tooltipText:
+          "Specific image for Twitter cards (1200x675px recommended)",
       },
     ],
   },
@@ -104,8 +98,8 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/og-image.jpg",
-        description: "Specific image for this page (1200x630px recommended)",
         hasMediaHelper: true,
+        tooltipText: "Specific image for this page (1200x630px recommended)",
       },
       {
         key: "og_image_alt",
@@ -223,16 +217,16 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/twitter-image.jpg",
-        description:
-          "Specific image for Twitter cards (1200x675px recommended)",
         hasMediaHelper: true,
+        tooltipText:
+          "Specific image for Twitter cards (1200x675px recommended)",
       },
     ],
   },
 
   // === FACEBOOK SPECIFIC ===
   {
-    section: "Facebook Specific Settings",
+    section: "Facebook Settings",
     fields: [
       {
         key: "fb_app_id",
@@ -249,33 +243,6 @@ export const socialFields = [
         placeholder: "100001234567890,100009876543210",
         description: "Comma-separated Facebook user IDs of page admins",
         global: true,
-      },
-    ],
-  },
-
-  // === PINTEREST ===
-  {
-    section: "Pinterest Settings",
-    fields: [
-      {
-        key: "pinterest_description",
-        label: "Pinterest Description",
-        type: "textarea",
-        placeholder:
-          "A Pinterest-optimized description with relevant keywords and hashtags",
-        description:
-          "Description optimized for Pinterest (can include hashtags)",
-        maxLength: 500,
-      },
-      {
-        key: "pinterest_image",
-        label: "Pinterest Image",
-        type: "url",
-        placeholder:
-          "https://yoursite.com/wp-content/uploads/2024/pinterest-image.jpg",
-        description:
-          "Pinterest-optimized image (1000x1500px recommended - vertical)",
-        hasMediaHelper: true,
       },
     ],
   },

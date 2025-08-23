@@ -1,12 +1,9 @@
 // assets/js/components/tabs/SocialMedia.jsx
 import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
-
 import LoadingSpinner from "../common/LoadingSpinner";
-
 import { socialFields } from "./socialFields";
-
-import styles from "@css/components/tabs/GeneralMeta.module.scss"; // Reusing existing styles
+import styles from "@css/components/tabs/SocialMedia.module.scss";
 
 const SocialMedia = ({ tabId, config }) => {
   const {
@@ -25,6 +22,15 @@ const SocialMedia = ({ tabId, config }) => {
   const [apiError, setApiError] = useState(null);
   const [showSaveAlert, setShowSaveAlert] = useState(false);
 
+  // State for collapsible sections - first section open by default
+  const [expandedSections, setExpandedSections] = useState({
+    "Social Media Profiles": true, // Open by default
+    "Default Social Images": false,
+    "Open Graph Settings": false,
+    "Twitter Card Settings": false,
+    "Facebook Settings": false,
+  });
+
   // Load pages on component mount
   useEffect(() => {
     loadPagesFromWordPress();
@@ -37,6 +43,13 @@ const SocialMedia = ({ tabId, config }) => {
       loadPageSettings(selectedPage);
     }
   }, [selectedPage]);
+
+  const toggleSection = (sectionName) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionName]: !prev[sectionName],
+    }));
+  };
 
   const loadPagesFromWordPress = async () => {
     try {
@@ -96,159 +109,39 @@ const SocialMedia = ({ tabId, config }) => {
       } else {
         return "unique";
       }
-    }
-
-    if (globalValue) {
+    } else {
       return "using_global";
     }
-
-    return "empty";
   };
 
   const handleFieldChange = (fieldKey, value) => {
     const pageKey = `page_${selectedPage}`;
-    const currentPageSettings = settings[pageKey] || {};
-
-    const updatedPageSettings = {
-      ...currentPageSettings,
-      [fieldKey]: value,
-    };
-
-    updateSetting(pageKey, updatedPageSettings);
+    updateSetting(pageKey, fieldKey, value);
     setHasChanges(true);
   };
 
+  const handlePageChange = (pageId) => {
+    setSelectedPage(pageId);
+    setHasChanges(false);
+  };
+
   const handleSave = async () => {
-    const pageSettings = settings[`page_${selectedPage}`] || {};
-
     try {
-      const result = await savePageSettings(selectedPage, pageSettings);
-
-      if (result.success) {
-        setHasChanges(false);
-        setShowSaveAlert(true);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setTimeout(() => setShowSaveAlert(false), 3000);
-      } else {
-        alert(`Failed to save settings: ${result.message}`);
-      }
+      await savePageSettings(selectedPage);
+      setHasChanges(false);
+      setShowSaveAlert(true);
+      setTimeout(() => setShowSaveAlert(false), 3000);
     } catch (error) {
-      alert(`Error during save: ${error.message}`);
+      console.error("Save failed:", error);
+      setApiError(`Save failed: ${error.message}`);
     }
   };
 
-  const generateSocialMetaCode = () => {
-    const pageSettings = settings[`page_${selectedPage}`] || {};
-    const globalSettings = settings["page_global"] || {};
-
-    const getValue = (key) => {
-      if (pageSettings[key] !== undefined && pageSettings[key] !== "") {
-        return pageSettings[key];
-      }
-      return globalSettings[key] || "";
-    };
-
-    let code = "";
-
-    // Open Graph tags
-    const ogTitle = getValue("og_title") || getValue("meta_title");
-    if (ogTitle) {
-      code += `<meta property="og:title" content="${ogTitle}" />\n`;
-    }
-
-    const ogDescription =
-      getValue("og_description") || getValue("meta_description");
-    if (ogDescription) {
-      code += `<meta property="og:description" content="${ogDescription}" />\n`;
-    }
-
-    const ogImage = getValue("og_image") || getValue("social_default_image");
-    if (ogImage) {
-      code += `<meta property="og:image" content="${ogImage}" />\n`;
-    }
-
-    const ogImageAlt = getValue("og_image_alt");
-    if (ogImageAlt) {
-      code += `<meta property="og:image:alt" content="${ogImageAlt}" />\n`;
-    }
-
-    const ogType = getValue("og_type") || "website";
-    code += `<meta property="og:type" content="${ogType}" />\n`;
-
-    const ogSiteName = getValue("og_site_name");
-    if (ogSiteName) {
-      code += `<meta property="og:site_name" content="${ogSiteName}" />\n`;
-    }
-
-    const ogLocale = getValue("og_locale");
-    if (ogLocale) {
-      code += `<meta property="og:locale" content="${ogLocale}" />\n`;
-    }
-
-    // Current page URL
-    const currentUrl =
-      selectedPage === "global"
-        ? "https://yoursite.com"
-        : pages.find((p) => p.id === selectedPage)?.url || "/page-url";
-    code += `<meta property="og:url" content="${currentUrl}" />\n`;
-
-    // Twitter Card tags
-    const twitterCardType =
-      getValue("twitter_card_type") || "summary_large_image";
-    code += `<meta name="twitter:card" content="${twitterCardType}" />\n`;
-
-    const twitterSite = getValue("twitter_site");
-    if (twitterSite) {
-      code += `<meta name="twitter:site" content="${twitterSite}" />\n`;
-    }
-
-    const twitterCreator = getValue("twitter_creator");
-    if (twitterCreator) {
-      code += `<meta name="twitter:creator" content="${twitterCreator}" />\n`;
-    }
-
-    const twitterTitle = getValue("twitter_title") || ogTitle;
-    if (twitterTitle) {
-      code += `<meta name="twitter:title" content="${twitterTitle}" />\n`;
-    }
-
-    const twitterDescription = getValue("twitter_description") || ogDescription;
-    if (twitterDescription) {
-      code += `<meta name="twitter:description" content="${twitterDescription}" />\n`;
-    }
-
-    const twitterImage =
-      getValue("twitter_image") || getValue("social_twitter_image") || ogImage;
-    if (twitterImage) {
-      code += `<meta name="twitter:image" content="${twitterImage}" />\n`;
-    }
-
-    // Facebook specific
-    const fbAppId = getValue("fb_app_id");
-    if (fbAppId) {
-      code += `<meta property="fb:app_id" content="${fbAppId}" />\n`;
-    }
-
-    const fbAdmins = getValue("fb_admins");
-    if (fbAdmins) {
-      code += `<meta property="fb:admins" content="${fbAdmins}" />\n`;
-    }
-
-    return code || "<!-- No social media tags configured yet -->";
-  };
-
-  const MediaHelper = () => (
-    <span
-      className={styles.mediaHelper}
-      title="Upload your image to WordPress Media Library, then copy the URL here"
-      style={{
-        marginLeft: "8px",
-        cursor: "help",
-        color: "#666",
-        fontSize: "14px",
-      }}
-    >
-      ❓
+  const MediaHelper = ({ tooltipText }) => (
+    <span className={styles.mediaHelper}>
+      <span className={styles.tooltipTrigger} data-tooltip={tooltipText}>
+        ℹ️
+      </span>
     </span>
   );
 
@@ -270,7 +163,9 @@ const SocialMedia = ({ tabId, config }) => {
       <div key={field.key} className={styles.field}>
         <label className={styles.label}>
           {field.label}
-          {field.hasMediaHelper && <MediaHelper />}
+          {field.hasMediaHelper && (
+            <MediaHelper tooltipText={field.tooltipText} />
+          )}
           {field.global && (
             <span className={styles.globalBadge}>Global Only</span>
           )}
@@ -339,17 +234,39 @@ const SocialMedia = ({ tabId, config }) => {
             )}
           </div>
         )}
+      </div>
+    );
+  };
 
-        {isUsingGlobal && (
-          <div className={styles.usingGlobalNote}>
-            This page will automatically use the global value. Start typing to
-            customize it specifically for this page.
+  const renderSection = (section) => {
+    const sectionName = section.section;
+    const isExpanded = expandedSections[sectionName];
+    const sectionFields = section.fields || [];
+
+    return (
+      <div key={sectionName} className={styles.section}>
+        <button
+          className={`${styles.sectionHeader} ${
+            isExpanded ? styles.expanded : ""
+          }`}
+          onClick={() => toggleSection(sectionName)}
+          type="button"
+        >
+          <div className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>{isExpanded ? "▼" : "▶"}</span>
+            <h3>{sectionName}</h3>
           </div>
-        )}
+          <div className={styles.sectionCount}>
+            {sectionFields.length} setting
+            {sectionFields.length !== 1 ? "s" : ""}
+          </div>
+        </button>
 
-        {isUnique && (
-          <div className={styles.uniqueNote}>
-            This value is customized specifically for this page.
+        {isExpanded && (
+          <div className={styles.sectionContent}>
+            <div className={styles.fieldsContainer}>
+              {sectionFields.map(renderField)}
+            </div>
           </div>
         )}
       </div>
@@ -357,18 +274,18 @@ const SocialMedia = ({ tabId, config }) => {
   };
 
   if (isLoadingPages) {
-    return <LoadingSpinner message="Loading pages..." />;
+    return <LoadingSpinner message="Loading social media settings..." />;
   }
 
   return (
-    <div className={styles.generalMeta}>
+    <div className={styles.socialMedia}>
       {/* Success Alert */}
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
             <span className={styles.alertIcon}>✅</span>
             <span className={styles.alertText}>
-              Changes saved successfully!
+              Settings saved successfully!
             </span>
             <button
               className={styles.alertClose}
@@ -380,54 +297,25 @@ const SocialMedia = ({ tabId, config }) => {
         </div>
       )}
 
-      {apiError && (
-        <div className={styles.apiError}>
-          <h4>⚠️ API Connection Issue</h4>
-          <p>{apiError}</p>
-          <p>Only Global settings are available until this is resolved.</p>
-          <button onClick={loadPagesFromWordPress}>
-            🔄 Retry Loading Pages
-          </button>
-        </div>
-      )}
-
+      {/* Page Selector */}
       <div className={styles.pageSelector}>
         <label className={styles.selectorLabel}>
-          Configure social media for:
+          Configure social media settings for:
         </label>
         <select
           className={styles.pageSelect}
           value={selectedPage}
-          onChange={(e) => {
-            setSelectedPage(e.target.value);
-            setHasChanges(false);
-          }}
+          onChange={(e) => handlePageChange(e.target.value)}
         >
-          {pages.map((page) => {
-            let icon = "";
-            let prefix = "";
-
-            if (page.type === "global") {
-              icon = "🌐";
-              prefix = "Global";
-            } else if (page.type === "page") {
-              icon = "📄";
-              prefix = "Page";
-            } else if (page.type === "post") {
-              icon = "📝";
-              prefix = "Post";
-            } else if (page.type === "special") {
-              icon = "⭐";
-              prefix = "Special";
-            }
-
-            return (
+          <option value="global">🌐 Global Defaults (All Pages)</option>
+          {pages
+            .filter((page) => page.id !== "global")
+            .map((page) => (
               <option key={page.id} value={page.id}>
-                {icon} {prefix}: {page.title.replace(/^🌐\s*/, "")}
-                {page.url && page.url !== "/" ? ` (${page.url})` : ""}
+                📄 {page.title}
+                {page.url ? ` (${page.url})` : ""}
               </option>
-            );
-          })}
+            ))}
         </select>
 
         {selectedPage !== "global" && (
@@ -440,120 +328,29 @@ const SocialMedia = ({ tabId, config }) => {
         )}
       </div>
 
-      <div className={styles.previewSection}>
-        <h4>Social Media Preview</h4>
-        <div className={styles.previewBox}>
-          <strong>Facebook/LinkedIn Preview:</strong>
-          <div
-            style={{
-              marginTop: "8px",
-              padding: "12px",
-              background: "#f5f5f5",
-              borderRadius: "4px",
-            }}
-          >
-            <div style={{ fontWeight: "bold", color: "#1877f2" }}>
-              {getFieldValue("og_title") ||
-                getFieldValue("meta_title") ||
-                "Page title will appear here"}
-            </div>
-            <div
-              style={{ fontSize: "14px", color: "#65676b", marginTop: "4px" }}
-            >
-              {getFieldValue("og_description") ||
-                getFieldValue("meta_description") ||
-                "Description will appear here"}
-            </div>
-            <div
-              style={{ fontSize: "12px", color: "#8a8d91", marginTop: "4px" }}
-            >
-              {pages.find((p) => p.id === selectedPage)?.url || "yoursite.com"}
-            </div>
-          </div>
-
-          <strong style={{ display: "block", marginTop: "20px" }}>
-            Twitter Preview:
-          </strong>
-          <div
-            style={{
-              marginTop: "8px",
-              padding: "12px",
-              background: "#f7f9fa",
-              borderRadius: "4px",
-              border: "1px solid #e1e8ed",
-            }}
-          >
-            <div style={{ fontWeight: "bold", color: "#14171a" }}>
-              {getFieldValue("twitter_title") ||
-                getFieldValue("og_title") ||
-                getFieldValue("meta_title") ||
-                "Tweet title here"}
-            </div>
-            <div
-              style={{ fontSize: "14px", color: "#657786", marginTop: "4px" }}
-            >
-              {getFieldValue("twitter_description") ||
-                getFieldValue("og_description") ||
-                getFieldValue("meta_description") ||
-                "Tweet description here"}
-            </div>
-            <div
-              style={{ fontSize: "12px", color: "#657786", marginTop: "4px" }}
-            >
-              🔗{" "}
-              {pages.find((p) => p.id === selectedPage)?.url || "yoursite.com"}
-            </div>
-          </div>
+      {/* Error Display */}
+      {apiError && (
+        <div className={styles.errorAlert}>
+          <p>⚠️ {apiError}</p>
         </div>
+      )}
 
-        <h4 style={{ marginTop: "1.5rem" }}>Generated Social Media Code</h4>
-        <div className={styles.codePreview}>
-          <pre className={styles.codeBlock}>
-            <code>{generateSocialMetaCode()}</code>
-          </pre>
-          <button
-            className={styles.copyButton}
-            onClick={() => {
-              navigator.clipboard.writeText(generateSocialMetaCode());
-            }}
-          >
-            📋 Copy Code
-          </button>
-        </div>
+      {/* Collapsible Sections */}
+      <div className={styles.sectionsContainer}>
+        {socialFields.map(renderSection)}
       </div>
 
-      <div className={styles.fieldsContainer}>
-        {socialFields.map((section, sectionIndex) => (
-          <div key={sectionIndex}>
-            <h4
-              style={{
-                margin: "2rem 0 1rem 0",
-                padding: "0.5rem 0",
-                borderBottom: "2px solid #0073aa",
-                color: "#0073aa",
-              }}
-            >
-              {section.section}
-            </h4>
-            {section.fields.map(renderField)}
-          </div>
-        ))}
-      </div>
-
-      <div className={styles.actions}>
+      {/* Save Button */}
+      <div className={styles.saveSection}>
         <button
-          className={styles.saveButton}
+          className={`${styles.saveButton} ${
+            hasChanges ? styles.hasChanges : ""
+          }`}
           onClick={handleSave}
           disabled={isSaving || !hasChanges}
         >
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? "Saving..." : hasChanges ? "Save Changes" : "No Changes"}
         </button>
-
-        {hasChanges && (
-          <span className={styles.unsavedChanges}>
-            You have unsaved changes
-          </span>
-        )}
       </div>
     </div>
   );

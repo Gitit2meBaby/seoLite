@@ -21,8 +21,19 @@ const SettingsProvider = ({ children }) => {
   const apiUrl = wpData.apiUrl;
   const nonce = wpData.nonce;
 
+  // useEffect(() => {
+  //   loadSettings();
+  // }, []);
+
   useEffect(() => {
     loadSettings();
+
+    // Check if we have a page_id URL parameter (from meta box edit button)
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageId = urlParams.get("page_id");
+    if (pageId) {
+      loadPageSettings(pageId);
+    }
   }, []);
 
   const loadSettings = async () => {
