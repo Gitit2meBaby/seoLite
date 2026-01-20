@@ -1,0 +1,694 @@
+// assets/css/components/tabs/GeneralMeta.module.scss
+
+.generalMeta {
+  padding: 1rem;
+  background: #fff;
+  position: relative;
+}
+
+.successAlert {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+
+  .alertContent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-left: 4px solid #28a745;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+  }
+
+  .alertIcon {
+    font-size: 1.2rem;
+  }
+
+  .alertText {
+    flex: 1;
+    color: #155724;
+    font-weight: 600;
+  }
+
+  .alertClose {
+    background: none;
+    border: none;
+    color: #155724;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+      background: rgba(21, 87, 36, 0.1);
+    }
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+  }
+}
+
+.pageSelector {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+
+  .selectorLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .pageSelect {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: #0073aa;
+    }
+  }
+
+  .inheritanceInfo {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: #e7f3ff;
+    border-left: 3px solid #0073aa;
+    border-radius: 4px;
+
+    small {
+      color: #0073aa;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.fieldsContainer {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.field {
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+  }
+
+  .globalBadge,
+  .inheritedBadge,
+  .usingGlobalBadge,
+  .uniqueBadge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .globalBadge {
+    background: #17a2b8;
+    color: white;
+  }
+
+  .inheritedBadge {
+    background: #ffc107;
+    color: #212529;
+  }
+
+  .usingGlobalBadge {
+    background: #6c757d;
+    color: white;
+  }
+
+  .uniqueBadge {
+    background: #28a745;
+    color: white;
+  }
+
+  .description {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: normal;
+    font-style: italic;
+  }
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+  }
+
+  &.inherited {
+    background: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+
+    &:focus {
+      background: #fff;
+      color: #333;
+      border-color: #0073aa;
+    }
+  }
+
+  &.placeholder {
+    color: #999;
+    font-style: italic;
+
+    &:focus {
+      color: #333;
+      font-style: normal;
+    }
+  }
+
+  &.usingGlobal {
+    background: #f8f9ff;
+    border-color: #d4e3ff;
+    color: #333;
+
+    &:focus {
+      background: #fff;
+      border-color: #0073aa;
+    }
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.inputWrapper,
+.textareaWrapper {
+  position: relative;
+}
+
+.charCount {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  font-size: 0.8rem;
+  color: #666;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+}
+
+.colorWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  .colorInput {
+    width: 50px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .colorText {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: monospace;
+
+    &:focus {
+      outline: none;
+      border-color: #0073aa;
+      box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+    }
+  }
+}
+
+.inheritanceNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+
+.placeholderNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-left: 3px solid #6c757d;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.uniqueNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #d1f2eb;
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #155724;
+}
+
+.usingGlobalNote {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #e7f3ff;
+  border-left: 3px solid #0073aa;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #0073aa;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid #ddd;
+}
+
+.saveButton {
+  padding: 0.75rem 1.5rem;
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #005a87;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.unsavedChanges {
+  color: #d54e21;
+  font-weight: bold;
+}
+
+.previewSection {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+  }
+}
+
+.previewBox {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-bottom: 1.5rem;
+}
+
+.previewTitle {
+  color: #1a0dab;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.previewUrl {
+  color: #006621;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.previewDescription {
+  color: #545454;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.codePreview {
+  position: relative;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .codeBlock {
+    margin: 0;
+    padding: 1rem;
+    background: #282c34;
+    color: #abb2bf;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+
+    code {
+      color: inherit;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .copyButton {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #005a87;
+    }
+  }
+}
+
+.preview {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+  }
+}
+
+.apiError {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-left: 4px solid #f39c12;
+  border-radius: 4px;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: #856404;
+  }
+
+  p {
+    margin: 0.25rem 0;
+    color: #856404;
+  }
+
+  button {
+    background: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+
+    &:hover {
+      background: #e67e22;
+    }
+  }
+}
+
+// Additional styles for GeneralMeta.module.scss - Service Catalog Inheritance
+
+.serviceArray {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.serviceList {
+  margin-bottom: 1rem;
+}
+
+.serviceItem {
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+
+  &.inheritedService {
+    background: #f8f9fa;
+    border-color: #0073aa;
+    border-style: dashed;
+  }
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.serviceName {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inheritedBadge {
+  font-size: 0.75rem;
+  background: #e7f3ff;
+  color: #0073aa;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: normal;
+  border: 1px solid #0073aa;
+}
+
+.removeServiceButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #c82333;
+  }
+
+  &:focus {
+    outline: 2px solid #dc3545;
+    outline-offset: 2px;
+  }
+}
+
+.serviceFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.serviceField {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+
+    &:focus {
+      outline: 2px solid #0073aa;
+      border-color: #0073aa;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+}
+
+.disabledInput {
+  background: #f5f5f5 !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.inheritedNote {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+
+.addServiceForm {
+  background: #fff;
+  border: 2px solid #0073aa;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #0073aa;
+  }
+}
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
+}
+
+.saveServiceButton {
+  background: #0073aa;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #005a87;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.cancelButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #5a6268;
+  }
+}
+
+.addServiceButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #218838;
+  }
+}

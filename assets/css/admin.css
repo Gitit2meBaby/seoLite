@@ -1,0 +1,19 @@
+#seo-plugin-admin * {
+  box-sizing: border-box;
+}
+#seo-plugin-admin h1,
+#seo-plugin-admin h2,
+#seo-plugin-admin h3,
+#seo-plugin-admin h4,
+#seo-plugin-admin h5,
+#seo-plugin-admin h6 {
+  margin: 0 0 1rem 0;
+}
+#seo-plugin-admin p {
+  margin: 0 0 1rem 0;
+}
+#seo-plugin-admin ul,
+#seo-plugin-admin li {
+  margin: 0;
+  padding: 0;
+}/*# sourceMappingURL=admin.css.map */

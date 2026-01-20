@@ -1,0 +1,634 @@
+// assets/css/components/tabs/Breadcrumbs.module.scss
+
+.breadcrumbs {
+  padding: 1rem;
+  background: #fff;
+  position: relative;
+}
+
+// === ALERTS ===
+.successAlert {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease-out;
+
+  .alertContent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-left: 4px solid #28a745;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+  }
+
+  .alertIcon {
+    font-size: 1.2rem;
+  }
+
+  .alertText {
+    flex: 1;
+    color: #155724;
+    font-weight: 600;
+  }
+
+  .alertClose {
+    background: none;
+    border: none;
+    color: #155724;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+      background: rgba(21, 87, 36, 0.1);
+    }
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// ==== Quick Actions ====
+.quickActions {
+  margin-bottom: 3rem;
+}
+
+.quickActionCard {
+  background: linear-gradient(135deg, #e7f3ff 0%, #f8f9ff 100%);
+  border: 2px solid #bee5eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 115, 170, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 115, 170, 0.15);
+  }
+}
+
+.quickActionContent {
+  padding: 2rem;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 1rem 0;
+    color: #0073aa;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  > p {
+    margin: 0 0 1.5rem 0;
+    color: #495057;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+
+    strong {
+      color: #0073aa;
+      font-weight: 600;
+    }
+  }
+}
+
+.benefitsList {
+  margin: 1.5rem 0 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  color: #495057;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 1px solid rgba(0, 115, 170, 0.1);
+  text-align: left;
+}
+
+.autoGenerateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 115, 170, 0.3);
+  text-transform: none;
+  letter-spacing: 0.3px;
+  min-width: 220px;
+  margin-bottom: 1rem; // Added margin below button
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #005a87 0%, #004666 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 115, 170, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 115, 170, 0.3);
+  }
+
+  &:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+  }
+
+  // Success state styling
+  &:has-text("✅") {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+    }
+  }
+}
+
+.buttonSubtext {
+  margin: 0 !important;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+  line-height: 1.4;
+  max-width: 500px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .quickActionContent {
+    padding: 1.5rem;
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    > p {
+      font-size: 1rem;
+    }
+  }
+
+  .benefitsList {
+    gap: 0.5rem;
+  }
+
+  .benefit {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .autoGenerateButton {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    min-width: 200px;
+  }
+}
+
+// === SECTION HEADERS ===
+.sectionHeader {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #0073aa;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: #0073aa;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.5rem 0;
+    color: #666;
+    line-height: 1.5;
+    font-size: 1rem;
+  }
+}
+
+// === FORM ELEMENTS ===
+.fieldsContainer {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.field {
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+
+    .description {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: normal;
+      font-style: italic;
+    }
+  }
+}
+
+.globalSettings {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.input,
+.select {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+  }
+}
+
+// === VISUAL BREADCRUMB PREVIEW ===
+.previewSection {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      color: #666;
+      line-height: 1.4;
+
+      strong {
+        color: #333;
+        font-weight: 600;
+      }
+
+      code {
+        background: #e9ecef;
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 0.85rem;
+        color: #495057;
+      }
+    }
+  }
+}
+
+.exampleBox {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-left: 4px solid #f39c12;
+  border-radius: 4px;
+
+  strong {
+    color: #856404;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.5rem;
+
+    li {
+      margin-bottom: 0.25rem;
+      color: #856404;
+      line-height: 1.3;
+      font-size: 0.9rem;
+
+      code {
+        background: rgba(133, 100, 4, 0.1);
+        color: #856404;
+        border: 1px solid rgba(133, 100, 4, 0.2);
+      }
+    }
+  }
+}
+
+h5 {
+  margin: 1.5rem 0 0.75rem 0;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.previewControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  label {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .select {
+    max-width: 250px;
+  }
+}
+
+.visualPreview {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e1e5e9;
+}
+
+.visualBreadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.separator {
+  color: #666;
+  margin: 0 0.5rem;
+  font-weight: 500;
+}
+
+.breadcrumbLink {
+  color: #0073aa;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #005a87;
+    text-decoration: underline;
+  }
+
+  &.current {
+    color: #333;
+    font-weight: 500;
+    pointer-events: none;
+  }
+}
+
+// === CODE PREVIEW ===
+.codePreview {
+  position: relative;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .codeBlock {
+    margin: 0;
+    padding: 1rem;
+    background: #282c34;
+    color: #abb2bf;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 400px;
+
+    code {
+      color: inherit;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .copyButton {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #005a87;
+    }
+  }
+}
+
+// === PAGE-SPECIFIC SETTINGS ===
+.pageList {
+  display: grid;
+  gap: 1rem;
+}
+
+.pageItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: #0073aa;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pageInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pageTitle {
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+}
+
+.pageUrl {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.pageControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 200px;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+  }
+}
+
+.customLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .input {
+    max-width: none;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+}
+
+.excludeCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  &:hover {
+    color: #333;
+  }
+}
+
+// === ACTIONS ===
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #ddd;
+  margin-top: 2rem;
+}
+
+.saveButton {
+  padding: 0.75rem 1.5rem;
+  background: #0073aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #005a87;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.unsavedChanges {
+  color: #d54e21;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+// === HELP SECTION ===
+.helpSection {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+}
