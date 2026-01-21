@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
+import Tooltip from "../schemaTypes/Tooltip";
 import styles from "@css/components/tabs/SocialMedia.module.scss";
 import { trackingFields } from "./trackingFields";
 
@@ -60,7 +61,7 @@ const TrackingTags = ({ tabId, config }) => {
         setPages(fetchedPages);
       } else {
         setApiError(
-          "No pages found. The WordPress API might not be working properly."
+          "No pages found. The WordPress API might not be working properly.",
         );
         setPages([{ id: "global", title: "Global Defaults", type: "global" }]);
       }
@@ -135,14 +136,6 @@ const TrackingTags = ({ tabId, config }) => {
     }
   };
 
-  const TooltipHelper = ({ tooltipText }) => (
-    <span className={styles.mediaHelper}>
-      <span className={styles.tooltipTrigger} data-tooltip={tooltipText}>
-        ℹ️
-      </span>
-    </span>
-  );
-
   const renderField = (field) => {
     const currentValue = getFieldValue(field.key);
     const fieldStatus = getFieldStatus(field.key);
@@ -157,9 +150,7 @@ const TrackingTags = ({ tabId, config }) => {
       <div key={field.key} className={styles.field}>
         <label className={styles.label}>
           {field.label}
-          {field.hasTooltip && (
-            <TooltipHelper tooltipText={field.tooltipText} />
-          )}
+          {field.tooltip && <Tooltip text={field.tooltip} />}
           {isInherited && (
             <span className={styles.inheritedBadge}>Inherited from Global</span>
           )}
@@ -168,9 +159,6 @@ const TrackingTags = ({ tabId, config }) => {
           )}
           {isUnique && (
             <span className={styles.uniqueBadge}>Unique to {pageSlug}</span>
-          )}
-          {field.description && (
-            <span className={styles.description}>{field.description}</span>
           )}
         </label>
 
@@ -220,7 +208,7 @@ const TrackingTags = ({ tabId, config }) => {
           </div>
           <div className={styles.sectionCount}>
             {sectionFields.length} setting
-            {sectionFields.length !== 1 ? "s" : ""}
+            <span className={styles.sectionIcon}>{isExpanded ? "▼" : "▶"}</span>
           </div>
         </button>
 

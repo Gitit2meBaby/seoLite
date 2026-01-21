@@ -171,7 +171,7 @@
     gap: 0.75rem;
 
     h3 {
-      margin: 0;
+      margin: 0 !important;
       font-size: 1.1rem;
       font-weight: 600;
       color: #495057;
@@ -248,91 +248,170 @@
     display: inline-block;
     position: relative;
   }
+}
 
-  .tooltipTrigger {
-    cursor: help;
-    color: #6c757d;
-    font-size: 0.9rem;
-    display: inline-block;
-    position: relative;
+// Tooltip System
+.tooltipWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 
-    // Tooltip on hover - positioned below icon to avoid cutoff
-    &:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: calc(100% + 12px); /* Always position below the icon */
+.tooltipTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6c757d;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: help;
+  transition: background-color 0.2s ease;
+  margin-left: 0.5rem;
+
+  &:hover {
+    background: #495057;
+  }
+
+  &::before {
+    content: "?";
+  }
+}
+
+.tooltip {
+  position: absolute; // This is now absolute to the body due to portal
+  padding: 12px 16px;
+  background: #333;
+  color: white;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: normal;
+  z-index: 999999; // Very high z-index since it's on document.body
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: auto; // Changed to auto so hover works
+  max-width: 350px;
+  min-width: 220px;
+  width: max-content;
+  text-align: left;
+  line-height: 1.5;
+  font-weight: 500;
+  animation: tooltipFadeIn 0.2s ease;
+
+  // Base arrow styles (will be overridden by placement modifiers)
+  &::after {
+    content: "";
+    position: absolute;
+    border: 8px solid transparent;
+  }
+
+  // TOP PLACEMENT (default - tooltip above trigger)
+  &--top {
+    transform: translate(-50%, -100%);
+
+    &::after {
+      top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      padding: 12px 16px;
-      background: #333;
-      color: white;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      white-space: normal;
-      z-index: 9999;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      animation: tooltipFadeIn 0.2s ease-out;
-      pointer-events: none;
-      max-width: 350px; /* Much wider tooltip */
-      min-width: 220px;
-      width: max-content;
-      text-align: left;
-      line-height: 1.5;
-      font-weight: 500;
-
-      /* Prevent tooltip from going off screen horizontally */
-      @media (max-width: 768px) {
-        max-width: 280px;
-        left: 0;
-        transform: none;
-        margin-left: -140px; /* Center it roughly */
-      }
+      border-top-color: #333;
     }
+  }
 
-    // Tooltip arrow pointing up to the icon
-    &:hover::before {
-      content: "";
-      position: absolute;
-      top: calc(100% + 6px);
+  // BOTTOM PLACEMENT (tooltip below trigger)
+  &--bottom {
+    transform: translate(-50%, 0);
+
+    &::after {
+      bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border: 8px solid transparent;
-      border-bottom-color: #333; /* Arrow pointing up to icon */
-      z-index: 10000;
-      animation: tooltipFadeIn 0.2s ease-out;
-
-      @media (max-width: 768px) {
-        left: 0;
-        margin-left: -8px;
-        transform: none;
-      }
-    }
-
-    // Special positioning for tooltips in sections near top of container
-    .sectionContent:first-child &:hover::after,
-    .fieldsContainer > .field:first-child &:hover::after {
-      top: calc(
-        100% + 12px
-      ); /* Keep below positioning even for first elements */
-    }
-
-    .sectionContent:first-child &:hover::before,
-    .fieldsContainer > .field:first-child &:hover::before {
-      top: calc(100% + 6px);
-      border-top-color: transparent;
       border-bottom-color: #333;
     }
   }
 
-  @keyframes tooltipFadeIn {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-8px);
+  // LEFT PLACEMENT (tooltip to the left of trigger)
+  &--left {
+    transform: translate(-100%, -50%);
+
+    &::after {
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left-color: #333;
     }
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+  }
+
+  // RIGHT PLACEMENT (tooltip to the right of trigger)
+  &--right {
+    transform: translate(0, -50%);
+
+    &::after {
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-right-color: #333;
     }
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 5px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+// Variant for bottom placement animation
+.tooltip--bottom {
+  animation: tooltipFadeInBottom 0.2s ease;
+}
+
+@keyframes tooltipFadeInBottom {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+// Variant for left placement animation
+.tooltip--left {
+  animation: tooltipFadeInLeft 0.2s ease;
+}
+
+@keyframes tooltipFadeInLeft {
+  from {
+    opacity: 0;
+    transform: translate(calc(-100% - 5px), -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-100%, -50%);
+  }
+}
+
+// Variant for right placement animation
+.tooltip--right {
+  animation: tooltipFadeInRight 0.2s ease;
+}
+
+@keyframes tooltipFadeInRight {
+  from {
+    opacity: 0;
+    transform: translate(-5px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
   }
 }
 
@@ -380,7 +459,9 @@
   border: 1px solid #ced4da;
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 
   &:focus {
     outline: none;

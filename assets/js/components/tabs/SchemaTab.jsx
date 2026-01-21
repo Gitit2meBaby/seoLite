@@ -41,11 +41,53 @@ import OnlineMarketplaceSchema, {
 } from "../schemaTypes/OnlineMarketplaceSchema";
 
 const SCHEMA_TYPES = {
-  Organization: {
-    label: "Organization/Business",
-    component: OrganizationSchema,
-    builder: buildOrganizationJson,
+  Article: {
+    label: "Article/Blog Post",
+    component: ArticleSchema,
+    builder: buildArticleJson,
     allowMultiple: false,
+  },
+  BreadcrumbList: {
+    label: "Breadcrumb Navigation",
+    component: BreadcrumbListSchema,
+    builder: buildBreadcrumbListJson,
+    allowMultiple: false,
+  },
+  Course: {
+    label: "Course/Educational",
+    component: CourseSchema,
+    builder: buildCourseJson,
+    allowMultiple: true,
+  },
+  Custom: {
+    label: "Custom Schema",
+    component: CustomSchema,
+    builder: buildCustomJson,
+    allowMultiple: true,
+  },
+  Event: {
+    label: "Event",
+    component: EventSchema,
+    builder: buildEventJson,
+    allowMultiple: true,
+  },
+  FaqPage: {
+    label: "FAQ Page",
+    component: FaqPageSchema,
+    builder: buildFaqPageJson,
+    allowMultiple: false,
+  },
+  HowTo: {
+    label: "How-To Guide",
+    component: HowToSchema,
+    builder: buildHowToJson,
+    allowMultiple: true,
+  },
+  JobPosting: {
+    label: "Job Posting",
+    component: JobPostingSchema,
+    builder: buildJobPostingJson,
+    allowMultiple: true,
   },
   LocalBusiness: {
     label: "Local Business",
@@ -59,22 +101,16 @@ const SCHEMA_TYPES = {
     builder: buildNonProfitOrganizationJson,
     allowMultiple: false,
   },
-  Service: {
-    label: "Service",
-    component: ServiceSchema,
-    builder: buildServiceJson,
-    allowMultiple: true,
+  OnlineMarketplace: {
+    label: "Online Marketplace",
+    component: OnlineMarketplaceSchema,
+    builder: buildOnlineMarketplaceJson,
+    allowMultiple: false,
   },
-  Product: {
-    label: "Product",
-    component: ProductSchema,
-    builder: buildProductJson,
-    allowMultiple: true,
-  },
-  Article: {
-    label: "Article/Blog Post",
-    component: ArticleSchema,
-    builder: buildArticleJson,
+  Organization: {
+    label: "Organization/Business",
+    component: OrganizationSchema,
+    builder: buildOrganizationJson,
     allowMultiple: false,
   },
   Person: {
@@ -83,10 +119,10 @@ const SCHEMA_TYPES = {
     builder: buildPersonJson,
     allowMultiple: false,
   },
-  Event: {
-    label: "Event",
-    component: EventSchema,
-    builder: buildEventJson,
+  Product: {
+    label: "Product",
+    component: ProductSchema,
+    builder: buildProductJson,
     allowMultiple: true,
   },
   Recipe: {
@@ -95,47 +131,23 @@ const SCHEMA_TYPES = {
     builder: buildRecipeJson,
     allowMultiple: true,
   },
-  VideoObject: {
-    label: "Video",
-    component: VideoObjectSchema,
-    builder: buildVideoObjectJson,
-    allowMultiple: true,
-  },
-  HowTo: {
-    label: "How-To Guide",
-    component: HowToSchema,
-    builder: buildHowToJson,
-    allowMultiple: true,
-  },
-  FaqPage: {
-    label: "FAQ Page",
-    component: FaqPageSchema,
-    builder: buildFaqPageJson,
-    allowMultiple: false,
-  },
-  BreadcrumbList: {
-    label: "Breadcrumb Navigation",
-    component: BreadcrumbListSchema,
-    builder: buildBreadcrumbListJson,
-    allowMultiple: false,
-  },
   Review: {
     label: "Review",
     component: ReviewSchema,
     builder: buildReviewJson,
     allowMultiple: true,
   },
-  Course: {
-    label: "Course/Educational",
-    component: CourseSchema,
-    builder: buildCourseJson,
+  Service: {
+    label: "Service",
+    component: ServiceSchema,
+    builder: buildServiceJson,
     allowMultiple: true,
   },
-  WebSite: {
-    label: "Website",
-    component: WebSiteSchema,
-    builder: buildWebSiteJson,
-    allowMultiple: false,
+  VideoObject: {
+    label: "Video",
+    component: VideoObjectSchema,
+    builder: buildVideoObjectJson,
+    allowMultiple: true,
   },
   WebPage: {
     label: "Web Page",
@@ -143,23 +155,11 @@ const SCHEMA_TYPES = {
     builder: buildWebPageJson,
     allowMultiple: false,
   },
-  JobPosting: {
-    label: "Job Posting",
-    component: JobPostingSchema,
-    builder: buildJobPostingJson,
-    allowMultiple: true,
-  },
-  OnlineMarketplace: {
-    label: "Online Marketplace",
-    component: OnlineMarketplaceSchema,
-    builder: buildOnlineMarketplaceJson,
+  WebSite: {
+    label: "Website",
+    component: WebSiteSchema,
+    builder: buildWebSiteJson,
     allowMultiple: false,
-  },
-  Custom: {
-    label: "Custom Schema",
-    component: CustomSchema,
-    builder: buildCustomJson,
-    allowMultiple: true,
   },
 };
 

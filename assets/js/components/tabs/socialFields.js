@@ -9,36 +9,48 @@ export const socialFields = [
         label: "Facebook Page URL",
         type: "url",
         placeholder: "https://www.facebook.com/yourpage",
+        tooltip:
+          "Your Facebook business page or profile URL. Used in Organization schema and social links.",
       },
       {
         key: "social_twitter_url",
         label: "Twitter/X Profile URL",
         type: "url",
         placeholder: "https://twitter.com/yourusername",
+        tooltip:
+          "Your Twitter/X profile URL. Used in Organization schema and social links.",
       },
       {
         key: "social_instagram_url",
         label: "Instagram Profile URL",
         type: "url",
         placeholder: "https://www.instagram.com/yourusername",
+        tooltip:
+          "Your Instagram profile URL. Used in Organization schema and social links.",
       },
       {
         key: "social_linkedin_url",
         label: "LinkedIn Profile/Company URL",
         type: "url",
         placeholder: "https://www.linkedin.com/company/yourcompany",
+        tooltip:
+          "Your LinkedIn company page or personal profile URL. Used in Organization schema and social links.",
       },
       {
         key: "social_youtube_url",
         label: "YouTube Channel URL",
         type: "url",
         placeholder: "https://www.youtube.com/c/yourchannel",
+        tooltip:
+          "Your YouTube channel URL. Used in Organization schema and social links.",
       },
       {
         key: "social_tiktok_url",
         label: "TikTok Profile URL",
         type: "url",
         placeholder: "https://www.tiktok.com/@yourusername",
+        tooltip:
+          "Your TikTok profile URL. Used in Organization schema and social links.",
       },
     ],
   },
@@ -53,9 +65,8 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/social-image.jpg",
-        hasMediaHelper: true,
-        tooltipText:
-          "Default image when content is shared (1200x630px recommended)",
+        tooltip:
+          "Default image shown when your content is shared on social media. Recommended size: 1200x630px. Falls back to site logo if not set.",
       },
       {
         key: "social_twitter_image",
@@ -63,9 +74,8 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/twitter-card.jpg",
-        hasMediaHelper: true,
-        tooltipText:
-          "Specific image for Twitter cards (1200x675px recommended)",
+        tooltip:
+          "Specific image for Twitter cards. Recommended size: 1200x675px (16:9 ratio). Falls back to default social image if not set.",
       },
     ],
   },
@@ -79,7 +89,8 @@ export const socialFields = [
         label: "Open Graph Title",
         type: "text",
         placeholder: "Amazing Content Title - Your Site",
-        description: "Title for social media shares (falls back to meta title)",
+        tooltip:
+          "Title shown when shared on Facebook, LinkedIn, and other platforms. Falls back to your meta title if not set. Max 60 characters recommended.",
         maxLength: 60,
       },
       {
@@ -88,8 +99,8 @@ export const socialFields = [
         type: "textarea",
         placeholder:
           "A compelling description that makes people want to click and share",
-        description:
-          "Description for social media shares (falls back to meta description)",
+        tooltip:
+          "Description shown when shared on social media. Falls back to your meta description if not set. Max 155 characters recommended.",
         maxLength: 155,
       },
       {
@@ -98,16 +109,16 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/og-image.jpg",
-        hasMediaHelper: true,
-        tooltipText: "Specific image for this page (1200x630px recommended)",
+        tooltip:
+          "Specific image for this page when shared on social media. Recommended size: 1200x630px. Falls back to default social image if not set.",
       },
       {
         key: "og_image_alt",
         label: "Open Graph Image Alt Text",
         type: "text",
         placeholder: "Descriptive text for the social share image",
-        description:
-          "Alt text for accessibility and better social media optimization",
+        tooltip:
+          "Alt text for your Open Graph image. Important for accessibility and helps social platforms understand your image content.",
       },
       {
         key: "og_type",
@@ -125,14 +136,16 @@ export const socialFields = [
           { value: "video.movie", label: "Video/Movie" },
           { value: "video.episode", label: "Video Episode" },
         ],
-        description: "Type of content for better social media categorization",
+        tooltip:
+          "Defines the type of content. Auto-detect works for most cases. Choose specific types for better categorization on social platforms.",
       },
       {
         key: "og_site_name",
         label: "Site Name",
         type: "text",
         placeholder: "Your Awesome Website",
-        description: "Your website/brand name (usually global setting)",
+        tooltip:
+          "Your website or brand name. Shown alongside your content on social media. Usually set globally and consistent across all pages.",
         global: true,
       },
       {
@@ -152,78 +165,9 @@ export const socialFields = [
           { value: "ko_KR", label: "Korean (Korea)" },
           { value: "zh_CN", label: "Chinese (Simplified)" },
         ],
-        description: "Language and region for social media platforms",
+        tooltip:
+          "Language and region of your content. Helps social platforms show your content to the right audience. Usually set globally.",
         global: true,
-      },
-    ],
-  },
-
-  // === ARTICLE METADATA ===
-  {
-    section: "Article Metadata (for Articles/Blog Posts)",
-    fields: [
-      {
-        key: "article_published_time",
-        label: "Article Published Time",
-        type: "datetime-local",
-        description: "When article was first published (ISO 8601 format)",
-      },
-      {
-        key: "article_modified_time",
-        label: "Article Modified Time",
-        type: "datetime-local",
-        description: "When article was last updated",
-      },
-      {
-        key: "article_author",
-        label: "Article Author",
-        type: "text",
-        placeholder: "John Doe or https://facebook.com/johndoe",
-        description: "Author name or Facebook profile URL",
-      },
-      {
-        key: "article_section",
-        label: "Article Section/Category",
-        type: "text",
-        placeholder: "Technology, Business, Lifestyle",
-        description: "General category for the article",
-      },
-      {
-        key: "article_tag",
-        label: "Article Tags",
-        type: "textarea",
-        placeholder: "WordPress\nSEO\nWeb Development",
-        description: "Keywords/tags for the article (one per line)",
-      },
-    ],
-  },
-
-  // === IMAGE DIMENSIONS ===
-  {
-    section: "Social Media Image Optimization",
-    fields: [
-      {
-        key: "og_image_width",
-        label: "Open Graph Image Width",
-        type: "number",
-        placeholder: "1200",
-        description:
-          "Image width in pixels (1200 recommended for best display)",
-      },
-      {
-        key: "og_image_height",
-        label: "Open Graph Image Height",
-        type: "number",
-        placeholder: "630",
-        description:
-          "Image height in pixels (630 recommended for 1.91:1 ratio)",
-      },
-      {
-        key: "twitter_image_alt",
-        label: "Twitter Image Alt Text",
-        type: "text",
-        placeholder: "Descriptive text for the image",
-        description: "Alt text for Twitter card image (accessibility)",
       },
     ],
   },
@@ -245,14 +189,16 @@ export const socialFields = [
           { value: "app", label: "App Card" },
           { value: "player", label: "Player Card" },
         ],
-        description: "Type of Twitter card to display",
+        tooltip:
+          "Type of Twitter card to display. 'Summary Card with Large Image' is recommended for most content with images.",
       },
       {
         key: "twitter_site",
         label: "Twitter Site Handle",
         type: "text",
         placeholder: "@yourwebsite",
-        description: "Your website's Twitter handle (include @)",
+        tooltip:
+          "Your website's Twitter handle (include the @ symbol). Shown in Twitter cards and helps attribute content to your brand.",
         global: true,
       },
       {
@@ -260,15 +206,16 @@ export const socialFields = [
         label: "Twitter Creator Handle",
         type: "text",
         placeholder: "@contentcreator",
-        description: "Content creator's Twitter handle (include @)",
+        tooltip:
+          "Twitter handle of the content creator (include the @ symbol). Attributes this specific content to an individual.",
       },
       {
         key: "twitter_title",
         label: "Twitter Card Title",
         type: "text",
         placeholder: "Amazing Content - Perfect for Twitter",
-        description:
-          "Title for Twitter cards (falls back to OG title or meta title)",
+        tooltip:
+          "Title shown on Twitter cards. Falls back to OG title or meta title if not set. Max 70 characters recommended.",
         maxLength: 70,
       },
       {
@@ -277,8 +224,8 @@ export const socialFields = [
         type: "textarea",
         placeholder:
           "A concise description optimized for Twitter's character limits",
-        description:
-          "Description for Twitter cards (falls back to OG description)",
+        tooltip:
+          "Description shown on Twitter cards. Falls back to OG description if not set. Max 200 characters recommended.",
         maxLength: 200,
       },
       {
@@ -287,9 +234,8 @@ export const socialFields = [
         type: "url",
         placeholder:
           "https://yoursite.com/wp-content/uploads/2024/twitter-image.jpg",
-        hasMediaHelper: true,
-        tooltipText:
-          "Specific image for Twitter cards (1200x675px recommended)",
+        tooltip:
+          "Specific image for Twitter cards. Recommended size: 1200x675px (16:9 ratio). Falls back to OG image or default social image if not set.",
       },
     ],
   },
@@ -303,7 +249,8 @@ export const socialFields = [
         label: "Facebook App ID",
         type: "text",
         placeholder: "1234567890123456",
-        description: "Facebook App ID for analytics and admin features",
+        tooltip:
+          "Your Facebook App ID. Required for Facebook Insights and admin features. Find this in your Facebook Developer dashboard.",
         global: true,
       },
       {
@@ -311,7 +258,8 @@ export const socialFields = [
         label: "Facebook Admin IDs",
         type: "text",
         placeholder: "100001234567890,100009876543210",
-        description: "Comma-separated Facebook user IDs of page admins",
+        tooltip:
+          "Comma-separated list of Facebook user IDs who can manage your page's social features. Find your ID at facebook.com/help.",
         global: true,
       },
     ],

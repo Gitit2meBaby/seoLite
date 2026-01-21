@@ -44,7 +44,6 @@ class SEO_Plugin_Meta_Output {
         // Output different types of meta tags
         $this->output_basic_meta_tags($meta_settings);
         $this->output_robots_meta($meta_settings);
-        $this->output_social_media_meta($meta_settings);
         $this->output_other_meta_tags($meta_settings);
         $this->output_verification_meta_tags($meta_settings);
         $this->output_schema_markup($meta_settings);
@@ -131,143 +130,6 @@ class SEO_Plugin_Meta_Output {
         $robots_content = implode(', ', $robots_parts);
         echo "<meta name=\"robots\" content=\"{$robots_content}\">\n";
     }
-
-    /**
-     * Output social media meta tags (Open Graph, Twitter Cards, Article metadata)
-     */
-    private function output_social_media_meta($meta_settings) {
-        echo "<!-- Open Graph Meta Tags -->\n";
-        
-        // Get current URL
-        $current_url = get_permalink();
-        if (!$current_url) {
-            $current_url = home_url($_SERVER['REQUEST_URI']);
-        }
-        
-        // Open Graph basic tags
-        if (!empty($meta_settings['og_title'])) {
-            echo '<meta property="og:title" content="' . esc_attr($meta_settings['og_title']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['meta_title'])) {
-            echo '<meta property="og:title" content="' . esc_attr($meta_settings['meta_title']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['og_description'])) {
-            echo '<meta property="og:description" content="' . esc_attr($meta_settings['og_description']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['meta_description'])) {
-            echo '<meta property="og:description" content="' . esc_attr($meta_settings['meta_description']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['og_image'])) {
-            echo '<meta property="og:image" content="' . esc_url($meta_settings['og_image']) . '" />' . "\n";
-            
-            // Image dimensions
-            if (!empty($meta_settings['og_image_width'])) {
-                echo '<meta property="og:image:width" content="' . esc_attr($meta_settings['og_image_width']) . '" />' . "\n";
-            }
-            if (!empty($meta_settings['og_image_height'])) {
-                echo '<meta property="og:image:height" content="' . esc_attr($meta_settings['og_image_height']) . '" />' . "\n";
-            }
-        }
-        
-        if (!empty($meta_settings['og_image_alt'])) {
-            echo '<meta property="og:image:alt" content="' . esc_attr($meta_settings['og_image_alt']) . '" />' . "\n";
-        }
-        
-        // URL
-        echo '<meta property="og:url" content="' . esc_url($current_url) . '" />' . "\n";
-        
-        // Type
-        $og_type = !empty($meta_settings['og_type']) ? $meta_settings['og_type'] : 'website';
-        echo '<meta property="og:type" content="' . esc_attr($og_type) . '" />' . "\n";
-        
-        // Site name
-        if (!empty($meta_settings['og_site_name'])) {
-            echo '<meta property="og:site_name" content="' . esc_attr($meta_settings['og_site_name']) . '" />' . "\n";
-        } else {
-            echo '<meta property="og:site_name" content="' . esc_attr(get_bloginfo('name')) . '" />' . "\n";
-        }
-        
-        // Locale
-        if (!empty($meta_settings['og_locale'])) {
-            echo '<meta property="og:locale" content="' . esc_attr($meta_settings['og_locale']) . '" />' . "\n";
-        }
-        
-        // Article metadata (only for article type)
-        if ($og_type === 'article') {
-            if (!empty($meta_settings['article_published_time'])) {
-                echo '<meta property="article:published_time" content="' . esc_attr($meta_settings['article_published_time']) . '" />' . "\n";
-            }
-            if (!empty($meta_settings['article_modified_time'])) {
-                echo '<meta property="article:modified_time" content="' . esc_attr($meta_settings['article_modified_time']) . '" />' . "\n";
-            }
-            if (!empty($meta_settings['article_author'])) {
-                echo '<meta property="article:author" content="' . esc_attr($meta_settings['article_author']) . '" />' . "\n";
-            }
-            if (!empty($meta_settings['article_section'])) {
-                echo '<meta property="article:section" content="' . esc_attr($meta_settings['article_section']) . '" />' . "\n";
-            }
-            if (!empty($meta_settings['article_tag'])) {
-                $tags = explode("\n", $meta_settings['article_tag']);
-                foreach ($tags as $tag) {
-                    $tag = trim($tag);
-                    if (!empty($tag)) {
-                        echo '<meta property="article:tag" content="' . esc_attr($tag) . '" />' . "\n";
-                    }
-                }
-            }
-        }
-        
-        // Facebook specific
-        if (!empty($meta_settings['fb_app_id'])) {
-            echo '<meta property="fb:app_id" content="' . esc_attr($meta_settings['fb_app_id']) . '" />' . "\n";
-        }
-        if (!empty($meta_settings['fb_admins'])) {
-            echo '<meta property="fb:admins" content="' . esc_attr($meta_settings['fb_admins']) . '" />' . "\n";
-        }
-        
-        // Twitter Card tags
-        echo "\n<!-- Twitter Card Meta Tags -->\n";
-        
-        $twitter_card = !empty($meta_settings['twitter_card_type']) ? $meta_settings['twitter_card_type'] : 'summary_large_image';
-        echo '<meta name="twitter:card" content="' . esc_attr($twitter_card) . '" />' . "\n";
-        
-        if (!empty($meta_settings['twitter_site'])) {
-            echo '<meta name="twitter:site" content="' . esc_attr($meta_settings['twitter_site']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['twitter_creator'])) {
-            echo '<meta name="twitter:creator" content="' . esc_attr($meta_settings['twitter_creator']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['twitter_title'])) {
-            echo '<meta name="twitter:title" content="' . esc_attr($meta_settings['twitter_title']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['og_title'])) {
-            echo '<meta name="twitter:title" content="' . esc_attr($meta_settings['og_title']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['meta_title'])) {
-            echo '<meta name="twitter:title" content="' . esc_attr($meta_settings['meta_title']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['twitter_description'])) {
-            echo '<meta name="twitter:description" content="' . esc_attr($meta_settings['twitter_description']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['og_description'])) {
-            echo '<meta name="twitter:description" content="' . esc_attr($meta_settings['og_description']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['meta_description'])) {
-            echo '<meta name="twitter:description" content="' . esc_attr($meta_settings['meta_description']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['twitter_image'])) {
-            echo '<meta name="twitter:image" content="' . esc_url($meta_settings['twitter_image']) . '" />' . "\n";
-        } elseif (!empty($meta_settings['og_image'])) {
-            echo '<meta name="twitter:image" content="' . esc_url($meta_settings['og_image']) . '" />' . "\n";
-        }
-        
-        if (!empty($meta_settings['twitter_image_alt'])) {
-            echo '<meta name="twitter:image:alt" content="' . esc_attr($meta_settings['twitter_image_alt']) . '" />' . "\n";
-        }
-        
-        echo "\n";
-    }
-    
     
     /**
      * Output other meta tags like canonical, hreflang, etc.
@@ -685,19 +547,6 @@ class SEO_Plugin_Meta_Output {
             echo "    t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n";
             echo "    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n";
             echo "})(window, document, \"clarity\", \"script\", \"{$clarity_id}\");\n";
-            echo "</script>\n\n";
-        }
-        
-        // TikTok Pixel
-        if (!empty($meta_settings['tiktok_pixel_id'])) {
-            $tiktok_id = esc_attr($meta_settings['tiktok_pixel_id']);
-            echo "<!-- TikTok Pixel Code -->\n";
-            echo "<script>\n";
-            echo "!function (w, d, t) {\n";
-            echo "  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=[\"page\",\"track\",\"identify\",\"instances\",\"debug\",\"on\",\"off\",\"once\",\"ready\",\"alias\",\"group\",\"enableCookie\",\"disableCookie\"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i=\"https://analytics.tiktok.com/i18n/pixel/events.js\";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement(\"script\");n.type=\"text/javascript\",n.async=!0,n.src=i+\"?sdkid=\"+e+\"&lib=\"+t;e=document.getElementsByTagName(\"script\")[0];e.parentNode.insertBefore(n,e)};\n";
-            echo "  ttq.load('{$tiktok_id}');\n";
-            echo "  ttq.page();\n";
-            echo "}(window, document, 'ttq');\n";
             echo "</script>\n\n";
         }
         
