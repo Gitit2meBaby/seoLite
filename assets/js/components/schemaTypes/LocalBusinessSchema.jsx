@@ -1,629 +1,478 @@
-// /components/schemaTypes/LocalBusinessSchema.jsx
-
+/* ================================================================== */
+/* LocalBusiness Schema Editor */
+/* ================================================================== */
 import { useState, useEffect } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-/**
- * LocalBusiness Schema Editor
- * Fully dynamic with subtype dropdown and conditional fields
- */
-export default function LocalBusinessSchema({ value = {}, onChange }) {
-  const [data, setData] = useState(value);
+const businessTypes = [
+  "LocalBusiness",
+  "Restaurant",
+  "CafeOrCoffeeShop",
+  "Bakery",
+  "BarOrPub",
+  "NightClub",
+  "Store",
+  "RetailStore",
+  "HealthAndBeautyBusiness",
+  "MedicalBusiness",
+  "AutomotiveBusiness",
+  "ProfessionalService",
+  "NonprofitOrganization",
+  "EducationalOrganization",
+  "GovernmentOrganization",
+];
+
+const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const CURRENCIES = ["AUD", "USD", "EUR", "GBP", "JPY"];
+
+export default function LocalBusinessSchema({ value, onChange }) {
+  const [data, setData] = useState({
+    address: {},
+    geo: {},
+    businessType: "LocalBusiness",
+    openingHoursSpecification: DAYS.map((day) => ({
+      dayOfWeek: day,
+      opens: "09:00",
+      closes: "17:00",
+    })),
+    offerCatalog: [{ name: "", price: "", currency: "AUD" }],
+    ...value,
+    address: value?.address || {},
+    geo: value?.geo || {},
+    businessType: value?.businessType || "LocalBusiness",
+    openingHoursSpecification:
+      value?.openingHoursSpecification?.length > 0
+        ? value.openingHoursSpecification
+        : DAYS.map((day) => ({
+            dayOfWeek: day,
+            opens: "09:00",
+            closes: "17:00",
+          })),
+    offerCatalog:
+      value?.offerCatalog?.length > 0
+        ? value.offerCatalog
+        : [{ name: "", price: "", currency: "AUD" }],
+  });
 
   useEffect(() => {
     if (onChange) onChange(data);
-  }, [data]);
+  }, [data, onChange]);
 
-  const handleChange = (field, val) => {
-    setData((prev) => ({ ...prev, [field]: val }));
-  };
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+  const updateAddress = (field, val) =>
+    setData((prev) => ({
+      ...prev,
+      address: { ...(prev.address || {}), [field]: val },
+    }));
+  const updateGeo = (field, val) =>
+    setData((prev) => ({
+      ...prev,
+      geo: { ...(prev.geo || {}), [field]: val },
+    }));
 
-  const businessTypes = [
-    "LocalBusiness",
+  /* Conditional Fields by Business Type */
+  const showMenuFields = [
     "Restaurant",
-    "FoodEstablishment",
     "CafeOrCoffeeShop",
     "Bakery",
     "BarOrPub",
     "NightClub",
-    "Store",
-    "RetailStore",
-    "ClothingStore",
-    "GroceryStore",
-    "HardwareStore",
-    "BookStore",
-    "ElectronicsStore",
-    "JewelryStore",
-    "FurnitureStore",
-    "HomeGoodsStore",
-    "SportingGoodsStore",
-    "HealthAndBeautyBusiness",
-    "HairSalon",
-    "Spa",
-    "Gym",
-    "MedicalBusiness",
-    "Dentist",
-    "Physician",
-    "VeterinaryCare",
-    "AutomotiveBusiness",
-    "AutoRepair",
-    "CarDealer",
-    "CarRental",
-    "RealEstateAgent",
-    "ProfessionalService",
-    "LegalService",
-    "AccountingService",
-    "ITService",
-    "FinancialService",
-    "NonprofitOrganization",
-    "EducationalOrganization",
-    "School",
-    "University",
-    "PlaceOfWorship",
-    "GovernmentOrganization",
-  ];
-
-  // Comprehensive conditional fields
-  const conditionalFields = {
-    Restaurant: [
-      "servesCuisine",
-      "menuUrl",
-      "acceptsReservations",
-      "priceRange",
-      "openingHours",
-      "paymentAccepted",
-      "hasMenu",
-    ],
-    CafeOrCoffeeShop: [
-      "servesCuisine",
-      "menuUrl",
-      "priceRange",
-      "openingHours",
-      "paymentAccepted",
-      "acceptsReservations",
-    ],
-    Bakery: [
-      "servesCuisine",
-      "menuUrl",
-      "priceRange",
-      "openingHours",
-      "paymentAccepted",
-    ],
-    BarOrPub: [
-      "servesCuisine",
-      "menuUrl",
-      "priceRange",
-      "openingHours",
-      "paymentAccepted",
-      "acceptsReservations",
-    ],
-    NightClub: [
-      "openingHours",
-      "priceRange",
-      "paymentAccepted",
-      "acceptsReservations",
-    ],
-    Store: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    RetailStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    ClothingStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    GroceryStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    HardwareStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    BookStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    ElectronicsStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    JewelryStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    FurnitureStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    HomeGoodsStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    SportingGoodsStore: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    HealthAndBeautyBusiness: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    HairSalon: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    Spa: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    Gym: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    MedicalBusiness: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "medicalSpecialty",
-    ],
-    Dentist: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "medicalSpecialty",
-    ],
-    Physician: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "medicalSpecialty",
-    ],
-    VeterinaryCare: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "medicalSpecialty",
-    ],
-    AutomotiveBusiness: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    AutoRepair: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    CarDealer: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    CarRental: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-      "hasOfferCatalog",
-    ],
-    RealEstateAgent: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    ProfessionalService: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    LegalService: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    AccountingService: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    ITService: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    FinancialService: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-    NonprofitOrganization: [
-      "openingHours",
-      "donationUrl",
-      "volunteerUrl",
-      "mission",
-      "taxID",
-      "nonprofitStatus",
-    ],
-    EducationalOrganization: ["openingHours", "email", "telephone", "address"],
-    School: ["openingHours", "email", "telephone", "address"],
-    University: ["openingHours", "email", "telephone", "address"],
-    PlaceOfWorship: ["openingHours", "email", "telephone", "address"],
-    GovernmentOrganization: ["openingHours", "email", "telephone", "address"],
-    LocalBusiness: [
-      "openingHours",
-      "paymentAccepted",
-      "priceRange",
-      "currenciesAccepted",
-    ],
-  };
-
-  // Determine if a field should be displayed for the current subtype
-  const showField = (field) => {
-    const subtypeFields = conditionalFields[data.businessType] || [];
-    return subtypeFields.includes(field);
-  };
+  ].includes(data.businessType);
+  const showCuisineFields = [
+    "Restaurant",
+    "CafeOrCoffeeShop",
+    "Bakery",
+  ].includes(data.businessType);
 
   return (
-    <form className="schema-form schema-localbusiness">
-      {/* Core Fields */}
-      <label>
-        Business Name *
+    <div className={styles.schemaForm}>
+      {/* Core Identity */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Business Name</label>
         <input
-          type="text"
+          className={styles.input}
           value={data.name || ""}
-          onChange={(e) => handleChange("name", e.target.value)}
-          required
+          onChange={(e) => update("name", e.target.value)}
         />
-      </label>
+      </div>
 
-      <label>
-        Business URL
-        <input
-          type="url"
-          value={data.url || ""}
-          onChange={(e) => handleChange("url", e.target.value)}
-        />
-      </label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Business Type</label>
+        <select
+          className={styles.select}
+          value={data.businessType}
+          onChange={(e) => update("businessType", e.target.value)}
+        >
+          {businessTypes.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
+        </select>
+      </div>
 
-      <label>
-        Logo URL
-        <input
-          type="url"
-          value={data.logo || ""}
-          onChange={(e) => handleChange("logo", e.target.value)}
-        />
-      </label>
+      {/* Address */}
+      <div className={styles.fieldGroup}>
+        <h4>Address</h4>
+        {[
+          { field: "streetAddress", label: "Street Address" },
+          { field: "addressLocality", label: "City" },
+          { field: "addressRegion", label: "State / Region" },
+          { field: "postalCode", label: "Postal Code" },
+          {
+            field: "addressCountry",
+            label: "Country",
+            placeholder: "Australia",
+          },
+        ].map(({ field, label, placeholder }) => (
+          <div className={styles.formGroup} key={field}>
+            <label className={styles.label}>{label}</label>
+            <input
+              type="text"
+              className={styles.input}
+              placeholder={placeholder || ""}
+              value={data.address[field] || ""}
+              onChange={(e) => updateAddress(field, e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
 
-      <label>
-        Description
-        <textarea
-          value={data.description || ""}
-          onChange={(e) => handleChange("description", e.target.value)}
-        />
-      </label>
+      {/* Geo */}
+      <div className={styles.fieldGroup}>
+        <h4>Geo Coordinates</h4>
+        <div className={styles.formRow}>
+          <input
+            type="text"
+            className={styles.input}
+            placeholder="Latitude (e.g., -37.8136)"
+            value={data.geo.latitude || ""}
+            onChange={(e) => updateGeo("latitude", e.target.value)}
+          />
+          <input
+            type="text"
+            className={styles.input}
+            placeholder="Longitude (e.g., 144.9631)"
+            value={data.geo.longitude || ""}
+            onChange={(e) => updateGeo("longitude", e.target.value)}
+          />
+        </div>
+      </div>
 
-      <label>
-        Telephone
+      {/* Contact */}
+      <div className={styles.fieldGroup}>
+        <h4>Contact & Website</h4>
         <input
           type="tel"
+          className={styles.input}
+          placeholder="Telephone"
           value={data.telephone || ""}
-          onChange={(e) => handleChange("telephone", e.target.value)}
+          onChange={(e) => update("telephone", e.target.value)}
         />
-      </label>
-
-      <label>
-        Email
         <input
-          type="email"
-          value={data.email || ""}
-          onChange={(e) => handleChange("email", e.target.value)}
+          type="url"
+          className={styles.input}
+          placeholder="Website URL"
+          value={data.url || ""}
+          onChange={(e) => update("url", e.target.value)}
         />
-      </label>
-
-      <label>
-        Address
         <input
           type="text"
-          value={data.address || ""}
-          onChange={(e) => handleChange("address", e.target.value)}
+          className={styles.input}
+          placeholder="@id (Unique Identifier)"
+          value={data["@id"] || ""}
+          onChange={(e) => update("@id", e.target.value)}
         />
-      </label>
+      </div>
 
-      <label>
-        Business Type
+      {/* Images */}
+      <div className={styles.fieldGroup}>
+        <h4>Images</h4>
+        <input
+          type="text"
+          className={styles.input}
+          placeholder="Image URL"
+          value={data.image || ""}
+          onChange={(e) => update("image", e.target.value)}
+        />
+      </div>
+
+      {/* Opening Hours */}
+      <OpeningHoursEditor
+        value={data.openingHoursSpecification}
+        onChange={(val) => update("openingHoursSpecification", val)}
+      />
+
+      {/* Offer Catalog */}
+      <OfferCatalogEditor
+        value={data.offerCatalog}
+        onChange={(val) => update("offerCatalog", val)}
+      />
+
+      {/* Details Section (conditional) */}
+      <div className={styles.fieldGroup}>
+        <h4>Details</h4>
+        {showCuisineFields && (
+          <input
+            type="text"
+            className={styles.input}
+            placeholder="Serves Cuisine"
+            value={data.servesCuisine || ""}
+            onChange={(e) => update("servesCuisine", e.target.value)}
+          />
+        )}
+        {showMenuFields && (
+          <input
+            type="url"
+            className={styles.input}
+            placeholder="Menu URL"
+            value={data.menuUrl || ""}
+            onChange={(e) => update("menuUrl", e.target.value)}
+          />
+        )}
+        <input
+          type="text"
+          className={styles.input}
+          placeholder="Price Range (e.g., $$$)"
+          value={data.priceRange || ""}
+          onChange={(e) => update("priceRange", e.target.value)}
+        />
+        <input
+          type="text"
+          className={styles.input}
+          placeholder="Payment Accepted (e.g., Cash, Credit Card)"
+          value={data.paymentAccepted || ""}
+          onChange={(e) => update("paymentAccepted", e.target.value)}
+        />
         <select
-          value={data.businessType || "LocalBusiness"}
-          onChange={(e) => handleChange("businessType", e.target.value)}
+          className={styles.select}
+          value={data.currenciesAccepted || "AUD"}
+          onChange={(e) => update("currenciesAccepted", e.target.value)}
         >
-          {businessTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
             </option>
           ))}
         </select>
-      </label>
-
-      {/* Conditional fields */}
-      {showField("servesCuisine") && (
-        <label>
-          Serves Cuisine
-          <input
-            type="text"
-            value={data.servesCuisine || ""}
-            onChange={(e) => handleChange("servesCuisine", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("menuUrl") && (
-        <label>
-          Menu URL
-          <input
-            type="url"
-            value={data.menuUrl || ""}
-            onChange={(e) => handleChange("menuUrl", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("acceptsReservations") && (
-        <label>
-          Accepts Reservations
-          <input
-            type="text"
-            value={data.acceptsReservations || ""}
-            onChange={(e) =>
-              handleChange("acceptsReservations", e.target.value)
-            }
-            placeholder="Yes / No / Phone / Online"
-          />
-        </label>
-      )}
-
-      {showField("openingHours") && (
-        <label>
-          Opening Hours
-          <input
-            type="text"
-            value={data.openingHours || ""}
-            onChange={(e) => handleChange("openingHours", e.target.value)}
-            placeholder="Mo-Fr 09:00-17:00"
-          />
-        </label>
-      )}
-
-      {showField("paymentAccepted") && (
-        <label>
-          Payment Accepted
-          <input
-            type="text"
-            value={data.paymentAccepted || ""}
-            onChange={(e) => handleChange("paymentAccepted", e.target.value)}
-            placeholder="Cash, Credit Card, etc."
-          />
-        </label>
-      )}
-
-      {showField("priceRange") && (
-        <label>
-          Price Range
-          <input
-            type="text"
-            value={data.priceRange || ""}
-            onChange={(e) => handleChange("priceRange", e.target.value)}
-            placeholder="$, $$, $$$"
-          />
-        </label>
-      )}
-
-      {showField("currenciesAccepted") && (
-        <label>
-          Currencies Accepted
-          <input
-            type="text"
-            value={data.currenciesAccepted || ""}
-            onChange={(e) => handleChange("currenciesAccepted", e.target.value)}
-            placeholder="USD, EUR, VND, etc."
-          />
-        </label>
-      )}
-
-      {showField("hasOfferCatalog") && (
-        <label>
-          Has Offer Catalog
-          <input
-            type="text"
-            value={data.hasOfferCatalog || ""}
-            onChange={(e) => handleChange("hasOfferCatalog", e.target.value)}
-            placeholder="Catalog URL or ID"
-          />
-        </label>
-      )}
-
-      {showField("medicalSpecialty") && (
-        <label>
-          Medical Specialty
-          <input
-            type="text"
-            value={data.medicalSpecialty || ""}
-            onChange={(e) => handleChange("medicalSpecialty", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("donationUrl") && (
-        <label>
-          Donation URL
-          <input
-            type="url"
-            value={data.donationUrl || ""}
-            onChange={(e) => handleChange("donationUrl", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("volunteerUrl") && (
-        <label>
-          Volunteer URL
-          <input
-            type="url"
-            value={data.volunteerUrl || ""}
-            onChange={(e) => handleChange("volunteerUrl", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("mission") && (
-        <label>
-          Mission
-          <textarea
-            value={data.mission || ""}
-            onChange={(e) => handleChange("mission", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("taxID") && (
-        <label>
-          Tax ID / Charity Number
-          <input
-            type="text"
-            value={data.taxID || ""}
-            onChange={(e) => handleChange("taxID", e.target.value)}
-          />
-        </label>
-      )}
-
-      {showField("nonprofitStatus") && (
-        <label>
-          Nonprofit Status
-          <input
-            type="text"
-            value={data.nonprofitStatus || ""}
-            onChange={(e) => handleChange("nonprofitStatus", e.target.value)}
-          />
-        </label>
-      )}
-
-      <label>
-        Social Profiles (comma separated)
-        <input
-          type="text"
-          value={data.sameAs || ""}
-          onChange={(e) => handleChange("sameAs", e.target.value)}
-        />
-      </label>
-    </form>
+      </div>
+    </div>
   );
 }
 
-/**
- * JSON-LD builder for LocalBusiness (fully dynamic)
- */
-export function buildLocalBusinessJson(data) {
-  if (!data?.name) return null;
-
-  const sameAsArray = data.sameAs
-    ? data.sameAs
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const json = {
-    "@context": "https://schema.org",
-    "@type": data.businessType || "LocalBusiness",
-    name: data.name,
-    url: data.url,
-    logo: data.logo,
-    description: data.description,
-    telephone: data.telephone,
-    email: data.email,
-    ...(data.address && {
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: data.address,
-      },
-    }),
-    ...(data.servesCuisine && { servesCuisine: data.servesCuisine }),
-    ...(data.menuUrl && { menu: data.menuUrl }),
-    ...(data.acceptsReservations && {
-      acceptsReservations: data.acceptsReservations,
-    }),
-    ...(data.openingHours && { openingHours: data.openingHours }),
-    ...(data.paymentAccepted && { paymentAccepted: data.paymentAccepted }),
-    ...(data.priceRange && { priceRange: data.priceRange }),
-    ...(data.currenciesAccepted && {
-      currenciesAccepted: data.currenciesAccepted,
-    }),
-    ...(data.hasOfferCatalog && { hasOfferCatalog: data.hasOfferCatalog }),
-    ...(data.medicalSpecialty && { medicalSpecialty: data.medicalSpecialty }),
-    ...(data.donationUrl && { donationUrl: data.donationUrl }),
-    ...(data.volunteerUrl && { volunteerUrl: data.volunteerUrl }),
-    ...(data.mission && { mission: data.mission }),
-    ...(data.taxID && { taxID: data.taxID }),
-    ...(data.nonprofitStatus && { nonprofitStatus: data.nonprofitStatus }),
-    ...(sameAsArray && { sameAs: sameAsArray }),
+/* ================================================================== */
+/* Opening Hours Editor */
+/* ================================================================== */
+function OpeningHoursEditor({ value = [], onChange }) {
+  const updateDay = (i, field, val) => {
+    const next = [...value];
+    next[i] = { ...next[i], [field]: val };
+    onChange(next);
   };
+  const addDay = (day = "Monday") => {
+    onChange([...value, { dayOfWeek: day, opens: "09:00", closes: "17:00" }]);
+  };
+  return (
+    <div className={styles.fieldGroup}>
+      <h4>Opening Hours</h4>
+      {value.map((row, i) => (
+        <div key={i} className={styles.formRow}>
+          <select
+            className={styles.select}
+            value={row.dayOfWeek}
+            onChange={(e) => updateDay(i, "dayOfWeek", e.target.value)}
+          >
+            {DAYS.map((d) => (
+              <option key={d}>{d}</option>
+            ))}
+          </select>
+          <input
+            type="time"
+            className={styles.input}
+            value={row.opens}
+            onChange={(e) => updateDay(i, "opens", e.target.value)}
+          />
+          <input
+            type="time"
+            className={styles.input}
+            value={row.closes}
+            onChange={(e) => updateDay(i, "closes", e.target.value)}
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        className={styles.addButton}
+        onClick={() => addDay()}
+      >
+        + Add Opening Day
+      </button>
+    </div>
+  );
+}
 
-  return json;
+/* ================================================================== */
+/* Offer Catalog Editor */
+/* ================================================================== */
+function OfferCatalogEditor({ value = [], onChange }) {
+  const addOffer = () =>
+    onChange([...value, { name: "", price: "", currency: "AUD" }]);
+  const updateOffer = (i, field, val) => {
+    const next = [...value];
+    next[i] = { ...next[i], [field]: val };
+    onChange(next);
+  };
+  return (
+    <div className={styles.fieldGroup}>
+      <h4>Offer Catalog</h4>
+      {value.map((o, i) => (
+        <div key={i} className={styles.formRow}>
+          <input
+            className={styles.input}
+            placeholder="Offer Name"
+            value={o.name}
+            onChange={(e) => updateOffer(i, "name", e.target.value)}
+          />
+          <input
+            className={styles.input}
+            placeholder="Price"
+            value={o.price}
+            onChange={(e) => updateOffer(i, "price", e.target.value)}
+          />
+          <select
+            className={styles.select}
+            value={o.currency}
+            onChange={(e) => updateOffer(i, "currency", e.target.value)}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      ))}
+      <button type="button" className={styles.addButton} onClick={addOffer}>
+        + Add Offer
+      </button>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* JSON-LD Builder (Crash-Safe & Conditional) */
+/* ================================================================== */
+export function buildLocalBusinessJson(data) {
+  if (!data?.name || !data?.businessType) return null;
+
+  // Default opening hours if none exist
+  const openingHours =
+    data.openingHoursSpecification?.length > 0
+      ? data.openingHoursSpecification
+      : [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ].map((day) => ({
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: day,
+          opens: "09:00",
+          closes: "17:00",
+        }));
+
+  // Default offer catalog
+  const offers =
+    data.offerCatalog?.length > 0
+      ? data.offerCatalog
+      : [{ name: "Default Offer", price: "", currency: "AUD" }];
+
+  // Conditional fields based on business type
+  const isFood = [
+    "Restaurant",
+    "CafeOrCoffeeShop",
+    "Bakery",
+    "BarOrPub",
+    "NightClub",
+  ].includes(data.businessType);
+  const isCuisine = ["Restaurant", "CafeOrCoffeeShop", "Bakery"].includes(
+    data.businessType,
+  );
+
+  return {
+    "@context": "https://schema.org",
+    "@type": data.businessType,
+    "@id": data["@id"] || undefined,
+    name: data.name,
+    address: data.address?.streetAddress
+      ? { "@type": "PostalAddress", ...data.address }
+      : undefined,
+    geo:
+      data.geo?.latitude && data.geo?.longitude
+        ? { "@type": "GeoCoordinates", ...data.geo }
+        : undefined,
+    telephone: data.telephone || undefined,
+    url: data.url || undefined,
+    image: data.image ? [data.image] : undefined,
+    openingHoursSpecification: openingHours.map((d) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: d.dayOfWeek,
+      opens: d.opens,
+      closes: d.closes,
+    })),
+    hasOfferCatalog: offers.length
+      ? {
+          "@type": "OfferCatalog",
+          itemListElement: offers.map((o) => ({
+            "@type": "Offer",
+            name: o.name,
+            price: o.price || undefined,
+            priceCurrency: o.currency || "AUD",
+            availability: "https://schema.org/InStock",
+          })),
+        }
+      : undefined,
+    servesCuisine: isCuisine ? data.servesCuisine || undefined : undefined,
+    menu: isFood ? data.menuUrl || undefined : undefined,
+    acceptsReservations:
+      isFood && data.acceptsReservations !== undefined
+        ? data.acceptsReservations
+        : undefined,
+    paymentAccepted: data.paymentAccepted || undefined,
+    priceRange: data.priceRange || undefined,
+    currenciesAccepted: data.currenciesAccepted || "AUD",
+    medicalSpecialty:
+      data.businessType === "MedicalBusiness"
+        ? data.medicalSpecialty || undefined
+        : undefined,
+    donationUrl:
+      data.businessType === "NonprofitOrganization"
+        ? data.donationUrl || undefined
+        : undefined,
+    volunteerUrl:
+      data.businessType === "NonprofitOrganization"
+        ? data.volunteerUrl || undefined
+        : undefined,
+    mission:
+      data.businessType === "NonprofitOrganization"
+        ? data.mission || undefined
+        : undefined,
+    taxID:
+      data.businessType === "NonprofitOrganization"
+        ? data.taxID || undefined
+        : undefined,
+    nonprofitStatus:
+      data.businessType === "NonprofitOrganization"
+        ? data.nonprofitStatus || undefined
+        : undefined,
+  };
 }

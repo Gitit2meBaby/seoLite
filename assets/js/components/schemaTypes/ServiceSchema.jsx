@@ -1,168 +1,288 @@
-// /components/schemaTypes/ServiceSchema.jsx
+import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-import { useState, useEffect } from "react";
+export default function ServiceSchema({ value, onChange }) {
+  const emptyChannel = { name: "", serviceUrl: "", servicePhone: "" };
 
-/**
- * Service Schema Editor
- * Fully dynamic form with JSON-LD output
- */
-export default function ServiceSchema({ value = {}, onChange }) {
-  const [data, setData] = useState(value);
+  const [data, setData] = useState({
+    name: "",
+    description: "",
+    serviceType: "",
+    category: "",
+    serviceOutput: "",
+    provider: "",
+    brand: "",
+    url: "",
+    termsOfService: "",
+    areaServed: "",
+    availableChannel: [],
+    images: [],
+    reviews: [],
+    aggregateRating: {},
+    ...value,
+    availableChannel: value?.availableChannel || [],
+    images: value?.images || [],
+    reviews: value?.reviews || [],
+    aggregateRating: value?.aggregateRating || {},
+  });
 
   useEffect(() => {
     if (onChange) onChange(data);
-  }, [data]);
+  }, [data, onChange]);
 
-  const handleChange = (field, val) => {
-    setData((prev) => ({ ...prev, [field]: val }));
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+  const updateArray = (field, index, val) => {
+    const next = [...(data[field] || [])];
+    next[index] = val;
+    setData((prev) => ({ ...prev, [field]: next }));
   };
+  const addArrayItem = (field, item = {}) =>
+    setData((prev) => ({ ...prev, [field]: [...(prev[field] || []), item] }));
+  const removeArrayItem = (field, index) =>
+    setData((prev) => ({
+      ...prev,
+      [field]: (prev[field] || []).filter((_, i) => i !== index),
+    }));
 
   return (
-    <form className="schema-form schema-service">
-      <label>
-        Service Name *
-        <input
-          type="text"
-          value={data.name || ""}
-          onChange={(e) => handleChange("name", e.target.value)}
-          required
-        />
-      </label>
+    <div className={styles.schemaForm}>
+      {/* Service Overview */}
+      <div className={styles.fieldGroup}>
+        <h4>Service Overview</h4>
+        {[
+          {
+            field: "name",
+            label: "Service Name",
+            required: true,
+            tooltip: "Official name of the service",
+            type: "text",
+          },
+          {
+            field: "description",
+            label: "Description",
+            required: true,
+            tooltip: "Clear description of the service",
+            type: "textarea",
+            maxLength: 500,
+          },
+          {
+            field: "serviceType",
+            label: "Service Type",
+            tooltip:
+              "Classification of the service e.g., Professional, Medical",
+            type: "text",
+          },
+          {
+            field: "category",
+            label: "Category",
+            tooltip: "More specific category of the service",
+            type: "text",
+          },
+          {
+            field: "serviceOutput",
+            label: "Service Output",
+            tooltip: "What the customer receives from this service",
+            type: "text",
+          },
+        ].map(({ field, label, tooltip, required, type, maxLength }) => (
+          <div key={field} className={styles.formField}>
+            <label>
+              {label}
+              {required && <span className={styles.required}>*</span>}
+            </label>
+            {tooltip && <Tooltip content={tooltip} />}
+            {type === "textarea" ? (
+              <>
+                <textarea
+                  className={styles.input}
+                  value={data[field] || ""}
+                  onChange={(e) => update(field, e.target.value)}
+                  maxLength={maxLength}
+                  required={required}
+                />
+                {maxLength && (
+                  <small>
+                    {(data[field] || "").length} / {maxLength}
+                  </small>
+                )}
+              </>
+            ) : (
+              <input
+                className={styles.input}
+                type={type}
+                value={data[field] || ""}
+                onChange={(e) => update(field, e.target.value)}
+                required={required}
+              />
+            )}
+          </div>
+        ))}
+      </div>
 
-      <label>
-        Description
-        <textarea
-          value={data.description || ""}
-          onChange={(e) => handleChange("description", e.target.value)}
-        />
-      </label>
+      {/* Provider & Branding */}
+      <div className={styles.fieldGroup}>
+        <h4>Provider & Branding</h4>
+        {[
+          {
+            field: "provider",
+            label: "Provider Name",
+            tooltip: "The organization providing this service",
+          },
+          {
+            field: "brand",
+            label: "Brand",
+            tooltip: "The brand name associated with the service",
+          },
+          {
+            field: "url",
+            label: "Service Page URL",
+            tooltip: "URL of the service page",
+            type: "url",
+          },
+          {
+            field: "termsOfService",
+            label: "Terms of Service URL",
+            tooltip: "URL of terms of service",
+            type: "url",
+          },
+        ].map(({ field, label, tooltip, type }) => (
+          <div key={field} className={styles.formField}>
+            <label>{label}</label>
+            {tooltip && <Tooltip content={tooltip} />}
+            <input
+              type={type || "text"}
+              className={styles.input}
+              value={data[field] || ""}
+              onChange={(e) => update(field, e.target.value)}
+              placeholder={type === "url" ? "https://example.com" : undefined}
+            />
+          </div>
+        ))}
+      </div>
 
-      <label>
-        Service Type / Category
-        <input
-          type="text"
-          value={data.serviceType || ""}
-          onChange={(e) => handleChange("serviceType", e.target.value)}
-          placeholder="Consulting, Cleaning, Delivery..."
-        />
-      </label>
+      {/* Location & Channels */}
+      <div className={styles.fieldGroup}>
+        <h4>Location & Channels</h4>
+        <div className={styles.formField}>
+          <label>Area Served</label>
+          <Tooltip content="The geographic area where this service is offered" />
+          <input
+            className={styles.input}
+            type="text"
+            value={data.areaServed || ""}
+            onChange={(e) => update("areaServed", e.target.value)}
+            placeholder="City, State, Country"
+          />
+        </div>
 
-      <label>
-        Provider Name
-        <input
-          type="text"
-          value={data.providerName || ""}
-          onChange={(e) => handleChange("providerName", e.target.value)}
-          placeholder="Organization Name"
-        />
-      </label>
-
-      <label>
-        Provider URL
-        <input
-          type="url"
-          value={data.providerUrl || ""}
-          onChange={(e) => handleChange("providerUrl", e.target.value)}
-          placeholder="https://example.com"
-        />
-      </label>
-
-      <label>
-        Area Served (City, Region, or Country)
-        <input
-          type="text"
-          value={data.areaServed || ""}
-          onChange={(e) => handleChange("areaServed", e.target.value)}
-          placeholder="Melbourne, VIC, Australia"
-        />
-      </label>
-
-      <label>
-        Service Audience / Target
-        <input
-          type="text"
-          value={data.audience || ""}
-          onChange={(e) => handleChange("audience", e.target.value)}
-          placeholder="General Public, Businesses, Students..."
-        />
-      </label>
-
-      <label>
-        Service Hours
-        <input
-          type="text"
-          value={data.hoursAvailable || ""}
-          onChange={(e) => handleChange("hoursAvailable", e.target.value)}
-          placeholder="Mo-Fr 9:00-17:00"
-        />
-      </label>
-
-      <label>
-        Image URL(s) (comma separated)
-        <input
-          type="text"
-          value={data.image || ""}
-          onChange={(e) => handleChange("image", e.target.value)}
-          placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-        />
-      </label>
-
-      <label>
-        Social Profiles / SameAs (comma separated)
-        <input
-          type="text"
-          value={data.sameAs || ""}
-          onChange={(e) => handleChange("sameAs", e.target.value)}
-          placeholder="https://facebook.com, https://twitter.com"
-        />
-      </label>
-    </form>
+        <div className={styles.formField}>
+          <label>Available Channels</label>
+          <Tooltip content="How customers can contact or access this service (phone, website, etc.)" />
+          {(data.availableChannel || []).map((channel, i) => (
+            <div key={i} className={styles.formRow}>
+              <input
+                className={styles.input}
+                type="text"
+                placeholder="Channel Name"
+                value={channel.name || ""}
+                onChange={(e) =>
+                  updateArray("availableChannel", i, {
+                    ...channel,
+                    name: e.target.value,
+                  })
+                }
+              />
+              <input
+                className={styles.input}
+                type="url"
+                placeholder="Service URL"
+                value={channel.serviceUrl || ""}
+                onChange={(e) =>
+                  updateArray("availableChannel", i, {
+                    ...channel,
+                    serviceUrl: e.target.value,
+                  })
+                }
+              />
+              <input
+                className={styles.input}
+                type="tel"
+                placeholder="Service Phone"
+                value={channel.servicePhone || ""}
+                onChange={(e) =>
+                  updateArray("availableChannel", i, {
+                    ...channel,
+                    servicePhone: e.target.value,
+                  })
+                }
+              />
+              <button
+                className={styles.removeButton}
+                type="button"
+                onClick={() => removeArrayItem("availableChannel", i)}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+          <button
+            className={styles.addButton}
+            type="button"
+            onClick={() =>
+              addArrayItem("availableChannel", { ...emptyChannel })
+            }
+          >
+            + Add Channel
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
-/**
- * JSON-LD builder for Service
- */
+/* JSON-LD Builder */
 export function buildServiceJson(data) {
-  if (!data?.name) return null;
+  if (!data?.name || !data?.description) return null;
 
-  const sameAsArray = data.sameAs
-    ? data.sameAs
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const imageArray = data.image
-    ? data.image
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
-
-  const json = {
+  return {
     "@context": "https://schema.org",
     "@type": "Service",
+    ...(data.id && { "@id": data.id }),
     name: data.name,
-    ...(data.description && { description: data.description }),
-    ...(data.serviceType && { serviceType: data.serviceType }),
-    ...(data.providerName || data.providerUrl
-      ? {
-          provider: {
-            "@type": "Organization",
-            ...(data.providerName && { name: data.providerName }),
-            ...(data.providerUrl && { url: data.providerUrl }),
-          },
-        }
-      : undefined),
-    ...(data.areaServed && { areaServed: data.areaServed }),
-    ...(data.audience && {
-      audience: { "@type": "Audience", name: data.audience },
+    description: data.description,
+    ...(data.url && { url: data.url }),
+    ...(data.provider && {
+      provider: { "@type": "Organization", name: data.provider },
     }),
+    ...(data.brand && { brand: { "@type": "Brand", name: data.brand } }),
+    ...(data.areaServed && {
+      areaServed: { "@type": "Place", name: data.areaServed },
+    }),
+    ...(data.serviceType && { serviceType: data.serviceType }),
+    ...(data.category && { category: data.category }),
+    ...(data.serviceOutput && { serviceOutput: data.serviceOutput }),
+    ...(data.termsOfService && { termsOfService: data.termsOfService }),
+    ...(data.availableChannel?.length > 0 && {
+      availableChannel: data.availableChannel.map((ch) => ({
+        "@type": "ServiceChannel",
+        serviceLocation: ch.serviceLocation || {
+          "@type": "Place",
+          name: ch.name || "",
+        },
+        ...(ch.serviceUrl && { serviceUrl: ch.serviceUrl }),
+        ...(ch.servicePhone && { servicePhone: ch.servicePhone }),
+      })),
+    }),
+    ...(data.aggregateRating && { aggregateRating: data.aggregateRating }),
+    ...(data.reviews?.length > 0 && { review: data.reviews }),
     ...(data.hoursAvailable && { hoursAvailable: data.hoursAvailable }),
-    ...(imageArray && { image: imageArray }),
-    ...(sameAsArray && { sameAs: sameAsArray }),
+    ...(data.broker && {
+      broker: { "@type": "Organization", name: data.broker },
+    }),
+    ...(data.serviceArea && {
+      serviceArea: { "@type": "Place", name: data.serviceArea },
+    }),
+    ...(data.images?.length > 0 && { image: data.images }),
   };
-
-  return json;
 }

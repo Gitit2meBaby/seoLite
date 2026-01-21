@@ -1,243 +1,249 @@
-// /components/schemaTypes/ProductSchema.jsx
-
 import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-/**
- * Product Schema Editor
- * - Commercial schema
- * - Works for physical & digital products
- * - Clean base for Offers, Reviews, Variants
- */
+/* ================================================================== */
+/* Product Schema Editor */
+/* ================================================================== */
 export default function ProductSchema({ value, onChange }) {
-  const [data, setData] = useState(value || {});
+  const [data, setData] = useState({
+    name: "",
+    description: "",
+    sku: "",
+    gtin13: "",
+    mpn: "",
+    brand: "",
+    manufacturer: "",
+    url: "",
+    images: [],
+    colors: [],
+    sizes: [],
+    offers: [],
+    reviews: [],
+    additionalProperty: [],
+    weight: "",
+    width: "",
+    height: "",
+    depth: "",
+    category: "",
+    model: "",
+    releaseDate: "",
+    itemCondition: "",
+    isRelatedTo: [],
+    isSimilarTo: [],
+    ...value,
+  });
 
   useEffect(() => {
     if (onChange) onChange(data);
-  }, [data]);
+  }, [data, onChange]);
 
-  function update(field, val) {
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+  const updateArray = (field, index, val) => {
+    const next = [...(data[field] || [])];
+    next[index] = val;
+    setData((prev) => ({ ...prev, [field]: next }));
+  };
+  const addArrayItem = (field, item = "") =>
+    setData((prev) => ({ ...prev, [field]: [...(prev[field] || []), item] }));
+  const removeArrayItem = (field, index) =>
     setData((prev) => ({
       ...prev,
-      [field]: val,
+      [field]: prev[field].filter((_, i) => i !== index),
     }));
-  }
 
   return (
-    <form className="schema-form schema-product">
-      {/* Core */}
-      <label>
-        Product Name *
+    <div className={styles.schemaForm}>
+      {/* Core Fields */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          Product Name *
+          <Tooltip text="Name of the product" />
+        </label>
         <input
           type="text"
-          id="name"
-          value={data.name || ""}
+          className={styles.input}
+          value={data.name}
           onChange={(e) => update("name", e.target.value)}
           required
         />
-      </label>
+      </div>
 
-      <label>
-        Product URL *
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          Description
+          <Tooltip text="Short description" />
+        </label>
+        <textarea
+          className={styles.textarea}
+          value={data.description}
+          onChange={(e) => update("description", e.target.value)}
+        />
+      </div>
+
+      {/* Identifiers */}
+      <div className={styles.formRow}>
+        {["sku", "gtin13", "mpn"].map((field) => (
+          <div className={styles.formGroup} key={field}>
+            <label className={styles.label}>{field.toUpperCase()}</label>
+            <input
+              type="text"
+              className={styles.input}
+              value={data[field] || ""}
+              onChange={(e) => update(field, e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Brand & Manufacturer */}
+      <div className={styles.formRow}>
+        {["brand", "manufacturer"].map((field) => (
+          <div className={styles.formGroup} key={field}>
+            <label className={styles.label}>
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </label>
+            <input
+              type="text"
+              className={styles.input}
+              value={data[field] || ""}
+              onChange={(e) => update(field, e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* URL */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Product URL</label>
         <input
           type="url"
-          id="url"
+          className={styles.input}
           value={data.url || ""}
           onChange={(e) => update("url", e.target.value)}
-          required
         />
-      </label>
+      </div>
 
-      <label>
-        Description
-        <textarea
-          id="description"
-          value={data.description || ""}
-          onChange={(e) => update("description", e.target.value)}
-          maxLength={300}
-        />
-      </label>
-
-      {/* Identity */}
-      <label>
-        Product @id
-        <input
-          type="url"
-          id="id"
-          placeholder="https://example.com/product#product"
-          value={data.id || ""}
-          onChange={(e) => update("id", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Brand Name
-        <input
-          type="text"
-          id="brand"
-          value={data.brand || ""}
-          onChange={(e) => update("brand", e.target.value)}
-        />
-      </label>
-
-      <label>
-        SKU
-        <input
-          type="text"
-          id="sku"
-          value={data.sku || ""}
-          onChange={(e) => update("sku", e.target.value)}
-        />
-      </label>
-
-      <label>
-        GTIN (UPC / EAN / ISBN)
-        <input
-          type="text"
-          id="gtin"
-          value={data.gtin || ""}
-          onChange={(e) => update("gtin", e.target.value)}
-        />
-      </label>
-
-      <label>
-        MPN
-        <input
-          type="text"
-          id="mpn"
-          value={data.mpn || ""}
-          onChange={(e) => update("mpn", e.target.value)}
-        />
-      </label>
-
-      {/* Media */}
-      <label>
-        Product Image URL
-        <input
-          type="url"
-          id="image"
-          value={data.image || ""}
-          onChange={(e) => update("image", e.target.value)}
-        />
-      </label>
-
-      {/* Offer */}
-      <label>
-        Price
-        <input
-          type="number"
-          step="any"
-          id="price"
-          value={data.price || ""}
-          onChange={(e) => update("price", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Currency
-        <input
-          type="text"
-          id="priceCurrency"
-          placeholder="USD, EUR, AUD"
-          value={data.priceCurrency || ""}
-          onChange={(e) => update("priceCurrency", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Availability
-        <select
-          id="availability"
-          value={data.availability || ""}
-          onChange={(e) => update("availability", e.target.value)}
-        >
-          <option value="">—</option>
-          <option value="InStock">In stock</option>
-          <option value="OutOfStock">Out of stock</option>
-          <option value="PreOrder">Pre-order</option>
-          <option value="Discontinued">Discontinued</option>
-        </select>
-      </label>
-
-      {/* Relationships */}
-      <label>
-        Manufacturer Name
-        <input
-          type="text"
-          id="manufacturer"
-          value={data.manufacturer || ""}
-          onChange={(e) => update("manufacturer", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Category
-        <input
-          type="text"
-          id="category"
-          value={data.category || ""}
-          onChange={(e) => update("category", e.target.value)}
-        />
-      </label>
-    </form>
+      {/* Arrays: Images, Colors, Sizes, Additional Properties, Reviews */}
+      {["images", "colors", "sizes", "additionalProperty", "reviews"].map(
+        (field) => (
+          <ArrayFieldEditor
+            key={field}
+            title={field.charAt(0).toUpperCase() + field.slice(1)}
+            field={field}
+            data={data}
+            addArrayItem={addArrayItem}
+            removeArrayItem={removeArrayItem}
+            updateArray={updateArray}
+            placeholder={
+              field === "images" ? "https://example.com/image.jpg" : ""
+            }
+          />
+        ),
+      )}
+    </div>
   );
 }
 
-/**
- * JSON-LD builder for Product
- */
+/* ================================================================== */
+/* JSON-LD Builder for Product */
+/* ================================================================== */
 export function buildProductJson(data) {
-  if (!data?.name || !data?.url) return null;
+  if (!data?.name) return null;
 
-  const offer =
-    data.price && data.priceCurrency
-      ? {
+  const offersArray =
+    data.offers?.length > 0
+      ? data.offers.map((o) => ({
           "@type": "Offer",
-          price: data.price,
-          priceCurrency: data.priceCurrency,
-          availability: data.availability
-            ? `https://schema.org/${data.availability}`
+          price: o.price,
+          priceCurrency: o.priceCurrency,
+          availability: o.availability,
+          itemCondition: o.itemCondition,
+          seller: o.seller
+            ? { "@type": "Organization", name: o.seller }
             : undefined,
-          url: data.url,
-        }
+          priceValidUntil: o.priceValidUntil,
+          shippingDetails: o.shippingDetails,
+          hasMerchantReturnPolicy: o.hasMerchantReturnPolicy,
+          eligibleRegion: o.eligibleRegion,
+        }))
       : undefined;
 
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-
-    ...(data.id && { "@id": data.id }),
-
-    // Core
     name: data.name,
-    url: data.url,
-    description: data.description,
-
-    // Identity
-    sku: data.sku,
-    gtin: data.gtin,
-    mpn: data.mpn,
-
-    brand: data.brand
-      ? {
-          "@type": "Brand",
-          name: data.brand,
-        }
-      : undefined,
-
-    // Media
-    image: data.image,
-
-    // Offer
-    offers: offer,
-
-    // Relationships
+    description: data.description || undefined,
+    sku: data.sku || undefined,
+    gtin13: data.gtin13 || undefined,
+    mpn: data.mpn || undefined,
+    brand: data.brand ? { "@type": "Brand", name: data.brand } : undefined,
     manufacturer: data.manufacturer
-      ? {
-          "@type": "Organization",
-          name: data.manufacturer,
-        }
+      ? { "@type": "Organization", name: data.manufacturer }
       : undefined,
-
-    category: data.category,
+    image: data.images?.length ? data.images : undefined,
+    color: data.colors?.length ? data.colors : undefined,
+    size: data.sizes?.length ? data.sizes : undefined,
+    weight: data.weight || undefined,
+    width: data.width || undefined,
+    height: data.height || undefined,
+    depth: data.depth || undefined,
+    category: data.category || undefined,
+    model: data.model || undefined,
+    releaseDate: data.releaseDate || undefined,
+    itemCondition: data.itemCondition || undefined,
+    url: data.url || undefined,
+    additionalProperty: data.additionalProperty?.length
+      ? data.additionalProperty
+      : undefined,
+    isRelatedTo: data.isRelatedTo?.length ? data.isRelatedTo : undefined,
+    isSimilarTo: data.isSimilarTo?.length ? data.isSimilarTo : undefined,
+    aggregateRating: data.aggregateRating || undefined,
+    review: data.reviews?.length ? data.reviews : undefined,
+    offers: offersArray,
   };
+}
+
+/* ================================================================== */
+/* Reusable Array Field Editor Component */
+/* ================================================================== */
+function ArrayFieldEditor({
+  title,
+  field,
+  data,
+  addArrayItem,
+  removeArrayItem,
+  updateArray,
+  placeholder,
+}) {
+  return (
+    <div className={styles.fieldGroup}>
+      <div className={styles.fieldGroupTitle}>{title}</div>
+      {data[field]?.map((item, i) => (
+        <div key={i} className={styles.formRow}>
+          <input
+            type="text"
+            className={styles.input}
+            value={item}
+            onChange={(e) => updateArray(field, i, e.target.value)}
+            placeholder={placeholder}
+          />
+          <button
+            type="button"
+            className={styles.removeButton}
+            onClick={() => removeArrayItem(field, i)}
+          >
+            Delete
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className={styles.addButton}
+        onClick={() => addArrayItem(field)}
+      >
+        + Add {title}
+      </button>
+    </div>
+  );
 }

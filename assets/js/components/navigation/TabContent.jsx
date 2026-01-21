@@ -1,6 +1,6 @@
 // assets/js/components/navigation/TabContent.jsx
 import GeneralMeta from "../tabs/GeneralMeta";
-import SchemaMarkup from "../tabs/SchemaMarkup";
+import SchemaTab from "../tabs/SchemaTab";
 import SocialMedia from "../tabs/SocialMedia";
 import TrackingTags from "../tabs/TrackingTags";
 import SitemapRobots from "../tabs/SitemapRobots";
@@ -28,7 +28,7 @@ const TabContent = ({ activeTab, tabConfig }) => {
         return <SocialMedia tabId={activeTab} config={tabConfig} />;
 
       case "SchemaMarkup":
-        return <SchemaMarkup tabId={activeTab} config={tabConfig} />;
+        return <SchemaTab tabId={activeTab} config={tabConfig} />;
 
       case "Analytics":
       case "TrackingTags":

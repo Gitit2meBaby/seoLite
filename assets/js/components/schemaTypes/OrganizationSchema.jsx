@@ -1,234 +1,338 @@
 import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-/**
- * Organization Schema Editor
- * - Self-contained form
- * - Owns its state
- * - Exports JSON-LD builder
- */
+/* ================================================================== */
+/* Organization Schema Editor */
+/* ================================================================== */
 export default function OrganizationSchema({ value, onChange }) {
-  const [data, setData] = useState(value || {});
+  const [data, setData] = useState({
+    address: {},
+    contactPoint: [],
+    founder: [],
+    sameAs: [],
+    ...value,
+  });
 
   useEffect(() => {
     if (onChange) onChange(data);
-  }, [data]);
+  }, [data, onChange]);
 
-  function update(field, val) {
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+  const updateAddress = (field, val) =>
     setData((prev) => ({
       ...prev,
-      [field]: val,
+      address: { ...(prev.address || {}), [field]: val },
     }));
-  }
+
+  const updateArray = (field, index, val) => {
+    const next = [...(data[field] || [])];
+    next[index] = val;
+    setData((prev) => ({ ...prev, [field]: next }));
+  };
+
+  const addArrayItem = (field, item = "") =>
+    setData((prev) => ({ ...prev, [field]: [...(prev[field] || []), item] }));
+
+  const removeArrayItem = (field, index) =>
+    setData((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index),
+    }));
 
   return (
-    <form className="schema-form schema-organization">
-      {/* Required / Core */}
-      <label>
-        Organization Name *
-        <input
-          type="text"
-          id="name"
-          value={data.name || ""}
-          onChange={(e) => update("name", e.target.value)}
-          required
-        />
-      </label>
+    <div className={styles.schemaForm}>
+      {/* Core Identity */}
+      <div className={styles.fieldGroup}>
+        <h4>Organization Identity</h4>
 
-      <label>
-        Website URL
-        <input
-          type="url"
-          id="url"
-          value={data.url || ""}
-          onChange={(e) => update("url", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Organization Name *
+            <Tooltip content="Official registered or trading name of the organization." />
+          </label>
+          <input
+            type="text"
+            className={styles.input}
+            value={data.name || ""}
+            onChange={(e) => update("name", e.target.value)}
+            placeholder="Excel Experts Australia"
+            required
+          />
+        </div>
 
-      <label>
-        Description
-        <textarea
-          id="description"
-          value={data.description || ""}
-          onChange={(e) => update("description", e.target.value)}
-          maxLength={300}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Description
+            <Tooltip content="Brief description of what the organization does." />
+          </label>
+          <textarea
+            className={styles.textarea}
+            value={data.description || ""}
+            onChange={(e) => update("description", e.target.value)}
+            maxLength={500}
+            placeholder="We provide expert Excel automation, VBA development, and data solutions for businesses."
+          />
+          <small>{(data.description || "").length} / 500</small>
+        </div>
+      </div>
 
-      {/* Identity */}
-      <label>
-        Logo URL
-        <input
-          type="url"
-          id="logo"
-          value={data.logo || ""}
-          onChange={(e) => update("logo", e.target.value)}
-        />
-      </label>
+      {/* Identity URLs */}
+      <div className={styles.fieldGroup}>
+        <h4>Schema Identity & URLs</h4>
 
-      <label>
-        Brand Name
-        <input
-          type="text"
-          id="brand"
-          value={data.brand || ""}
-          onChange={(e) => update("brand", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Organization @id *
+            <Tooltip content="Stable identifier. Usually your homepage URL with #organization." />
+          </label>
+          <input
+            type="url"
+            className={styles.input}
+            value={data.id || ""}
+            onChange={(e) => update("id", e.target.value)}
+            placeholder="https://example.com/#organization"
+            required
+          />
+        </div>
 
-      {/* Contact */}
-      <label>
-        Email
-        <input
-          type="email"
-          id="email"
-          value={data.email || ""}
-          onChange={(e) => update("email", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Website URL *
+            <Tooltip content="Canonical homepage URL of the organization." />
+          </label>
+          <input
+            type="url"
+            className={styles.input}
+            value={data.url || ""}
+            onChange={(e) => update("url", e.target.value)}
+            placeholder="https://example.com"
+            required
+          />
+        </div>
+      </div>
 
-      <label>
-        Telephone
-        <input
-          type="tel"
-          id="telephone"
-          value={data.telephone || ""}
-          onChange={(e) => update("telephone", e.target.value)}
-        />
-      </label>
+      {/* Branding */}
+      <div className={styles.fieldGroup}>
+        <h4>Branding</h4>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Logo URL
+            <Tooltip content="Logo image used for brand recognition. Recommended size: at least 112x112px." />
+          </label>
+          <input
+            type="url"
+            className={styles.input}
+            value={data.logo || ""}
+            onChange={(e) => update("logo", e.target.value)}
+            placeholder="https://example.com/logo.png"
+          />
+        </div>
+      </div>
 
-      {/* Address (kept simple for uniformity) */}
-      <label>
-        Address
-        <input
-          type="text"
-          id="address"
-          value={data.address || ""}
-          onChange={(e) => update("address", e.target.value)}
-        />
-      </label>
+      {/* Address */}
+      <div className={styles.fieldGroup}>
+        <h4>Address</h4>
+        {[
+          "streetAddress",
+          "addressLocality",
+          "addressRegion",
+          "postalCode",
+          "addressCountry",
+        ].map((field) => (
+          <div className={styles.formGroup} key={field}>
+            <label className={styles.label}>
+              {field}
+              <Tooltip content={`Address field: ${field}`} />
+            </label>
+            <input
+              type="text"
+              className={styles.input}
+              value={data.address[field] || ""}
+              onChange={(e) => updateAddress(field, e.target.value)}
+              placeholder={field === "addressCountry" ? "AU" : ""}
+            />
+          </div>
+        ))}
+      </div>
 
-      {/* Business info */}
-      <label>
-        Founding Date
-        <input
-          type="date"
-          id="foundingDate"
-          value={data.foundingDate || ""}
-          onChange={(e) => update("foundingDate", e.target.value)}
-        />
-      </label>
+      {/* Contact Points */}
+      <div className={styles.fieldGroup}>
+        <h4>Contact Points</h4>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Contact Telephone
+            <Tooltip content="Public contact phone number in international format." />
+          </label>
+          <input
+            type="tel"
+            className={styles.input}
+            value={data.contactPoint?.[0]?.telephone || ""}
+            onChange={(e) =>
+              update("contactPoint", [
+                {
+                  "@type": "ContactPoint",
+                  telephone: e.target.value,
+                  contactType: "Customer Service",
+                  availableLanguage: ["English"],
+                  areaServed: "AU",
+                },
+              ])
+            }
+            placeholder="+61 3 9000 0000"
+          />
+        </div>
+      </div>
 
-      <label>
-        Number of Employees
-        <input
-          type="number"
-          id="numberOfEmployees"
-          value={data.numberOfEmployees || ""}
-          onChange={(e) => update("numberOfEmployees", e.target.value)}
-        />
-      </label>
+      {/* Additional Info */}
+      <div className={styles.fieldGroup}>
+        <h4>Additional Information</h4>
 
-      <label>
-        Area Served
-        <input
-          type="text"
-          id="areaServed"
-          value={data.areaServed || ""}
-          onChange={(e) => update("areaServed", e.target.value)}
-        />
-      </label>
+        {/* Founder (Array-safe) */}
+        {data.founder?.map((f, i) => (
+          <div key={i} className={styles.formGroup}>
+            <label className={styles.label}>Founder</label>
+            <input
+              type="text"
+              className={styles.input}
+              value={f}
+              onChange={(e) => updateArray("founder", i, e.target.value)}
+              placeholder="John Doe"
+            />
+            <button
+              type="button"
+              className={styles.removeButton}
+              onClick={() => removeArrayItem("founder", i)}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className={styles.addButton}
+          onClick={() => addArrayItem("founder")}
+        >
+          + Add Founder
+        </button>
 
-      <label>
-        Opening Hours
-        <input
-          type="text"
-          id="openingHours"
-          placeholder="Mo-Fr 09:00-17:00"
-          value={data.openingHours || ""}
-          onChange={(e) => update("openingHours", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Founding Date
+            <Tooltip content="ISO 8601 date the organization was founded." />
+          </label>
+          <input
+            type="date"
+            className={styles.input}
+            value={data.foundingDate || ""}
+            onChange={(e) => update("foundingDate", e.target.value)}
+          />
+        </div>
 
-      {/* Commercial */}
-      <label>
-        Payment Accepted
-        <input
-          type="text"
-          id="paymentAccepted"
-          placeholder="Cash, Credit Card, PayPal"
-          value={data.paymentAccepted || ""}
-          onChange={(e) => update("paymentAccepted", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Number of Employees
+            <Tooltip content="Total number of employees." />
+          </label>
+          <input
+            type="number"
+            className={styles.input}
+            value={data.numberOfEmployees || ""}
+            onChange={(e) => update("numberOfEmployees", e.target.value)}
+            placeholder="25"
+          />
+        </div>
 
-      <label>
-        Price Range
-        <input
-          type="text"
-          id="priceRange"
-          placeholder="$$"
-          value={data.priceRange || ""}
-          onChange={(e) => update("priceRange", e.target.value)}
-        />
-      </label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Area Served
+            <Tooltip content="Cities, regions or countries served by the organization." />
+          </label>
+          <input
+            type="text"
+            className={styles.input}
+            value={data.areaServed || ""}
+            onChange={(e) => update("areaServed", e.target.value)}
+            placeholder="Australia"
+          />
+        </div>
 
-      {/* Trust / Authority */}
-      <label>
-        Same As (one URL per line)
-        <textarea
-          id="sameAs"
-          placeholder="https://facebook.com/yourpage"
-          value={data.sameAs || ""}
-          onChange={(e) => update("sameAs", e.target.value)}
-        />
-      </label>
-    </form>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Awards
+            <Tooltip content="Industry awards or recognition." />
+          </label>
+          <input
+            type="text"
+            className={styles.input}
+            value={data.award || ""}
+            onChange={(e) => update("award", e.target.value)}
+            placeholder="Best Excel Solutions 2025"
+          />
+        </div>
+
+        {/* Social Profiles (sameAs) */}
+        {data.sameAs?.map((url, i) => (
+          <div key={i} className={styles.formGroup}>
+            <label className={styles.label}>Social Profile</label>
+            <input
+              type="url"
+              className={styles.input}
+              value={url}
+              onChange={(e) => updateArray("sameAs", i, e.target.value)}
+              placeholder="https://twitter.com/username"
+            />
+            <button
+              type="button"
+              className={styles.removeButton}
+              onClick={() => removeArrayItem("sameAs", i)}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className={styles.addButton}
+          onClick={() => addArrayItem("sameAs")}
+        >
+          + Add Social Profile
+        </button>
+      </div>
+    </div>
   );
 }
 
-/**
- * JSON-LD builder
- * Keep pure & predictable
- */
+/* ================================================================== */
+/* JSON-LD Builder */
+/* ================================================================== */
 export function buildOrganizationJson(data) {
-  if (!data?.name) return null;
-
-  const sameAsArray = data.sameAs
-    ? data.sameAs
-        .split("\n")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
+  if (!data?.name || !data?.url || !data?.id) return null;
 
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-
-    // Core
+    "@id": data.id,
     name: data.name,
+    ...(data.legalName && { legalName: data.legalName }),
+    ...(data.description && { description: data.description }),
     url: data.url,
-    description: data.description,
-
-    // Identity
-    logo: data.logo,
-    brand: data.brand,
-
-    // Contact
-    email: data.email,
-    telephone: data.telephone,
-    address: data.address,
-
-    // Business info
-    foundingDate: data.foundingDate,
-    numberOfEmployees: data.numberOfEmployees,
-    areaServed: data.areaServed,
-    openingHours: data.openingHours,
-
-    // Commercial
-    paymentAccepted: data.paymentAccepted,
-    priceRange: data.priceRange,
-
-    // Authority
-    sameAs: sameAsArray,
+    ...(data.logo && { logo: { "@type": "ImageObject", url: data.logo } }),
+    ...(data.address && {
+      address: { "@type": "PostalAddress", ...data.address },
+    }),
+    ...(data.contactPoint &&
+      data.contactPoint.length && { contactPoint: data.contactPoint }),
+    ...(data.email && { email: data.email }),
+    ...(data.telephone && { telephone: data.telephone }),
+    ...(data.founder && data.founder.length && { founder: data.founder }),
+    ...(data.foundingDate && { foundingDate: data.foundingDate }),
+    ...(data.numberOfEmployees && {
+      numberOfEmployees: data.numberOfEmployees,
+    }),
+    ...(data.areaServed && { areaServed: data.areaServed }),
+    ...(data.award && { award: data.award }),
+    ...(data.sameAs &&
+      data.sameAs.length && { sameAs: data.sameAs.filter(Boolean) }),
   };
 }

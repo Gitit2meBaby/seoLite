@@ -1,120 +1,142 @@
-// /components/schemaTypes/FaqPageSchema.jsx
+import { useEffect, useState } from "react";
 
-import { useState, useEffect } from "react";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-/**
- * FAQPage Schema Editor
- * Dynamic FAQ list with add/edit/delete
- */
-export default function FaqPageSchema({ value = [], onChange }) {
-  const [faqs, setFaqs] = useState(value);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [currentFAQ, setCurrentFAQ] = useState({ question: "", answer: "" });
+/* ================================================================== */
+/* FAQPage Schema Editor (Null-Safe & Styled) */
+/* ================================================================== */
+export default function FaqPageSchema({ value, onChange }) {
+  const [data, setData] = useState({
+    name: "",
+    description: "",
+    mainEntity: [],
+    ...value,
+    mainEntity: value?.mainEntity || [],
+  });
 
   useEffect(() => {
-    if (onChange) onChange(faqs);
-  }, [faqs]);
+    if (onChange) onChange(data);
+  }, [data, onChange]);
 
-  const handleChange = (field, val) => {
-    setCurrentFAQ((prev) => ({ ...prev, [field]: val }));
+  /* ======================= Update Functions ======================= */
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+
+  const addQA = () =>
+    setData((prev) => ({
+      ...prev,
+      mainEntity: [...(prev.mainEntity || []), { question: "", answer: "" }],
+    }));
+
+  const updateQA = (index, field, val) => {
+    const next = [...(data.mainEntity || [])];
+    next[index] = { ...next[index], [field]: val };
+    setData((prev) => ({ ...prev, mainEntity: next }));
   };
 
-  const addOrUpdateFAQ = () => {
-    if (!currentFAQ.question.trim() || !currentFAQ.answer.trim()) return;
-
-    if (editingIndex !== null) {
-      // update existing
-      const updated = [...faqs];
-      updated[editingIndex] = currentFAQ;
-      setFaqs(updated);
-      setEditingIndex(null);
-    } else {
-      // add new
-      setFaqs((prev) => [...prev, currentFAQ]);
-    }
-    setCurrentFAQ({ question: "", answer: "" });
-  };
-
-  const editFAQ = (index) => {
-    setCurrentFAQ(faqs[index]);
-    setEditingIndex(index);
-  };
-
-  const deleteFAQ = (index) => {
-    setFaqs((prev) => prev.filter((_, i) => i !== index));
-    if (editingIndex === index) {
-      setEditingIndex(null);
-      setCurrentFAQ({ question: "", answer: "" });
-    }
-  };
+  const removeQA = (index) =>
+    setData((prev) => ({
+      ...prev,
+      mainEntity: (prev.mainEntity || []).filter((_, i) => i !== index),
+    }));
 
   return (
-    <div className="schema-form schema-faqpage">
-      <div className="faq-inputs">
-        <label>
-          Question *
-          <input
-            type="text"
-            value={currentFAQ.question}
-            onChange={(e) => handleChange("question", e.target.value)}
-          />
+    <div className={styles.schemaForm}>
+      {/* Page Title */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          FAQ Page Title <span className={styles.required}>*</span>
         </label>
-
-        <label>
-          Answer *
-          <textarea
-            value={currentFAQ.answer}
-            onChange={(e) => handleChange("answer", e.target.value)}
-          />
-        </label>
-
-        <button type="button" onClick={addOrUpdateFAQ}>
-          {editingIndex !== null ? "Update FAQ" : "Add FAQ"}
-        </button>
+        <input
+          type="text"
+          className={styles.input}
+          value={data.name || ""}
+          onChange={(e) => update("name", e.target.value)}
+          placeholder="Frequently Asked Questions"
+          required
+        />
       </div>
 
-      {faqs.length > 0 && (
-        <div className="faq-list">
-          {faqs.map((faq, i) => (
-            <div key={i} className="faq-item">
-              <strong>Q:</strong> {faq.question} <br />
-              <strong>A:</strong> {faq.answer} <br />
-              <button type="button" onClick={() => editFAQ(i)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => deleteFAQ(i)}>
-                Delete
-              </button>
+      {/* Description */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          Description <span className={styles.required}>*</span>
+        </label>
+        <textarea
+          className={styles.textarea}
+          value={data.description || ""}
+          onChange={(e) => update("description", e.target.value)}
+          placeholder="This FAQ page covers common questions about our service..."
+          required
+        />
+      </div>
+
+      {/* Questions & Answers */}
+      <div className={styles.fieldGroup}>
+        <div className={styles.fieldGroupTitle}>Questions & Answers</div>
+        {(data.mainEntity || []).map((qa, i) => (
+          <div key={i} className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Question *</label>
+              <input
+                type="text"
+                className={styles.input}
+                value={qa.question || ""}
+                onChange={(e) => updateQA(i, "question", e.target.value)}
+                placeholder={`Question ${i + 1}`}
+                required
+              />
             </div>
-          ))}
-        </div>
-      )}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Answer *</label>
+              <textarea
+                className={styles.textarea}
+                value={qa.answer || ""}
+                onChange={(e) => updateQA(i, "answer", e.target.value)}
+                placeholder={`Answer ${i + 1}`}
+                required
+              />
+            </div>
+            <button
+              type="button"
+              className={styles.removeButton}
+              onClick={() => removeQA(i)}
+            >
+              Delete Q&A
+            </button>
+          </div>
+        ))}
+        <button type="button" className={styles.addButton} onClick={addQA}>
+          + Add Question
+        </button>
+      </div>
     </div>
   );
 }
 
-/**
- * JSON-LD builder for FAQPage
- */
-export function buildFaqPageJson(faqs) {
-  if (!Array.isArray(faqs) || faqs.length === 0) return null;
+/* ================================================================== */
+/* JSON-LD Builder for FAQPage (Null-Safe) */
+/* ================================================================== */
+export function buildFaqPageJson(data) {
+  if (!data?.name || !data?.description) return null;
 
-  const mainEntity = faqs
-    .filter((f) => f.question && f.answer)
-    .map((f) => ({
+  const mainEntity = (data.mainEntity || [])
+    .filter((qa) => qa?.question && qa?.answer)
+    .map((qa) => ({
       "@type": "Question",
-      name: f.question,
+      name: qa.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: f.answer,
+        text: qa.answer,
       },
     }));
 
-  if (mainEntity.length === 0) return null;
+  if (!mainEntity.length) return null;
 
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    name: data.name,
+    description: data.description,
     mainEntity,
   };
 }

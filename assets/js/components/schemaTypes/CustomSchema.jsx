@@ -1,6 +1,7 @@
 // /components/schemaTypes/CustomSchema.jsx
-
 import { useState, useEffect } from "react";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
+import Tooltip from "./Tooltip";
 
 /**
  * Custom Schema Editor
@@ -51,44 +52,76 @@ export default function CustomSchema({ value = {}, onChange }) {
   };
 
   return (
-    <div className="schema-form schema-custom">
-      <div className="custom-inputs">
-        <label>
-          Key *
-          <input
-            type="text"
-            value={currentPair.key}
-            onChange={(e) => handleChange("key", e.target.value)}
-            placeholder="Enter property name"
-          />
-        </label>
+    <div className={`${styles.schemaForm} ${styles.schemaCustom}`}>
+      {/* Input for new key/value pair */}
+      <div className={styles.fieldGroup}>
+        <div className={styles.fieldGroupTitle}>Add Custom Property</div>
 
-        <label>
-          Value
-          <input
-            type="text"
-            value={currentPair.value}
-            onChange={(e) => handleChange("value", e.target.value)}
-            placeholder="Enter value (string, number, JSON...)"
-          />
-        </label>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Key *
+              <Tooltip text="Enter the property name for the schema. Example: 'audience', 'publisher', 'exampleField'." />
+            </label>
+            <input
+              type="text"
+              className={styles.input}
+              value={currentPair.key}
+              onChange={(e) => handleChange("key", e.target.value)}
+              placeholder="Enter property name"
+              required
+            />
+          </div>
 
-        <button type="button" onClick={addOrUpdatePair}>
-          {editingKey !== null ? "Update" : "Add"}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Value
+              <Tooltip text="Enter the value for this property. Can be string, number, boolean, or JSON." />
+            </label>
+            <input
+              type="text"
+              className={styles.input}
+              value={currentPair.value}
+              onChange={(e) => handleChange("value", e.target.value)}
+              placeholder="Enter value"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={addOrUpdatePair}
+        >
+          {editingKey !== null ? "Update Property" : "Add Property"}
         </button>
       </div>
 
+      {/* Display existing key/value pairs */}
       {Object.keys(data).length > 0 && (
-        <div className="custom-list">
+        <div className={styles.fieldGroup}>
+          <div className={styles.fieldGroupTitle}>Custom Properties</div>
           {Object.entries(data).map(([key, value]) => (
-            <div key={key} className="custom-item">
-              <strong>{key}:</strong> {value.toString()}
-              <button type="button" onClick={() => editPair(key)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => deletePair(key)}>
-                Delete
-              </button>
+            <div key={key} className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <strong>{key}:</strong> {value.toString()}
+              </div>
+              <div className={styles.formGroup}>
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  onClick={() => editPair(key)}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className={styles.removeButton}
+                  onClick={() => deletePair(key)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

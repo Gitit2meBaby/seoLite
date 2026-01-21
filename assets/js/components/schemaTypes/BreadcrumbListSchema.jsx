@@ -1,95 +1,168 @@
 // /components/schemaTypes/BreadcrumbListSchema.jsx
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
 /**
  * BreadcrumbList Schema Editor
- * Dynamic breadcrumb items with add/edit/delete
+ * - Defines page breadcrumb hierarchy
+ * - Used by Google for breadcrumb rich results
  */
-export default function BreadcrumbListSchema({ value = [], onChange }) {
-  const [items, setItems] = useState(value);
+export default function BreadcrumbListSchema({ value = {}, onChange }) {
+  const [data, setData] = useState(
+    value || {
+      id: "",
+      items: [],
+    },
+  );
+
+  const [currentItem, setCurrentItem] = useState({
+    name: "",
+    url: "",
+  });
+
   const [editingIndex, setEditingIndex] = useState(null);
-  const [currentItem, setCurrentItem] = useState({ name: "", url: "" });
 
   useEffect(() => {
-    if (onChange) onChange(items);
-  }, [items]);
+    if (onChange) onChange(data);
+  }, [data]);
 
-  const handleChange = (field, val) => {
+  function update(field, val) {
+    setData((prev) => ({ ...prev, [field]: val }));
+  }
+
+  function updateCurrent(field, val) {
     setCurrentItem((prev) => ({ ...prev, [field]: val }));
-  };
+  }
 
-  const addOrUpdateItem = () => {
-    if (!currentItem.name.trim() || !currentItem.url.trim()) return;
+  function addOrUpdateItem() {
+    if (!currentItem.name || !currentItem.url) return;
 
-    if (editingIndex !== null) {
-      // update existing
-      const updated = [...items];
-      updated[editingIndex] = currentItem;
-      setItems(updated);
-      setEditingIndex(null);
-    } else {
-      // add new
-      setItems((prev) => [...prev, currentItem]);
-    }
+    setData((prev) => {
+      const items = [...(prev.items || [])];
+
+      if (editingIndex !== null) {
+        items[editingIndex] = currentItem;
+      } else {
+        items.push(currentItem);
+      }
+
+      return { ...prev, items };
+    });
+
     setCurrentItem({ name: "", url: "" });
-  };
+    setEditingIndex(null);
+  }
 
-  const editItem = (index) => {
-    setCurrentItem(items[index]);
+  function editItem(index) {
+    setCurrentItem(data.items[index]);
     setEditingIndex(index);
-  };
+  }
 
-  const deleteItem = (index) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+  function removeItem(index) {
+    setData((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+
     if (editingIndex === index) {
       setEditingIndex(null);
       setCurrentItem({ name: "", url: "" });
     }
-  };
+  }
 
   return (
-    <div className="schema-form schema-breadcrumb">
-      <div className="breadcrumb-inputs">
-        <label>
-          Name *
-          <input
-            type="text"
-            value={currentItem.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-          />
-        </label>
+    <div className={styles.schemaForm}>
+      {/* Advanced Settings */}
+      <div className={styles.fieldGroup}>
+        <div className={styles.fieldGroupTitle}>Advanced Settings</div>
 
-        <label>
-          URL *
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            BreadcrumbList @id
+            <Tooltip text="Optional unique identifier for this breadcrumb list. Useful when linking schemas together. Example: https://example.com/page#breadcrumb" />
+          </label>
           <input
             type="url"
-            value={currentItem.url}
-            onChange={(e) => handleChange("url", e.target.value)}
+            className={styles.input}
+            value={data.id || ""}
+            onChange={(e) => update("id", e.target.value)}
+            placeholder="https://example.com/page#breadcrumb"
           />
-        </label>
-
-        <button type="button" onClick={addOrUpdateItem}>
-          {editingIndex !== null ? "Update Item" : "Add Item"}
-        </button>
+        </div>
       </div>
 
-      {items.length > 0 && (
-        <div className="breadcrumb-list">
-          {items.map((item, i) => (
-            <div key={i} className="breadcrumb-item">
-              <strong>{i + 1}:</strong> {item.name} (
-              <a href={item.url}>{item.url}</a>)
-              <button type="button" onClick={() => editItem(i)}>
-                Edit
-              </button>
-              <button type="button" onClick={() => deleteItem(i)}>
-                Delete
-              </button>
-            </div>
-          ))}
+      {/* Breadcrumb Item Editor */}
+      <div className={styles.fieldGroup}>
+        <div className={styles.fieldGroupTitle}>Breadcrumb Item</div>
+
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Name
+              <span className={styles.required}>*</span>
+              <Tooltip text="The breadcrumb label as shown to users. Example: 'Blog' or 'Services'." />
+            </label>
+            <input
+              type="text"
+              className={styles.input}
+              value={currentItem.name}
+              onChange={(e) => updateCurrent("name", e.target.value)}
+              placeholder="Blog"
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              URL
+              <span className={styles.required}>*</span>
+              <Tooltip text="The full URL this breadcrumb points to. Must match the actual page URL and include https://." />
+            </label>
+            <input
+              type="url"
+              className={styles.input}
+              value={currentItem.url}
+              onChange={(e) => updateCurrent("url", e.target.value)}
+              placeholder="https://example.com/blog"
+              required
+            />
+          </div>
         </div>
-      )}
+
+        <button
+          type="button"
+          className={styles.secondaryButton}
+          onClick={addOrUpdateItem}
+        >
+          {editingIndex !== null ? "Update Breadcrumb" : "Add Breadcrumb"}
+        </button>
+
+        {data.items?.length > 0 && (
+          <div className={styles.helpText}>
+            {data.items.map((item, index) => (
+              <div key={index}>
+                {index + 1}. {item.name} — {item.url}{" "}
+                <button
+                  className={styles.editButton}
+                  type="button"
+                  onClick={() => editItem(index)}
+                >
+                  Edit
+                </button>
+                <button
+                  className={styles.removeButton}
+                  type="button"
+                  onClick={() => removeItem(index)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -97,16 +170,16 @@ export default function BreadcrumbListSchema({ value = [], onChange }) {
 /**
  * JSON-LD builder for BreadcrumbList
  */
-export function buildBreadcrumbListJson(items) {
-  if (!Array.isArray(items) || items.length === 0) return null;
+export function buildBreadcrumbListJson(data) {
+  if (!data?.items || data.items.length === 0) return null;
 
-  const itemListElement = items
-    .filter((i) => i.name && i.url)
-    .map((i, idx) => ({
+  const itemListElement = data.items
+    .filter((item) => item.name && item.url)
+    .map((item, index) => ({
       "@type": "ListItem",
-      position: idx + 1,
-      name: i.name,
-      item: i.url,
+      position: index + 1,
+      name: item.name,
+      item: item.url,
     }));
 
   if (itemListElement.length === 0) return null;
@@ -114,6 +187,7 @@ export function buildBreadcrumbListJson(items) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
+    ...(data.id && { "@id": data.id }),
     itemListElement,
   };
 }

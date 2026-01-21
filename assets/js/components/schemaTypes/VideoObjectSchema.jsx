@@ -1,194 +1,349 @@
-// /components/schemaTypes/VideoObjectSchema.jsx
+import { useEffect, useState } from "react";
+import Tooltip from "./Tooltip";
+import styles from "@css/components/tabs/SchemaTab.module.scss";
 
-import { useState, useEffect } from "react";
-
-/**
- * VideoObject Schema Editor
- * Fully dynamic form with JSON-LD output
- */
-export default function VideoObjectSchema({ value = {}, onChange }) {
-  const [data, setData] = useState(value);
+export default function VideoObjectSchema({ value, onChange }) {
+  const [data, setData] = useState({
+    name: "",
+    description: "",
+    contentUrl: "",
+    embedUrl: "",
+    thumbnailUrl: "",
+    uploadDate: "",
+    duration: "",
+    keywords: "",
+    requiresSubscription: false,
+    regionsAllowed: [],
+    inLanguage: "",
+    caption: "",
+    videoQuality: "",
+    encodingFormat: "",
+    bitrate: "",
+    videoFrameSize: "",
+    startOffset: "",
+    endOffset: "",
+    expires: "",
+    viewCount: 0,
+    likeCount: 0,
+    publisherName: "",
+    publisherLogo: "",
+    transcriptUrl: "",
+    hasPart: [],
+    isPartOf: [],
+    ...value,
+    regionsAllowed: value?.regionsAllowed || [],
+    hasPart: value?.hasPart || [],
+    isPartOf: value?.isPartOf || [],
+  });
 
   useEffect(() => {
     if (onChange) onChange(data);
-  }, [data]);
+  }, [data, onChange]);
 
-  const handleChange = (field, val) => {
-    setData((prev) => ({ ...prev, [field]: val }));
+  const update = (field, val) => setData((prev) => ({ ...prev, [field]: val }));
+
+  const updateArray = (field, index, val) => {
+    const next = [...(data[field] || [])];
+    next[index] = val;
+    setData((prev) => ({ ...prev, [field]: next }));
   };
 
+  const addArrayItem = (field) =>
+    setData((prev) => ({ ...prev, [field]: [...(prev[field] || []), ""] }));
+
+  const removeArrayItem = (field, index) =>
+    setData((prev) => ({
+      ...prev,
+      [field]: (prev[field] || []).filter((_, i) => i !== index),
+    }));
+
   return (
-    <form className="schema-form schema-videoobject">
-      <label>
-        Video Title *
+    <div className={styles.schemaForm}>
+      {/* Core Video Fields */}
+      <div className={styles.formGroup}>
+        <label>Video Title *</label>
         <input
           type="text"
           value={data.name || ""}
-          onChange={(e) => handleChange("name", e.target.value)}
+          onChange={(e) => update("name", e.target.value)}
           required
         />
-      </label>
 
-      <label>
-        Description
+        <label>Description *</label>
         <textarea
           value={data.description || ""}
-          onChange={(e) => handleChange("description", e.target.value)}
+          onChange={(e) => update("description", e.target.value)}
+          required
         />
-      </label>
 
-      <label>
-        Upload Date
-        <input
-          type="date"
-          value={data.uploadDate || ""}
-          onChange={(e) => handleChange("uploadDate", e.target.value)}
-        />
-      </label>
-
-      <label>
-        Thumbnail URL(s) (comma separated)
-        <input
-          type="text"
-          value={data.thumbnailUrl || ""}
-          onChange={(e) => handleChange("thumbnailUrl", e.target.value)}
-          placeholder="https://example.com/thumb1.jpg, https://example.com/thumb2.jpg"
-        />
-      </label>
-
-      <label>
-        Video URL
+        <label>Content URL</label>
         <input
           type="url"
           value={data.contentUrl || ""}
-          onChange={(e) => handleChange("contentUrl", e.target.value)}
-          placeholder="https://example.com/video.mp4"
+          onChange={(e) => update("contentUrl", e.target.value)}
         />
-      </label>
 
-      <label>
-        Embed URL
+        <label>Embed URL</label>
         <input
           type="url"
           value={data.embedUrl || ""}
-          onChange={(e) => handleChange("embedUrl", e.target.value)}
-          placeholder="https://example.com/embed/video"
+          onChange={(e) => update("embedUrl", e.target.value)}
         />
-      </label>
 
-      <label>
-        Duration (ISO 8601)
+        <label>Thumbnail URL</label>
+        <input
+          type="url"
+          value={data.thumbnailUrl || ""}
+          onChange={(e) => update("thumbnailUrl", e.target.value)}
+        />
+      </div>
+
+      {/* Optional Metadata */}
+      <div className={styles.formGroup}>
+        <label>Upload Date</label>
+        <input
+          type="date"
+          value={data.uploadDate || ""}
+          onChange={(e) => update("uploadDate", e.target.value)}
+        />
+
+        <label>Duration</label>
         <input
           type="text"
           value={data.duration || ""}
-          onChange={(e) => handleChange("duration", e.target.value)}
+          onChange={(e) => update("duration", e.target.value)}
           placeholder="PT2M30S"
         />
-      </label>
 
-      <label>
-        Author Name
+        <label>Keywords (comma-separated)</label>
         <input
           type="text"
-          value={data.author || ""}
-          onChange={(e) => handleChange("author", e.target.value)}
-          placeholder="John Doe"
+          value={data.keywords || ""}
+          onChange={(e) => update("keywords", e.target.value)}
         />
-      </label>
 
-      <label>
-        Author URL
+        <label>Requires Subscription?</label>
+        <select
+          value={data.requiresSubscription ? "true" : "false"}
+          onChange={(e) =>
+            update("requiresSubscription", e.target.value === "true")
+          }
+        >
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+
+        <label>Regions Allowed (comma-separated ISO codes)</label>
+        <input
+          type="text"
+          value={(data.regionsAllowed || []).join(",")}
+          onChange={(e) =>
+            update(
+              "regionsAllowed",
+              e.target.value
+                .split(",")
+                .map((v) => v.trim())
+                .filter(Boolean),
+            )
+          }
+          placeholder="US,CA,GB"
+        />
+
+        <label>Language (inLanguage)</label>
+        <input
+          type="text"
+          value={data.inLanguage || ""}
+          onChange={(e) => update("inLanguage", e.target.value)}
+          placeholder="en"
+        />
+
+        <label>Caption URL</label>
         <input
           type="url"
-          value={data.authorUrl || ""}
-          onChange={(e) => handleChange("authorUrl", e.target.value)}
-          placeholder="https://example.com"
+          value={data.caption || ""}
+          onChange={(e) => update("caption", e.target.value)}
         />
-      </label>
 
-      <label>
-        Publisher Name
+        <label>Video Quality</label>
         <input
           type="text"
-          value={data.publisherName || ""}
-          onChange={(e) => handleChange("publisherName", e.target.value)}
-          placeholder="Organization Name"
+          value={data.videoQuality || ""}
+          onChange={(e) => update("videoQuality", e.target.value)}
+          placeholder="HD, SD, 4K"
         />
-      </label>
 
-      <label>
-        Publisher Logo URL
-        <input
-          type="url"
-          value={data.publisherLogo || ""}
-          onChange={(e) => handleChange("publisherLogo", e.target.value)}
-          placeholder="https://example.com/logo.png"
-        />
-      </label>
-
-      <label>
-        Social Profiles / SameAs (comma separated)
+        <label>Encoding Format</label>
         <input
           type="text"
-          value={data.sameAs || ""}
-          onChange={(e) => handleChange("sameAs", e.target.value)}
-          placeholder="https://facebook.com, https://twitter.com"
+          value={data.encodingFormat || ""}
+          onChange={(e) => update("encodingFormat", e.target.value)}
+          placeholder="video/mp4"
         />
-      </label>
-    </form>
+
+        <label>Bitrate</label>
+        <input
+          type="text"
+          value={data.bitrate || ""}
+          onChange={(e) => update("bitrate", e.target.value)}
+        />
+
+        <label>Video Frame Size</label>
+        <input
+          type="text"
+          value={data.videoFrameSize || ""}
+          onChange={(e) => update("videoFrameSize", e.target.value)}
+          placeholder="1920x1080"
+        />
+
+        <label>Start Offset</label>
+        <input
+          type="text"
+          value={data.startOffset || ""}
+          onChange={(e) => update("startOffset", e.target.value)}
+        />
+
+        <label>End Offset</label>
+        <input
+          type="text"
+          value={data.endOffset || ""}
+          onChange={(e) => update("endOffset", e.target.value)}
+        />
+
+        <label>Expires</label>
+        <input
+          type="date"
+          value={data.expires || ""}
+          onChange={(e) => update("expires", e.target.value)}
+        />
+      </div>
+
+      {/* Video series / playlist */}
+      <div className={styles.formGroup}>
+        <h4>Has Part (Videos in Series)</h4>
+        {(data.hasPart || []).map((item, i) => (
+          <div key={i}>
+            <input
+              type="text"
+              value={item || ""}
+              onChange={(e) => updateArray("hasPart", i, e.target.value)}
+            />
+            <button
+              className={styles.removeButton}
+              type="button"
+              onClick={() => removeArrayItem("hasPart", i)}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+        <button
+          className={styles.addButton}
+          type="button"
+          onClick={() => addArrayItem("hasPart")}
+        >
+          + Add Part
+        </button>
+
+        <h4>Is Part Of (Playlist / Series)</h4>
+        {(data.isPartOf || []).map((item, i) => (
+          <div key={i}>
+            <input
+              type="text"
+              value={item || ""}
+              onChange={(e) => updateArray("isPartOf", i, e.target.value)}
+            />
+            <button
+              className={styles.removeButton}
+              type="button"
+              onClick={() => removeArrayItem("isPartOf", i)}
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+        <button
+          className={styles.addButton}
+          type="button"
+          onClick={() => addArrayItem("isPartOf")}
+        >
+          + Add Series
+        </button>
+      </div>
+    </div>
   );
 }
 
-/**
- * JSON-LD builder for VideoObject
- */
+/* JSON-LD Builder (Null-safe) */
 export function buildVideoObjectJson(data) {
-  if (!data?.name) return null;
+  if (!data?.name || !data?.description) return null;
 
-  const sameAsArray = data.sameAs
-    ? data.sameAs
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
+  const keywordsArray = data.keywords
+    ?.split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
 
-  const thumbnailArray = data.thumbnailUrl
-    ? data.thumbnailUrl
-        .split(",")
-        .map((url) => url.trim())
-        .filter(Boolean)
-    : undefined;
+  const interactionStats = [];
+  if (data.viewCount) {
+    interactionStats.push({
+      "@type": "InteractionCounter",
+      interactionType: { "@type": "http://schema.org/WatchAction" },
+      userInteractionCount: Number(data.viewCount),
+    });
+  }
+  if (data.likeCount) {
+    interactionStats.push({
+      "@type": "InteractionCounter",
+      interactionType: { "@type": "http://schema.org/LikeAction" },
+      userInteractionCount: Number(data.likeCount),
+    });
+  }
 
-  const json = {
+  return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     name: data.name,
-    ...(data.description && { description: data.description }),
-    ...(data.uploadDate && { uploadDate: data.uploadDate }),
-    ...(thumbnailArray && { thumbnailUrl: thumbnailArray }),
+    description: data.description,
     ...(data.contentUrl && { contentUrl: data.contentUrl }),
     ...(data.embedUrl && { embedUrl: data.embedUrl }),
+    ...(data.thumbnailUrl && { thumbnailUrl: data.thumbnailUrl }),
+    ...(data.uploadDate && { uploadDate: data.uploadDate }),
     ...(data.duration && { duration: data.duration }),
-    ...(data.author && {
-      author: {
-        "@type": "Person",
-        name: data.author,
-        ...(data.authorUrl && { url: data.authorUrl }),
+    ...(keywordsArray?.length && { keywords: keywordsArray }),
+    ...(interactionStats.length && { interactionStatistic: interactionStats }),
+    ...(data.publisherName && {
+      publisher: {
+        "@type": "Organization",
+        name: data.publisherName,
+        ...(data.publisherLogo && {
+          logo: { "@type": "ImageObject", url: data.publisherLogo },
+        }),
       },
     }),
-    ...(data.publisherName
-      ? {
-          publisher: {
-            "@type": "Organization",
-            name: data.publisherName,
-            ...(data.publisherLogo && {
-              logo: { "@type": "ImageObject", url: data.publisherLogo },
-            }),
-          },
-        }
-      : undefined),
-    ...(sameAsArray && { sameAs: sameAsArray }),
+    ...(data.transcriptUrl && { transcript: data.transcriptUrl }),
+    ...(data.requiresSubscription !== undefined && {
+      requiresSubscription: data.requiresSubscription,
+    }),
+    ...(data.regionsAllowed?.length && { regionsAllowed: data.regionsAllowed }),
+    ...(data.inLanguage && { inLanguage: data.inLanguage }),
+    ...(data.caption && { caption: data.caption }),
+    ...(data.videoQuality && { videoQuality: data.videoQuality }),
+    ...(data.encodingFormat && { encodingFormat: data.encodingFormat }),
+    ...(data.bitrate && { bitrate: data.bitrate }),
+    ...(data.videoFrameSize && { videoFrameSize: data.videoFrameSize }),
+    ...(data.startOffset && { startOffset: data.startOffset }),
+    ...(data.endOffset && { endOffset: data.endOffset }),
+    ...(data.expires && { expires: data.expires }),
+    ...(data.hasPart?.length && {
+      hasPart: data.hasPart.map((url) => ({
+        "@type": "VideoObject",
+        contentUrl: url || "",
+      })),
+    }),
+    ...(data.isPartOf?.length && {
+      isPartOf: data.isPartOf.map((url) => ({
+        "@type": "VideoObject",
+        contentUrl: url || "",
+      })),
+    }),
   };
-
-  return json;
 }
