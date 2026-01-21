@@ -1,6 +1,6 @@
 // Schema type configurations with proper field assignments
 export const schemaTypes = {
-  "": { label: "Select Schema Type", fields: [] },
+  // "": { label: "Select Schema Type", fields: [] },
 
   Organization: {
     label: "Organization/Business",
@@ -12,7 +12,7 @@ export const schemaTypes = {
       "email",
       "telephone",
       "address",
-      "sameAs", // âœ… Correct - Organizations have authoritative profiles
+      "sameAs", // Ã¢Å“â€¦ Correct - Organizations have authoritative profiles
       "foundingDate",
       "numberOfEmployees",
       "areaServed",
@@ -21,6 +21,30 @@ export const schemaTypes = {
       "offerCatalog", // New field for actual services
       "paymentAccepted",
       "priceRange",
+    ],
+  },
+
+  NonProfit: {
+    label: "Non-Profit Organization",
+    extends: "Organization",
+    fields: [
+      "name",
+      "url",
+      "logo",
+      "description",
+      "email",
+      "telephone",
+      "address",
+      "sameAs",
+      "foundingDate",
+      "areaServed",
+      "mission",
+      "nonprofitStatus",
+      "donationUrl",
+      "volunteerUrl",
+      "taxID",
+      "hasOfferCatalog",
+      "offerCatalog",
     ],
   },
 
@@ -35,7 +59,7 @@ export const schemaTypes = {
       "email",
       "telephone",
       "address",
-      "sameAs", // âœ… Correct - Local businesses have profiles
+      "sameAs", // Ã¢Å“â€¦ Correct - Local businesses have profiles
       "openingHours",
       "hasOfferCatalog",
       "offerCatalog", // Services offered
@@ -58,7 +82,7 @@ export const schemaTypes = {
       "email",
       "telephone",
       "address",
-      "sameAs", // âœ… Restaurant social profiles
+      "sameAs", // Ã¢Å“â€¦ Restaurant social profiles
       "openingHours",
       "servesCuisine",
       "acceptsReservations",
@@ -81,7 +105,7 @@ export const schemaTypes = {
       "email",
       "telephone",
       "address",
-      "sameAs", // âœ… Store social profiles
+      "sameAs", // Ã¢Å“â€¦ Store social profiles
       "openingHours",
       "hasOfferCatalog",
       "offerCatalog", // Products/services sold
@@ -103,13 +127,14 @@ export const schemaTypes = {
       "articleSection",
       "wordCount",
       "articleBody",
-      // âŒ Removed sameAs - articles don't have social profiles
+      // Ã¢ÂÅ’ Removed sameAs - articles don't have social profiles
     ],
   },
 
   NewsArticle: {
     label: "News Article",
     extends: "Article",
+    allowMultiple: true,
     fields: [
       "headline",
       "description",
@@ -121,12 +146,13 @@ export const schemaTypes = {
       "articleSection",
       "wordCount",
       "dateline",
-      // âŒ Removed sameAs - news articles don't have profiles
+      // Ã¢ÂÅ’ Removed sameAs - news articles don't have profiles
     ],
   },
 
   Product: {
     label: "Product",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -139,12 +165,13 @@ export const schemaTypes = {
       "offers",
       "aggregateRating",
       "review",
-      // âŒ No sameAs for products
+      // Ã¢ÂÅ’ No sameAs for products
     ],
   },
 
   Service: {
     label: "Service",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -156,7 +183,7 @@ export const schemaTypes = {
       "offers",
       "aggregateRating",
       "review",
-      // âŒ No sameAs for individual services
+      // Ã¢ÂÅ’ No sameAs for individual services
     ],
   },
 
@@ -170,7 +197,7 @@ export const schemaTypes = {
       "email",
       "jobTitle",
       "worksFor",
-      "sameAs", // âœ… Correct - People have social profiles
+      "sameAs", // Ã¢Å“â€¦ Correct - People have social profiles
       "birthDate",
       "nationality",
       "alumniOf",
@@ -179,6 +206,7 @@ export const schemaTypes = {
 
   Event: {
     label: "Event",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -191,12 +219,13 @@ export const schemaTypes = {
       "eventStatus",
       "eventAttendanceMode",
       "image",
-      // âŒ Events typically don't have sameAs
+      // Ã¢ÂÅ’ Events typically don't have sameAs
     ],
   },
 
   Recipe: {
     label: "Recipe",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -213,12 +242,13 @@ export const schemaTypes = {
       "recipeInstructions",
       "nutrition",
       "aggregateRating",
-      // âŒ Individual recipes don't have sameAs
+      // Ã¢ÂÅ’ Individual recipes don't have sameAs
     ],
   },
 
   Book: {
     label: "Book",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -231,12 +261,13 @@ export const schemaTypes = {
       "genre",
       "image",
       "aggregateRating",
-      // âŒ Books don't have sameAs
+      // Ã¢ÂÅ’ Books don't have sameAs
     ],
   },
 
   Course: {
     label: "Course/Educational",
+    allowMultiple: true,
     fields: [
       "name",
       "description",
@@ -247,7 +278,7 @@ export const schemaTypes = {
       "coursePrerequisites",
       "competencyRequired",
       "offers",
-      // âŒ Courses don't have sameAs
+      // Ã¢ÂÅ’ Courses don't have sameAs
     ],
   },
 
@@ -259,7 +290,7 @@ export const schemaTypes = {
       "description",
       "publisher", // Links to Organization
       "potentialAction", // Search functionality
-      // âŒ Removed sameAs - use publisher.sameAs instead
+      // Ã¢ÂÅ’ Removed sameAs - use publisher.sameAs instead
     ],
   },
 
@@ -274,7 +305,85 @@ export const schemaTypes = {
       "datePublished",
       "dateModified",
       "author", // Links to Person
-      // âŒ Individual pages don't have sameAs
+      // Ã¢ÂÅ’ Individual pages don't have sameAs
+    ],
+  },
+
+  VideoObject: {
+    label: "Video",
+    allowMultiple: true,
+    fields: [
+      "name",
+      "description",
+      "thumbnailUrl",
+      "uploadDate",
+      "duration",
+      "contentUrl",
+      "embedUrl",
+      "videoQuality",
+      "transcript",
+    ],
+  },
+
+  HowTo: {
+    label: "How-To Guide",
+    allowMultiple: true,
+    fields: [
+      "name",
+      "description",
+      "image",
+      "totalTime",
+      "estimatedCost",
+      "tool",
+      "supply",
+      "howToSteps",
+    ],
+  },
+
+  JobPosting: {
+    label: "Job Posting",
+    allowMultiple: true,
+    fields: [
+      "title",
+      "description",
+      "datePosted",
+      "validThrough",
+      "hiringOrganization",
+      "jobLocation",
+      "baseSalary",
+      "employmentType",
+      "jobBenefits",
+      "experienceRequirements",
+      "educationRequirements",
+    ],
+  },
+
+  SoftwareApplication: {
+    label: "Software Application",
+    allowMultiple: true,
+    fields: [
+      "name",
+      "description",
+      "applicationCategory",
+      "operatingSystem",
+      "offers",
+      "aggregateRating",
+      "screenshot",
+      "softwareVersion",
+      "downloadUrl",
+      "fileSize",
+    ],
+  },
+
+  Review: {
+    label: "Review",
+    allowMultiple: true,
+    fields: [
+      "itemReviewed",
+      "reviewRating",
+      "author",
+      "datePublished",
+      "reviewBody",
     ],
   },
 };
@@ -769,6 +878,47 @@ export const fieldDefinitions = {
     description: "Geographic area where service is available",
   },
 
+  // Non-Profit Organization Specific Fields
+  mission: {
+    label: "Mission Statement",
+    type: "textarea",
+    placeholder: "Our mission is to...",
+    description: "The organization's mission or purpose statement",
+    maxLength: 500,
+  },
+  nonprofitStatus: {
+    label: "Non-Profit Status",
+    type: "select",
+    options: [
+      { value: "", label: "Select status" },
+      { value: "501(c)(3)", label: "501(c)(3) - Charitable" },
+      { value: "501(c)(4)", label: "501(c)(4) - Social Welfare" },
+      { value: "501(c)(6)", label: "501(c)(6) - Business League" },
+      { value: "Registered Charity", label: "Registered Charity" },
+      { value: "NGO", label: "NGO - Non-Governmental Organization" },
+      { value: "Other", label: "Other Non-Profit Status" },
+    ],
+    description: "Legal non-profit classification",
+  },
+  donationUrl: {
+    label: "Donation URL",
+    type: "url",
+    placeholder: "https://example.org/donate",
+    description: "Link to donation/giving page",
+  },
+  volunteerUrl: {
+    label: "Volunteer URL",
+    type: "url",
+    placeholder: "https://example.org/volunteer",
+    description: "Link to volunteer opportunities page",
+  },
+  taxID: {
+    label: "Tax ID / EIN",
+    type: "text",
+    placeholder: "12-3456789",
+    description: "Tax identification number (EIN in US)",
+  },
+
   // Additional fields for completeness...
   jobTitle: {
     label: "Job Title",
@@ -928,7 +1078,7 @@ export const fieldDefinitions = {
   recipeInstructions: {
     label: "Instructions",
     type: "array",
-    placeholder: "Preheat oven to 350Â°F",
+    placeholder: "Preheat oven to 350Ã‚Â°F",
     description: "Cooking instructions (one step per line)",
     arrayType: "text",
   },
@@ -1251,5 +1401,310 @@ export const fieldDefinitions = {
       },
     },
     description: "Who is performing at the event",
+  },
+
+  // Video fields
+  thumbnailUrl: {
+    label: "Video Thumbnail URL",
+    type: "url",
+    placeholder: "https://example.com/thumbnail.jpg",
+    description: "URL of video thumbnail image",
+    hasMediaHelper: true,
+  },
+  uploadDate: {
+    label: "Upload Date",
+    type: "date",
+    description: "When the video was uploaded/published",
+  },
+  duration: {
+    label: "Video Duration",
+    type: "text",
+    placeholder: "PT5M32S (5 minutes 32 seconds)",
+    description:
+      "Video duration in ISO 8601 format (e.g., PT1H30M for 1 hour 30 min)",
+  },
+  contentUrl: {
+    label: "Video Content URL",
+    type: "url",
+    placeholder: "https://example.com/video.mp4",
+    description: "Direct URL to video file",
+  },
+  embedUrl: {
+    label: "Video Embed URL",
+    type: "url",
+    placeholder: "https://youtube.com/embed/VIDEO_ID",
+    description: "URL for embedding the video",
+  },
+  videoQuality: {
+    label: "Video Quality",
+    type: "select",
+    options: [
+      { value: "", label: "Not specified" },
+      { value: "HD", label: "HD (720p+)" },
+      { value: "SD", label: "SD (480p)" },
+      { value: "4K", label: "4K (2160p)" },
+    ],
+    description: "Video quality/resolution",
+  },
+  transcript: {
+    label: "Video Transcript",
+    type: "textarea",
+    placeholder: "Full text transcript of the video",
+    description: "Transcript for accessibility and SEO",
+    maxLength: 5000,
+  },
+
+  // How-To fields
+  totalTime: {
+    label: "Total Time Required",
+    type: "text",
+    placeholder: "PT30M (30 minutes)",
+    description: "Total time in ISO 8601 format (PT1H30M = 1 hour 30 min)",
+  },
+  estimatedCost: {
+    label: "Estimated Cost",
+    type: "object",
+    subfields: {
+      currency: {
+        label: "Currency",
+        type: "text",
+        placeholder: "USD",
+      },
+      value: {
+        label: "Amount",
+        type: "number",
+        placeholder: "25.00",
+      },
+    },
+    description: "Estimated cost to complete the how-to",
+  },
+  tool: {
+    label: "Tools Required",
+    type: "array",
+    placeholder: "Hammer\nScrewdriver\nDrill",
+    description: "Tools needed (one per line)",
+    arrayType: "text",
+  },
+  supply: {
+    label: "Supplies/Materials Required",
+    type: "array",
+    placeholder: "Wood screws\nWood glue\nSandpaper",
+    description: "Materials needed (one per line)",
+    arrayType: "text",
+  },
+  howToSteps: {
+    label: "How-To Steps",
+    type: "stepArray",
+    description: "Step-by-step instructions",
+    arrayType: "step",
+  },
+
+  // Job Posting fields
+  title: {
+    label: "Job Title",
+    type: "text",
+    placeholder: "Senior Software Engineer",
+    description: "Job position title",
+  },
+  datePosted: {
+    label: "Date Posted",
+    type: "date",
+    description: "When the job was posted",
+  },
+  validThrough: {
+    label: "Valid Through",
+    type: "date",
+    description: "Last date to apply for this job",
+  },
+  hiringOrganization: {
+    label: "Hiring Organization",
+    type: "object",
+    subfields: {
+      name: {
+        label: "Company Name",
+        type: "text",
+        placeholder: "Your Company Inc.",
+      },
+      sameAs: {
+        label: "Company Website",
+        type: "url",
+        placeholder: "https://yourcompany.com",
+      },
+      logo: {
+        label: "Company Logo",
+        type: "url",
+        placeholder: "https://yourcompany.com/logo.png",
+      },
+    },
+    description: "Company hiring for this position",
+  },
+  jobLocation: {
+    label: "Job Location",
+    type: "object",
+    subfields: {
+      streetAddress: { label: "Street", type: "text" },
+      addressLocality: { label: "City", type: "text" },
+      addressRegion: { label: "State/Province", type: "text" },
+      postalCode: { label: "Postal Code", type: "text" },
+      addressCountry: { label: "Country", type: "text" },
+    },
+    description: "Physical job location",
+  },
+  baseSalary: {
+    label: "Base Salary",
+    type: "object",
+    subfields: {
+      currency: { label: "Currency", type: "text", placeholder: "USD" },
+      value: { label: "Amount", type: "number", placeholder: "75000" },
+      unitText: {
+        label: "Unit",
+        type: "select",
+        options: [
+          { value: "YEAR", label: "Per Year" },
+          { value: "MONTH", label: "Per Month" },
+          { value: "HOUR", label: "Per Hour" },
+        ],
+      },
+    },
+    description: "Salary information",
+  },
+  employmentType: {
+    label: "Employment Type",
+    type: "select",
+    options: [
+      { value: "FULL_TIME", label: "Full-time" },
+      { value: "PART_TIME", label: "Part-time" },
+      { value: "CONTRACT", label: "Contract" },
+      { value: "TEMPORARY", label: "Temporary" },
+      { value: "INTERN", label: "Internship" },
+      { value: "VOLUNTEER", label: "Volunteer" },
+    ],
+    description: "Type of employment",
+  },
+  jobBenefits: {
+    label: "Job Benefits",
+    type: "textarea",
+    placeholder: "Health insurance, 401k matching, Remote work",
+    description: "Employee benefits offered",
+  },
+  experienceRequirements: {
+    label: "Experience Requirements",
+    type: "text",
+    placeholder: "5+ years of software development",
+    description: "Required experience level",
+  },
+  educationRequirements: {
+    label: "Education Requirements",
+    type: "text",
+    placeholder: "Bachelor's degree in Computer Science or equivalent",
+    description: "Required education level",
+  },
+
+  // Software Application fields
+  applicationCategory: {
+    label: "Application Category",
+    type: "select",
+    options: [
+      { value: "", label: "Select category" },
+      { value: "GameApplication", label: "Game" },
+      { value: "SocialNetworkingApplication", label: "Social Networking" },
+      { value: "TravelApplication", label: "Travel" },
+      { value: "ShoppingApplication", label: "Shopping" },
+      { value: "SportsApplication", label: "Sports" },
+      { value: "LifestyleApplication", label: "Lifestyle" },
+      { value: "BusinessApplication", label: "Business" },
+      { value: "DesignApplication", label: "Design" },
+      { value: "DeveloperApplication", label: "Developer Tools" },
+      { value: "EducationApplication", label: "Education" },
+      { value: "HealthApplication", label: "Health & Fitness" },
+      { value: "FinanceApplication", label: "Finance" },
+      { value: "EntertainmentApplication", label: "Entertainment" },
+      { value: "MultimediaApplication", label: "Multimedia" },
+    ],
+    description: "Type of software application",
+  },
+  operatingSystem: {
+    label: "Operating System",
+    type: "text",
+    placeholder: "Windows 10, macOS 12+, Linux",
+    description: "Compatible operating systems",
+  },
+  screenshot: {
+    label: "Application Screenshot",
+    type: "url",
+    placeholder: "https://example.com/screenshot.jpg",
+    description: "Screenshot or preview image",
+    hasMediaHelper: true,
+  },
+  softwareVersion: {
+    label: "Software Version",
+    type: "text",
+    placeholder: "2.5.1",
+    description: "Current version number",
+  },
+  downloadUrl: {
+    label: "Download URL",
+    type: "url",
+    placeholder: "https://example.com/download",
+    description: "URL to download the software",
+  },
+  fileSize: {
+    label: "File Size",
+    type: "text",
+    placeholder: "25 MB",
+    description: "Size of download file",
+  },
+
+  // Review fields
+  itemReviewed: {
+    label: "Item Being Reviewed",
+    type: "object",
+    subfields: {
+      "@type": {
+        label: "Item Type",
+        type: "select",
+        options: [
+          { value: "Product", label: "Product" },
+          { value: "Organization", label: "Organization" },
+          { value: "Service", label: "Service" },
+          { value: "CreativeWork", label: "Book/Movie/Music" },
+        ],
+      },
+      name: {
+        label: "Item Name",
+        type: "text",
+        placeholder: "Product or service name",
+      },
+    },
+    description: "What is being reviewed",
+  },
+  reviewRating: {
+    label: "Review Rating",
+    type: "object",
+    subfields: {
+      ratingValue: {
+        label: "Rating Value",
+        type: "number",
+        placeholder: "4.5",
+      },
+      bestRating: {
+        label: "Best Rating",
+        type: "number",
+        placeholder: "5",
+      },
+      worstRating: {
+        label: "Worst Rating",
+        type: "number",
+        placeholder: "1",
+      },
+    },
+    description: "Numerical rating for this review",
+  },
+  reviewBody: {
+    label: "Review Text",
+    type: "textarea",
+    placeholder: "Write your review here...",
+    description: "The actual content of the review",
+    maxLength: 5000,
   },
 };

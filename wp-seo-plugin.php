@@ -21,12 +21,12 @@
  * SEO features in a tiny package. Our entire plugin is smaller than most plugins' CSS files!
  * 
  * Features:
- * ✅ Essential meta tags & Open Graph optimization
- * ✅ Schema markup for rich snippets 
- * ✅ Analytics & tracking code management
- * ✅ Custom script injection points
- * ✅ Modern React-powered admin interface
- * ✅ No premium upsells or feature limitations
+ * Essential meta tags & Open Graph optimization
+ * Schema markup for rich snippets 
+ * Analytics & tracking code management
+ * Custom script injection points
+ * Modern React-powered admin interface
+ * No premium upsells or feature limitations
  */
 
 if (!defined('ABSPATH')) {
@@ -86,7 +86,8 @@ class WP_SEO_Plugin {
             'includes/class-seo-plugin-tab-manager.php',
             'includes/class-seo-plugin-meta-output.php', 
             'includes/class-seo-plugin-meta-api.php',
-            'includes/class-seo-plugin-simple-integration.php' 
+            'includes/class-seo-plugin-simple-integration.php',
+            'includes/class-seo-plugin-sitemap-handler.php'
         ];
         
         foreach ($includes as $file) {

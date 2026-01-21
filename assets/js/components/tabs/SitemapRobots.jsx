@@ -23,6 +23,10 @@ const SitemapRobots = ({ tabId, config }) => {
   const [showSaveAlert, setShowSaveAlert] = useState(false);
   const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [sitemapPreview, setSitemapPreview] = useState("");
+  const [showRobotsAdvanced, setShowRobotsAdvanced] = useState(false);
+  const [showVideoSection, setShowVideoSection] = useState(false);
+  const [videos, setVideos] = useState([]);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(false);
 
   // Get WordPress data
   const wpData = window.seoPluginData || {};
@@ -53,6 +57,80 @@ Disallow: /wp-register.php
 # Sitemap location
 Sitemap: ${siteUrl}/sitemap.xml`;
 
+  // Predefined robots.txt rules that users can add
+  const robotsRules = {
+    searchEngines: [
+      { label: "Block Googlebot", rule: "User-agent: Googlebot\nDisallow: /" },
+      { label: "Block Bingbot", rule: "User-agent: Bingbot\nDisallow: /" },
+      { label: "Block Yandex", rule: "User-agent: Yandex\nDisallow: /" },
+      {
+        label: "Block Baiduspider",
+        rule: "User-agent: Baiduspider\nDisallow: /",
+      },
+      {
+        label: "Block DuckDuckBot",
+        rule: "User-agent: DuckDuckBot\nDisallow: /",
+      },
+      { label: "Block all crawlers", rule: "User-agent: *\nDisallow: /" },
+    ],
+    fileTypes: [
+      { label: "Block PDF files", rule: "User-agent: *\nDisallow: /*.pdf$" },
+      { label: "Block ZIP files", rule: "User-agent: *\nDisallow: /*.zip$" },
+      {
+        label: "Block DOC/DOCX files",
+        rule: "User-agent: *\nDisallow: /*.doc$\nDisallow: /*.docx$",
+      },
+      {
+        label: "Block Excel files",
+        rule: "User-agent: *\nDisallow: /*.xls$\nDisallow: /*.xlsx$",
+      },
+      {
+        label: "Block all downloads",
+        rule: "User-agent: *\nDisallow: /downloads/",
+      },
+    ],
+    commonPatterns: [
+      {
+        label: "Block search results",
+        rule: "User-agent: *\nDisallow: /*?s=\nDisallow: /search/",
+      },
+      {
+        label: "Block WordPress feeds",
+        rule: "User-agent: *\nDisallow: /feed/\nDisallow: /*/feed/",
+      },
+      {
+        label: "Block WordPress trackbacks",
+        rule: "User-agent: *\nDisallow: /trackback/\nDisallow: /*/trackback/",
+      },
+      {
+        label: "Block WordPress comments",
+        rule: "User-agent: *\nDisallow: /comments/\nDisallow: /*/comments/",
+      },
+      {
+        label: "Block author pages",
+        rule: "User-agent: *\nDisallow: /author/",
+      },
+      {
+        label: "Block category pages",
+        rule: "User-agent: *\nDisallow: /category/",
+      },
+      { label: "Block tag pages", rule: "User-agent: *\nDisallow: /tag/" },
+      {
+        label: "Block WordPress cron",
+        rule: "User-agent: *\nDisallow: /wp-cron.php",
+      },
+      {
+        label: "Add crawl delay (1 second)",
+        rule: "User-agent: *\nCrawl-delay: 1",
+      },
+      {
+        label: "Add crawl delay (5 seconds)",
+        rule: "User-agent: *\nCrawl-delay: 5",
+      },
+      { label: "Block query strings", rule: "User-agent: *\nDisallow: /*?" },
+    ],
+  };
+
   useEffect(() => {
     loadInitialData();
   }, []);
@@ -64,7 +142,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       // Load pages for sitemap
       const fetchedPages = await loadPages();
       if (fetchedPages && fetchedPages.length > 0) {
-        console.log("🔍 Raw pages data:", fetchedPages);
+        console.log("Raw pages data:", fetchedPages);
         setPages(fetchedPages);
 
         // Create initial sitemap data
@@ -101,10 +179,10 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           .filter(
             (page, index, self) =>
               // Remove duplicates based on URL
-              index === self.findIndex((p) => p.url === page.url)
+              index === self.findIndex((p) => p.url === page.url),
           );
 
-        console.log("🗺️ Final sitemap data:", initialSitemap);
+        console.log("Final sitemap data:", initialSitemap);
         setSitemap(initialSitemap);
         generateSitemapXML(initialSitemap);
       }
@@ -160,7 +238,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
   const handleSitemapChange = (pageId, field, value) => {
     const updatedSitemap = sitemap.map((page) =>
-      page.id === pageId ? { ...page, [field]: value } : page
+      page.id === pageId ? { ...page, [field]: value } : page,
     );
     setSitemap(updatedSitemap);
     generateSitemapXML(updatedSitemap);
@@ -174,9 +252,10 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
   const handleSave = async () => {
     try {
-      // Save sitemap and robots.txt settings to global
+      // Save sitemap, videos, and robots.txt settings to global
       const settings = {
         sitemap_data: sitemap,
+        video_data: videos,
         robots_txt: robotsTxt,
       };
 
@@ -203,8 +282,11 @@ Sitemap: ${siteUrl}/sitemap.xml`;
     try {
       setDeploymentStatus("deploying");
 
+      const videoSitemapXML = generateVideoSitemapXML();
+
       const deployData = {
         sitemap_xml: sitemapPreview,
+        video_sitemap_xml: videoSitemapXML,
         robots_txt: robotsTxt,
       };
 
@@ -238,6 +320,94 @@ Sitemap: ${siteUrl}/sitemap.xml`;
     setIsLoadingSitemap(false);
   };
 
+  // Function to add a robots.txt rule
+  const addRobotsRule = (rule) => {
+    const newContent = `${robotsTxt}\n\n# Added rule\n${rule}`;
+    setRobotsTxt(newContent);
+    setHasChanges(true);
+  };
+
+  // Function to detect videos from WordPress
+  const detectVideos = async () => {
+    setIsLoadingVideos(true);
+    try {
+      // Fetch videos from WordPress media library and embeds
+      const response = await fetch(`${apiUrl}detect-videos`, {
+        method: "GET",
+        headers: {
+          "X-WP-Nonce": nonce,
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const detectedVideos = result.data.map((video, index) => ({
+          id: video.id || `video-${index}`,
+          title: video.title || "",
+          description: video.description || "",
+          content_loc: video.url || "",
+          thumbnail_loc: video.thumbnail || "",
+          duration: video.duration || "",
+          publication_date: video.date || new Date().toISOString(),
+          included: true,
+          source: video.source || "unknown", // 'media', 'youtube', 'vimeo'
+        }));
+
+        setVideos(detectedVideos);
+      } else {
+        console.error("Failed to detect videos:", result.message);
+      }
+    } catch (error) {
+      console.error("Error detecting videos:", error);
+    } finally {
+      setIsLoadingVideos(false);
+    }
+  };
+
+  // Update video data
+  const handleVideoChange = (videoId, field, value) => {
+    const updatedVideos = videos.map((video) =>
+      video.id === videoId ? { ...video, [field]: value } : video,
+    );
+    setVideos(updatedVideos);
+    setHasChanges(true);
+  };
+
+  // Generate video sitemap XML
+  const generateVideoSitemapXML = () => {
+    if (videos.length === 0) return "";
+
+    const includedVideos = videos.filter((v) => v.included);
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">`;
+
+    includedVideos.forEach((video) => {
+      xml += `
+  <url>
+    <loc>${video.content_loc}</loc>
+    <video:video>
+      <video:thumbnail_loc>${video.thumbnail_loc}</video:thumbnail_loc>
+      <video:title>${video.title}</video:title>
+      <video:description>${video.description}</video:description>
+      <video:content_loc>${video.content_loc}</video:content_loc>${
+        video.duration
+          ? `\n      <video:duration>${video.duration}</video:duration>`
+          : ""
+      }
+      <video:publication_date>${video.publication_date}</video:publication_date>
+    </video:video>
+  </url>`;
+    });
+
+    xml += `
+</urlset>`;
+
+    return xml;
+  };
+
   if (isLoadingPages) {
     return <LoadingSpinner message="Loading sitemap data..." />;
   }
@@ -248,7 +418,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>✅</span>
             <span className={styles.alertText}>
               Settings saved successfully!
             </span>
@@ -256,7 +425,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              ×
+              X
             </button>
           </div>
         </div>
@@ -270,13 +439,11 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           <div className={styles.alertContent}>
             {deploymentStatus === "deploying" && (
               <>
-                <span className={styles.alertIcon}>⏳</span>
                 <span className={styles.alertText}>Deploying files...</span>
               </>
             )}
             {deploymentStatus === "success" && (
               <>
-                <span className={styles.alertIcon}>🎉</span>
                 <span className={styles.alertText}>
                   Files deployed successfully! Your sitemap.xml and robots.txt
                   are now live.
@@ -285,7 +452,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             )}
             {deploymentStatus === "error" && (
               <>
-                <span className={styles.alertIcon}>❌</span>
                 <span className={styles.alertText}>
                   Deployment failed. Check file permissions.
                 </span>
@@ -298,7 +464,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {/* XML Sitemap Section */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>🗺️ XML Sitemap</h3>
+          <h3>XML Sitemap</h3>
           <p>
             An XML sitemap helps search engines discover and understand all the
             pages on your website. Configure which pages to include and set
@@ -310,7 +476,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
               disabled={isLoadingSitemap}
               className={styles.refreshButton}
             >
-              {isLoadingSitemap ? "🔄 Refreshing..." : "🔄 Refresh Pages"}
+              {isLoadingSitemap ? "Refreshing..." : "Refresh Pages"}
             </button>
           </div>
         </div>
@@ -344,12 +510,12 @@ Sitemap: ${siteUrl}/sitemap.xml`;
               <div>
                 <span className={styles.pageType} data-type={page.type}>
                   {page.type === "special"
-                    ? "⭐ Home"
+                    ? "Home"
                     : page.type === "page"
-                    ? "📄 Page"
-                    : page.type === "post"
-                    ? "📝 Post"
-                    : page.type}
+                      ? "Page"
+                      : page.type === "post"
+                        ? "Post"
+                        : page.type}
                 </span>
               </div>
               <div>
@@ -414,7 +580,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
       {/* Sitemap Preview */}
       <div className={styles.previewSection}>
-        <h4>🔍 Generated Sitemap XML</h4>
+        <h4>Generated Sitemap XML</h4>
         <div className={styles.codePreview}>
           <pre className={styles.codeBlock}>
             <code>{sitemapPreview}</code>
@@ -423,7 +589,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             className={styles.copyButton}
             onClick={() => navigator.clipboard.writeText(sitemapPreview)}
           >
-            📋 Copy XML
+            Copy XML
           </button>
         </div>
       </div>
@@ -431,7 +597,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {/* Robots.txt Section */}
       <div className={styles.fieldsContainer} style={{ marginTop: "3rem" }}>
         <div className={styles.sectionHeader}>
-          <h3>🤖 Robots.txt</h3>
+          <h3>Robots.txt</h3>
           <p>
             The robots.txt file tells search engines which parts of your site
             they can and cannot crawl. This is automatically pre-filled with
@@ -456,8 +622,79 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           />
         </div>
 
+        {/* Advanced Robots.txt Options */}
+        <div className={styles.advancedSection}>
+          <button
+            className={styles.advancedToggle}
+            onClick={() => setShowRobotsAdvanced(!showRobotsAdvanced)}
+          >
+            {showRobotsAdvanced ? "▼" : "►"} Advanced Options - Add Predefined
+            Rules
+          </button>
+
+          {showRobotsAdvanced && (
+            <div className={styles.advancedContent}>
+              <p className={styles.advancedDescription}>
+                Click any rule below to add it to your robots.txt file. You can
+                then edit it in the textarea above.
+              </p>
+
+              {/* Block Search Engines */}
+              <div className={styles.ruleCategory}>
+                <h5>🔍 Block Search Engines</h5>
+                <div className={styles.ruleButtons}>
+                  {robotsRules.searchEngines.map((item, index) => (
+                    <button
+                      key={index}
+                      className={styles.ruleButton}
+                      onClick={() => addRobotsRule(item.rule)}
+                      title={item.rule}
+                    >
+                      + {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Block File Types */}
+              <div className={styles.ruleCategory}>
+                <h5>📁 Block File Types</h5>
+                <div className={styles.ruleButtons}>
+                  {robotsRules.fileTypes.map((item, index) => (
+                    <button
+                      key={index}
+                      className={styles.ruleButton}
+                      onClick={() => addRobotsRule(item.rule)}
+                      title={item.rule}
+                    >
+                      + {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Common Patterns */}
+              <div className={styles.ruleCategory}>
+                <h5>⚙️ Common Patterns</h5>
+                <div className={styles.ruleButtons}>
+                  {robotsRules.commonPatterns.map((item, index) => (
+                    <button
+                      key={index}
+                      className={styles.ruleButton}
+                      onClick={() => addRobotsRule(item.rule)}
+                      title={item.rule}
+                    >
+                      + {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className={styles.robotsPreview}>
-          <h4>🔗 Current robots.txt URL</h4>
+          <h4>Current robots.txt URL</h4>
           <p>
             After deployment, your robots.txt will be available at:
             <a
@@ -469,6 +706,183 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             </a>
           </p>
         </div>
+      </div>
+
+      {/* Video Sitemap Section */}
+      <div className={styles.fieldsContainer} style={{ marginTop: "3rem" }}>
+        <div className={styles.sectionHeader}>
+          <h3>🎥 Video Sitemap (Optional)</h3>
+          <p>
+            Add videos to your sitemap to help search engines discover and index
+            video content on your site. This will create a separate video
+            sitemap that complements your main sitemap.
+          </p>
+          <div className={styles.sectionActions}>
+            <button
+              className={styles.advancedToggle}
+              onClick={() => setShowVideoSection(!showVideoSection)}
+            >
+              {showVideoSection
+                ? "▼ Hide Video Sitemap"
+                : "► Show Video Sitemap"}
+            </button>
+          </div>
+        </div>
+
+        {showVideoSection && (
+          <>
+            <div className={styles.videoDetection}>
+              <button
+                className={styles.detectButton}
+                onClick={detectVideos}
+                disabled={isLoadingVideos}
+              >
+                {isLoadingVideos
+                  ? "🔍 Detecting..."
+                  : "🔍 Detect Videos from Site"}
+              </button>
+              <p className={styles.detectDescription}>
+                This will scan your WordPress media library and post content for
+                YouTube/Vimeo embeds.
+              </p>
+            </div>
+
+            {videos.length > 0 && (
+              <>
+                <div className={styles.videoStats}>
+                  <strong>Detected Videos:</strong>
+                  <span>Total: {videos.length}</span>
+                  <span>
+                    Included: {videos.filter((v) => v.included).length}
+                  </span>
+                  <span>
+                    Media Library:{" "}
+                    {videos.filter((v) => v.source === "media").length}
+                  </span>
+                  <span>
+                    YouTube:{" "}
+                    {videos.filter((v) => v.source === "youtube").length}
+                  </span>
+                  <span>
+                    Vimeo: {videos.filter((v) => v.source === "vimeo").length}
+                  </span>
+                </div>
+
+                <div className={styles.videoTable}>
+                  <div className={styles.videoTableHeader}>
+                    <div>Include</div>
+                    <div>Title</div>
+                    <div>Description</div>
+                    <div>Duration (sec)</div>
+                    <div>Source</div>
+                  </div>
+
+                  {videos.map((video) => (
+                    <div key={video.id} className={styles.videoRow}>
+                      <div>
+                        <input
+                          type="checkbox"
+                          checked={video.included}
+                          onChange={(e) =>
+                            handleVideoChange(
+                              video.id,
+                              "included",
+                              e.target.checked,
+                            )
+                          }
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={video.title}
+                          onChange={(e) =>
+                            handleVideoChange(video.id, "title", e.target.value)
+                          }
+                          placeholder="Video title"
+                          className={styles.videoInput}
+                          disabled={!video.included}
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={video.description}
+                          onChange={(e) =>
+                            handleVideoChange(
+                              video.id,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Video description"
+                          className={styles.videoInput}
+                          disabled={!video.included}
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={video.duration}
+                          onChange={(e) =>
+                            handleVideoChange(
+                              video.id,
+                              "duration",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="e.g. 120"
+                          className={styles.videoInput}
+                          disabled={!video.included}
+                        />
+                      </div>
+                      <div>
+                        <span
+                          className={styles.videoSource}
+                          data-source={video.source}
+                        >
+                          {video.source === "media"
+                            ? "📹 Media"
+                            : video.source === "youtube"
+                              ? "▶️ YouTube"
+                              : video.source === "vimeo"
+                                ? "🎬 Vimeo"
+                                : "❓"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.videoPreview}>
+                  <h4>📄 Generated Video Sitemap XML</h4>
+                  <div className={styles.codePreview}>
+                    <pre className={styles.codeBlock}>
+                      <code>{generateVideoSitemapXML()}</code>
+                    </pre>
+                    <button
+                      className={styles.copyButton}
+                      onClick={() =>
+                        navigator.clipboard.writeText(generateVideoSitemapXML())
+                      }
+                    >
+                      📋 Copy XML
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {videos.length === 0 && !isLoadingVideos && (
+              <div className={styles.noVideos}>
+                <p>
+                  No videos detected yet. Click "Detect Videos from Site" to
+                  scan your content.
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Actions */}
@@ -487,8 +901,8 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           disabled={deploymentStatus === "deploying" || hasChanges}
         >
           {deploymentStatus === "deploying"
-            ? "⏳ Deploying..."
-            : "🚀 Deploy Files to Website"}
+            ? "Deploying..."
+            : "Deploy Files to Website"}
         </button>
 
         {hasChanges && (
@@ -500,7 +914,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
       {/* Help Section */}
       <div className={styles.helpSection}>
-        <h4>ℹ️ What happens when you deploy?</h4>
+        <h4>What happens when you deploy?</h4>
         <ul>
           <li>
             <strong>sitemap.xml</strong> - Created at {siteUrl}/sitemap.xml
@@ -514,7 +928,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
         </ul>
 
         <div className={styles.warningBox}>
-          <strong>⚠️ Important Notes:</strong>
+          <strong>Important Notes:</strong>
           <ul>
             <li>
               Make sure your WordPress installation has write permissions to the

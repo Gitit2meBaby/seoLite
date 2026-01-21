@@ -158,6 +158,76 @@ export const socialFields = [
     ],
   },
 
+  // === ARTICLE METADATA ===
+  {
+    section: "Article Metadata (for Articles/Blog Posts)",
+    fields: [
+      {
+        key: "article_published_time",
+        label: "Article Published Time",
+        type: "datetime-local",
+        description: "When article was first published (ISO 8601 format)",
+      },
+      {
+        key: "article_modified_time",
+        label: "Article Modified Time",
+        type: "datetime-local",
+        description: "When article was last updated",
+      },
+      {
+        key: "article_author",
+        label: "Article Author",
+        type: "text",
+        placeholder: "John Doe or https://facebook.com/johndoe",
+        description: "Author name or Facebook profile URL",
+      },
+      {
+        key: "article_section",
+        label: "Article Section/Category",
+        type: "text",
+        placeholder: "Technology, Business, Lifestyle",
+        description: "General category for the article",
+      },
+      {
+        key: "article_tag",
+        label: "Article Tags",
+        type: "textarea",
+        placeholder: "WordPress\nSEO\nWeb Development",
+        description: "Keywords/tags for the article (one per line)",
+      },
+    ],
+  },
+
+  // === IMAGE DIMENSIONS ===
+  {
+    section: "Social Media Image Optimization",
+    fields: [
+      {
+        key: "og_image_width",
+        label: "Open Graph Image Width",
+        type: "number",
+        placeholder: "1200",
+        description:
+          "Image width in pixels (1200 recommended for best display)",
+      },
+      {
+        key: "og_image_height",
+        label: "Open Graph Image Height",
+        type: "number",
+        placeholder: "630",
+        description:
+          "Image height in pixels (630 recommended for 1.91:1 ratio)",
+      },
+      {
+        key: "twitter_image_alt",
+        label: "Twitter Image Alt Text",
+        type: "text",
+        placeholder: "Descriptive text for the image",
+        description: "Alt text for Twitter card image (accessibility)",
+      },
+    ],
+  },
+
   // === TWITTER CARD SETTINGS ===
   {
     section: "Twitter Card Settings",

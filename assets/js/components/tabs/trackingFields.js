@@ -13,7 +13,7 @@ export const trackingFields = [
         pattern: "^G-[A-Z0-9]{10}$",
         hasTooltip: true,
         tooltipText:
-          "Find this in Google Analytics → Admin → Data Streams → Web → Measurement ID",
+          "Find this in Google Analytics -> Admin -> Data Streams -> Web -> Measurement ID",
       },
       {
         key: "google_universal_analytics_id",
@@ -37,7 +37,7 @@ export const trackingFields = [
         pattern: "^GTM-[A-Z0-9]{7}$",
         hasTooltip: true,
         tooltipText:
-          "Find this in Google Tag Manager → Admin → Container Settings",
+          "Find this in Google Tag Manager -> Admin -> Container Settings",
       },
       {
         key: "google_adsense_id",
@@ -47,7 +47,7 @@ export const trackingFields = [
         description: "Your AdSense publisher ID for ad monetization",
         hasTooltip: true,
         tooltipText:
-          "Find this in AdSense → Account → Settings → Account Information",
+          "Find this in AdSense -> Account -> Settings -> Account Information",
       },
       {
         key: "google_ads_conversion_id",
@@ -56,7 +56,8 @@ export const trackingFields = [
         placeholder: "AW-XXXXXXXXXX",
         description: "For tracking Google Ads conversions and remarketing",
         hasTooltip: true,
-        tooltipText: "Find this in Google Ads → Tools & Settings → Conversions",
+        tooltipText:
+          "Find this in Google Ads -> Tools & Settings -> Conversions",
       },
     ],
   },
@@ -73,7 +74,7 @@ export const trackingFields = [
         description: "Facebook Pixel for conversion tracking and remarketing",
         hasTooltip: true,
         tooltipText:
-          "Find this in Facebook Events Manager → Data Sources → Pixels",
+          "Find this in Facebook Events Manager -> Data Sources -> Pixels",
       },
       {
         key: "linkedin_partner_id",
@@ -84,7 +85,7 @@ export const trackingFields = [
           "LinkedIn Insight Tag for advertising and conversion tracking",
         hasTooltip: true,
         tooltipText:
-          "Find this in LinkedIn Campaign Manager → Account Assets → Insight Tag",
+          "Find this in LinkedIn Campaign Manager -> Account Assets -> Insight Tag",
       },
       {
         key: "twitter_pixel_id",
@@ -93,7 +94,7 @@ export const trackingFields = [
         placeholder: "o1234",
         description: "Twitter advertising conversion tracking pixel",
         hasTooltip: true,
-        tooltipText: "Find this in Twitter Ads → Tools → Conversion Tracking",
+        tooltipText: "Find this in Twitter Ads -> Tools -> Conversion Tracking",
       },
       {
         key: "pinterest_tag_id",
@@ -102,7 +103,16 @@ export const trackingFields = [
         placeholder: "2612345678901",
         description: "Pinterest Tag for advertising and conversion tracking",
         hasTooltip: true,
-        tooltipText: "Find this in Pinterest Business → Ads → Conversions",
+        tooltipText: "Find this in Pinterest Business -> Ads -> Conversions",
+      },
+      {
+        key: "tiktok_pixel_id",
+        label: "TikTok Pixel ID",
+        type: "text",
+        placeholder: "ABCDEFGHIJKLMNOP",
+        description: "TikTok Pixel for advertising and conversion tracking",
+        hasTooltip: true,
+        tooltipText: "Find this in TikTok Ads Manager -> Assets -> Events",
       },
     ],
   },
@@ -119,7 +129,7 @@ export const trackingFields = [
         description:
           "Microsoft Clarity for free user behavior analytics and heatmaps",
         hasTooltip: true,
-        tooltipText: "Find this in Microsoft Clarity → Settings → Setup",
+        tooltipText: "Find this in Microsoft Clarity -> Settings -> Setup",
       },
       {
         key: "hotjar_site_id",
@@ -128,7 +138,7 @@ export const trackingFields = [
         placeholder: "1234567",
         description: "Hotjar site ID for heatmaps and user session recordings",
         hasTooltip: true,
-        tooltipText: "Find this in Hotjar → Settings → Sites & Organizations",
+        tooltipText: "Find this in Hotjar -> Settings -> Sites & Organizations",
       },
       {
         key: "mixpanel_token",
@@ -138,7 +148,7 @@ export const trackingFields = [
         description:
           "Mixpanel project token for advanced event tracking and analytics",
         hasTooltip: true,
-        tooltipText: "Find this in Mixpanel → Settings → Project Settings",
+        tooltipText: "Find this in Mixpanel -> Settings -> Project Settings",
       },
       {
         key: "amplitude_api_key",
@@ -148,7 +158,7 @@ export const trackingFields = [
         description:
           "Amplitude API key for product analytics and user behavior tracking",
         hasTooltip: true,
-        tooltipText: "Find this in Amplitude → Settings → Projects",
+        tooltipText: "Find this in Amplitude -> Settings -> Projects",
       },
       {
         key: "fullstory_org_id",
@@ -157,7 +167,7 @@ export const trackingFields = [
         placeholder: "XXXXX",
         description: "FullStory organization ID for user session recordings",
         hasTooltip: true,
-        tooltipText: "Find this in FullStory → Settings → FS Setup",
+        tooltipText: "Find this in FullStory -> Settings -> FS Setup",
       },
     ],
   },
@@ -174,7 +184,7 @@ export const trackingFields = [
         description: "Google Search Console verification meta tag",
         hasTooltip: true,
         tooltipText:
-          "Get this from Google Search Console → Settings → Ownership Verification",
+          "Get this from Google Search Console -> Settings -> Ownership Verification",
       },
       {
         key: "bing_site_verification",
@@ -184,7 +194,7 @@ export const trackingFields = [
         description: "Bing Webmaster Tools verification meta tag",
         hasTooltip: true,
         tooltipText:
-          "Get this from Bing Webmaster Tools → Settings → Verify Ownership",
+          "Get this from Bing Webmaster Tools -> Settings -> Verify Ownership",
       },
       {
         key: "yandex_verification",
@@ -194,7 +204,7 @@ export const trackingFields = [
         description: "Yandex Webmaster verification meta tag",
         hasTooltip: true,
         tooltipText:
-          "Get this from Yandex Webmaster → Site Settings → Ownership Verification",
+          "Get this from Yandex Webmaster -> Site Settings -> Ownership Verification",
       },
       {
         key: "pinterest_verification",
@@ -204,7 +214,7 @@ export const trackingFields = [
         description: "Pinterest Business verification meta tag",
         hasTooltip: true,
         tooltipText:
-          "Get this from Pinterest Business → Settings → Claim → Website",
+          "Get this from Pinterest Business -> Settings -> Claim -> Website",
       },
     ],
   },

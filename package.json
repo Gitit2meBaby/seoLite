@@ -22,7 +22,8 @@
     "deploy:watch": "node deploy.js --watch",
     "start": "npm run deploy:watch",
     "build:plugin": "node build-plugin.js",
-    "release": "npm run build && npm run build:plugin"
+    "release": "npm run build && npm run build:plugin",
+    "update": "npm run build && npm run deploy"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.0",
