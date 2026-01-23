@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ReviewPublishButton from "../common/ReviewPublishButton";
+
 import styles from "@css/components/tabs/GeneralMeta.module.scss";
 
-const GeneralMeta = ({ tabId, config }) => {
+const GeneralMeta = ({ tabId, config, onNavigate }) => {
   const settingsContext = useSettings();
   const {
     settings,
@@ -101,7 +103,7 @@ const GeneralMeta = ({ tabId, config }) => {
       key: "meta_copyright",
       label: "Copyright",
       type: "text",
-      placeholder: "© 2025 Your Company Name",
+      placeholder: "Ã‚Â© 2025 Your Company Name",
       description: "Copyright information",
     },
     {
@@ -220,7 +222,7 @@ const GeneralMeta = ({ tabId, config }) => {
         setPages(fetchedPages);
       } else {
         setApiError(
-          "No pages found. The WordPress API might not be working properly."
+          "No pages found. The WordPress API might not be working properly.",
         );
         setPages([{ id: "global", title: "(All pages)", type: "global" }]);
       }
@@ -608,7 +610,7 @@ const GeneralMeta = ({ tabId, config }) => {
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>✅</span>
+            <span className={styles.alertIcon}>Ã¢Å“â€¦</span>
             <span className={styles.alertText}>
               Changes saved successfully!
             </span>
@@ -616,7 +618,7 @@ const GeneralMeta = ({ tabId, config }) => {
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              ×
+              Ãƒâ€”
             </button>
           </div>
         </div>
@@ -624,14 +626,14 @@ const GeneralMeta = ({ tabId, config }) => {
 
       {apiError && (
         <div className={styles.apiError}>
-          <h4>⚠️ API Connection Issue</h4>
+          <h4>Ã¢Å¡Â Ã¯Â¸Â API Connection Issue</h4>
           <p>{apiError}</p>
           <p>Only Global settings are available until this is resolved.</p>
           <button
             onClick={loadPagesFromWordPress}
             style={{ padding: "5px 10px", marginTop: "10px" }}
           >
-            🔄 Retry Loading Pages
+            Ã°Å¸â€â€ž Retry Loading Pages
           </button>
         </div>
       )}
@@ -651,22 +653,22 @@ const GeneralMeta = ({ tabId, config }) => {
             let prefix = "";
 
             if (page.type === "global") {
-              icon = "🌐";
+              icon = "Ã°Å¸Å’Â";
               prefix = "Global";
             } else if (page.type === "page") {
-              icon = "📄";
+              icon = "Ã°Å¸â€œâ€ž";
               prefix = "Page";
             } else if (page.type === "post") {
-              icon = "📝";
+              icon = "Ã°Å¸â€œÂ";
               prefix = "Post";
             } else if (page.type === "special") {
-              icon = "⭐";
+              icon = "Ã¢Â­Â";
               prefix = "Special";
             }
 
             return (
               <option key={page.id} value={page.id}>
-                {icon} {prefix}: {page.title.replace(/^🌐\s*/, "")}
+                {icon} {prefix}: {page.title.replace(/^Ã°Å¸Å’Â\s*/, "")}
                 {page.url && page.url !== "/" ? ` (${page.url})` : ""}
               </option>
             );
@@ -676,10 +678,10 @@ const GeneralMeta = ({ tabId, config }) => {
         {selectedPage !== "global" && (
           <div className={styles.inheritanceInfo}>
             <small>
-              💡 This page inherits settings from Global. Override any field to
-              customize it specifically for this page. Global-only settings
-              (Character Encoding, Viewport, Theme Color, Generator) are managed
-              in the Global section.
+              Ã°Å¸â€™Â¡ This page inherits settings from Global. Override any
+              field to customize it specifically for this page. Global-only
+              settings (Character Encoding, Viewport, Theme Color, Generator)
+              are managed in the Global section.
             </small>
           </div>
         )}
@@ -687,8 +689,9 @@ const GeneralMeta = ({ tabId, config }) => {
         {selectedPage === "global" && (
           <div className={styles.inheritanceInfo}>
             <small>
-              🌐 These are your global default settings. Individual pages will
-              inherit these values unless you override them on specific pages.
+              Ã°Å¸Å’Â These are your global default settings. Individual pages
+              will inherit these values unless you override them on specific
+              pages.
             </small>
           </div>
         )}
@@ -718,7 +721,7 @@ const GeneralMeta = ({ tabId, config }) => {
               navigator.clipboard.writeText(generateMetaTagsCode());
             }}
           >
-            📋 Copy Code
+            Ã°Å¸â€œâ€¹ Copy Code
           </button>
         </div>
       </div>
@@ -743,6 +746,13 @@ const GeneralMeta = ({ tabId, config }) => {
         >
           {isSaving ? "Saving..." : "Save Changes"}
         </button>
+
+        <ReviewPublishButton
+          onSave={handleSave}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onNavigate={onNavigate}
+        />
 
         {hasChanges && (
           <span className={styles.unsavedChanges}>

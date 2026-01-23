@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ReviewPublishButton from "../common/ReviewPublishButton";
+
 import styles from "@css/components/tabs/SitemapRobots.module.scss";
 
-const SitemapRobots = ({ tabId, config }) => {
+const SitemapRobots = ({ tabId, config, onNavigate }) => {
   const {
     settings,
     updateSetting,
@@ -142,7 +144,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       // Load pages for sitemap
       const fetchedPages = await loadPages();
       if (fetchedPages && fetchedPages.length > 0) {
-        console.log("Raw pages data:", fetchedPages);
         setPages(fetchedPages);
 
         // Create initial sitemap data
@@ -182,7 +183,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
               index === self.findIndex((p) => p.url === page.url),
           );
 
-        console.log("Final sitemap data:", initialSitemap);
         setSitemap(initialSitemap);
         generateSitemapXML(initialSitemap);
       }
@@ -628,7 +628,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             className={styles.advancedToggle}
             onClick={() => setShowRobotsAdvanced(!showRobotsAdvanced)}
           >
-            {showRobotsAdvanced ? "▼" : "►"} Advanced Options - Add Predefined
+            {showRobotsAdvanced ? "▼" : "â–º"} Advanced Options - Add Predefined
             Rules
           </button>
 
@@ -641,7 +641,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Block Search Engines */}
               <div className={styles.ruleCategory}>
-                <h5>🔍 Block Search Engines</h5>
+                <h5>ðŸ” Block Search Engines</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.searchEngines.map((item, index) => (
                     <button
@@ -658,7 +658,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Block File Types */}
               <div className={styles.ruleCategory}>
-                <h5>📁 Block File Types</h5>
+                <h5>ðŸ“ Block File Types</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.fileTypes.map((item, index) => (
                     <button
@@ -675,7 +675,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Common Patterns */}
               <div className={styles.ruleCategory}>
-                <h5>⚙️ Common Patterns</h5>
+                <h5>âš™ï¸ Common Patterns</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.commonPatterns.map((item, index) => (
                     <button
@@ -711,7 +711,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {/* Video Sitemap Section */}
       <div className={styles.fieldsContainer} style={{ marginTop: "3rem" }}>
         <div className={styles.sectionHeader}>
-          <h3>🎥 Video Sitemap (Optional)</h3>
+          <h3>ðŸŽ¥ Video Sitemap (Optional)</h3>
           <p>
             Add videos to your sitemap to help search engines discover and index
             video content on your site. This will create a separate video
@@ -724,7 +724,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             >
               {showVideoSection
                 ? "▼ Hide Video Sitemap"
-                : "► Show Video Sitemap"}
+                : "â–º Show Video Sitemap"}
             </button>
           </div>
         </div>
@@ -738,8 +738,8 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                 disabled={isLoadingVideos}
               >
                 {isLoadingVideos
-                  ? "🔍 Detecting..."
-                  : "🔍 Detect Videos from Site"}
+                  ? "ðŸ” Detecting..."
+                  : "ðŸ” Detect Videos from Site"}
               </button>
               <p className={styles.detectDescription}>
                 This will scan your WordPress media library and post content for
@@ -842,12 +842,12 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                           data-source={video.source}
                         >
                           {video.source === "media"
-                            ? "📹 Media"
+                            ? "ðŸ“¹ Media"
                             : video.source === "youtube"
-                              ? "▶️ YouTube"
+                              ? "▶ï¸ YouTube"
                               : video.source === "vimeo"
-                                ? "🎬 Vimeo"
-                                : "❓"}
+                                ? "ðŸŽ¬ Vimeo"
+                                : "â“"}
                         </span>
                       </div>
                     </div>
@@ -855,7 +855,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                 </div>
 
                 <div className={styles.videoPreview}>
-                  <h4>📄 Generated Video Sitemap XML</h4>
+                  <h4>ðŸ“„ Generated Video Sitemap XML</h4>
                   <div className={styles.codePreview}>
                     <pre className={styles.codeBlock}>
                       <code>{generateVideoSitemapXML()}</code>
@@ -866,7 +866,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                         navigator.clipboard.writeText(generateVideoSitemapXML())
                       }
                     >
-                      📋 Copy XML
+                      ðŸ“‹ Copy XML
                     </button>
                   </div>
                 </div>
@@ -910,6 +910,13 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             You have unsaved changes. Save before deploying.
           </span>
         )}
+
+        <ReviewPublishButton
+          onSave={handleSave}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onNavigate={onNavigate}
+        />
       </div>
 
       {/* Help Section */}

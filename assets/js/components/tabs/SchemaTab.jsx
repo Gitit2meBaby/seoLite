@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ReviewPublishButton from "../common/ReviewPublishButton";
+
 import styles from "@css/components/tabs/SocialMedia.module.scss";
 
 // Import schema components
@@ -24,9 +26,6 @@ import VideoObjectSchema, {
 } from "../schemaTypes/VideoObjectSchema";
 import HowToSchema, { buildHowToJson } from "../schemaTypes/HowToSchema";
 import FaqPageSchema, { buildFaqPageJson } from "../schemaTypes/FaqPageSchema";
-import BreadcrumbListSchema, {
-  buildBreadcrumbListJson,
-} from "../schemaTypes/BreadcrumbListSchema";
 import ReviewSchema, { buildReviewJson } from "../schemaTypes/ReviewSchema";
 import CourseSchema, { buildCourseJson } from "../schemaTypes/CourseSchema";
 import NonProfitOrganizationSchema, {
@@ -45,12 +44,6 @@ const SCHEMA_TYPES = {
     label: "Article/Blog Post",
     component: ArticleSchema,
     builder: buildArticleJson,
-    allowMultiple: false,
-  },
-  BreadcrumbList: {
-    label: "Breadcrumb Navigation",
-    component: BreadcrumbListSchema,
-    builder: buildBreadcrumbListJson,
     allowMultiple: false,
   },
   Course: {
@@ -393,7 +386,7 @@ const SchemaTab = ({ tabId, config }) => {
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              ×
+              X
             </button>
           </div>
         </div>
@@ -689,6 +682,13 @@ const SchemaTab = ({ tabId, config }) => {
           </pre>
         </div>
       )}
+
+      {/* ADD THIS: */}
+      <ReviewPublishButton
+        onSave={handleSchemaSave}
+        hasChanges={true}
+        isSaving={false}
+      />
     </div>
   );
 };

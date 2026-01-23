@@ -179,7 +179,7 @@ Contributions are welcome! This plugin focuses on **essential SEO features done 
 - ⚡ **Keep it lightweight** (performance first)
 - 🧹 **Follow WordPress coding standards**
 - 📝 **Update documentation**
-- ✅ **Test thoroughly**
+- 🔍 **Test thoroughly**
 
 ## 📋 Roadmap
 

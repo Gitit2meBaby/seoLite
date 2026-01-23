@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ReviewPublishButton from "../common/ReviewPublishButton";
+
 import styles from "@css/components/tabs/Breadcrumbs.module.scss";
 
-const Breadcrumbs = ({ tabId, config }) => {
+const Breadcrumbs = ({ tabId, config, onNavigate }) => {
   const {
     settings,
     updateSetting,
@@ -53,13 +55,13 @@ const Breadcrumbs = ({ tabId, config }) => {
       // Load pages
       const fetchedPages = await loadPages();
       if (fetchedPages && fetchedPages.length > 0) {
-        console.log("🍞 Pages for breadcrumbs:", fetchedPages);
+        console.log("ðŸž Pages for breadcrumbs:", fetchedPages);
         setPages(fetchedPages);
 
         // Set default preview to first non-home page
         const firstPage =
           fetchedPages.find(
-            (p) => p.type !== "global" && p.type !== "special"
+            (p) => p.type !== "global" && p.type !== "special",
           ) || fetchedPages[0];
         if (firstPage) {
           setSelectedPagePreview(firstPage.id);
@@ -71,7 +73,7 @@ const Breadcrumbs = ({ tabId, config }) => {
       const existingBreadcrumbs = existingSettings?.breadcrumb_config || {};
 
       setBreadcrumbConfig({
-        enabled: existingBreadcrumbs.enabled === false,
+        enabled: existingBreadcrumbs.enabled !== false, // Default to true if not explicitly set to false
         homeText: existingBreadcrumbs.homeText || siteName,
         separator: existingBreadcrumbs.separator || "/",
         showOnHomepage: existingBreadcrumbs.showOnHomepage || false,
@@ -295,7 +297,7 @@ ${JSON.stringify(jsonLd, null, 2)}
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              ×
+              X
             </button>
           </div>
         </div>
@@ -305,7 +307,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       <div className={styles.quickActions}>
         <div className={styles.quickActionCard}>
           <div className={styles.quickActionContent}>
-            <h3>🚀 One-Click Setup</h3>
+            <h3>💾 One-Click Setup</h3>
             <p>
               <strong>Enable breadcrumbs instantly with smart defaults.</strong>{" "}
               This automatically configures everything for you - no technical
@@ -331,7 +333,7 @@ ${JSON.stringify(jsonLd, null, 2)}
             >
               {breadcrumbConfig.enabled
                 ? "✅ Breadcrumbs Are Active"
-                : "🍞 Enable Breadcrumbs Now"}
+                : "🚀 Enable Breadcrumbs Now"}
             </button>
             <p className={styles.buttonSubtext}>
               {breadcrumbConfig.enabled
@@ -345,7 +347,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       {/* Global Settings */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>🔧 Advanced Configuration</h3>
+          <h3>ðŸ”§ Advanced Configuration</h3>
           <p>
             Fine-tune your breadcrumb settings. Most sites work great with the
             default settings above.
@@ -353,22 +355,6 @@ ${JSON.stringify(jsonLd, null, 2)}
         </div>
 
         <div className={styles.globalSettings}>
-          <div className={styles.field}>
-            <label className={styles.label}>
-              <input
-                type="checkbox"
-                checked={breadcrumbConfig.enabled}
-                onChange={(e) =>
-                  handleConfigChange("enabled", e.target.checked)
-                }
-              />
-              Enable Breadcrumbs
-              <span className={styles.description}>
-                Generate breadcrumb structured data for all pages
-              </span>
-            </label>
-          </div>
-
           <div className={styles.field}>
             <label className={styles.label}>
               Home Page Text
@@ -399,10 +385,10 @@ ${JSON.stringify(jsonLd, null, 2)}
             >
               <option value="/">/</option>
               <option value=">">{">"}</option>
-              <option value="→">→</option>
-              <option value="»">»</option>
+              <option value="â†’">â†’</option>
+              <option value="Â»">Â»</option>
               <option value="|">|</option>
-              <option value="·">·</option>
+              <option value="Â·">Â·</option>
             </select>
           </div>
 
@@ -426,7 +412,7 @@ ${JSON.stringify(jsonLd, null, 2)}
 
       {/* Live Preview */}
       <div className={styles.previewSection}>
-        <h4>🔍 Live Preview</h4>
+        <h4>ðŸ” Live Preview</h4>
 
         <div className={styles.previewControls}>
           <label>Preview for page:</label>
@@ -440,12 +426,12 @@ ${JSON.stringify(jsonLd, null, 2)}
               .map((page) => (
                 <option key={page.id} value={page.id}>
                   {page.type === "special"
-                    ? "🏠 Home Page"
+                    ? "ðŸ  Home Page"
                     : page.type === "page"
-                    ? `📄 ${page.title}`
-                    : page.type === "post"
-                    ? `📝 ${page.title}`
-                    : page.title}
+                      ? `ðŸ“„ ${page.title}`
+                      : page.type === "post"
+                        ? `ðŸ“ ${page.title}`
+                        : page.title}
                 </option>
               ))}
           </select>
@@ -460,7 +446,7 @@ ${JSON.stringify(jsonLd, null, 2)}
             className={styles.copyButton}
             onClick={() => navigator.clipboard.writeText(breadcrumbPreview)}
           >
-            📋 Copy Code
+            ðŸ“‹ Copy Code
           </button>
         </div>
       </div>
@@ -468,7 +454,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       {/* Page-specific Settings */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>📝 Page-Specific Settings</h3>
+          <h3>ðŸ“ Page-Specific Settings</h3>
           <p>
             Customize breadcrumb labels or exclude specific pages from
             breadcrumb generation.
@@ -483,12 +469,12 @@ ${JSON.stringify(jsonLd, null, 2)}
                 <div className={styles.pageInfo}>
                   <div className={styles.pageTitle}>
                     {page.type === "special"
-                      ? "🏠 Home Page"
+                      ? "ðŸ  Home Page"
                       : page.type === "page"
-                      ? `📄 ${page.title}`
-                      : page.type === "post"
-                      ? `📝 ${page.title}`
-                      : page.title}
+                        ? `ðŸ“„ ${page.title}`
+                        : page.type === "post"
+                          ? `ðŸ“ ${page.title}`
+                          : page.title}
                   </div>
                   <div className={styles.pageUrl}>{page.url}</div>
                 </div>
@@ -538,11 +524,18 @@ ${JSON.stringify(jsonLd, null, 2)}
             You have unsaved changes
           </span>
         )}
+
+        <ReviewPublishButton
+          onSave={handleSave}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onNavigate={onNavigate}
+        />
       </div>
 
       {/* Help Section */}
       <div className={styles.helpSection}>
-        <h4>ℹ️ How Breadcrumbs Work</h4>
+        <h4>â„¹ï¸ How Breadcrumbs Work</h4>
         <ul>
           <li>
             <strong>Automatic Detection:</strong> Page hierarchy is determined
@@ -566,13 +559,14 @@ ${JSON.stringify(jsonLd, null, 2)}
           <strong>Example URL Structure:</strong>
           <ul>
             <li>
-              <code>/</code> → Home
+              <code>/</code> â†’ Home
             </li>
             <li>
-              <code>/services/</code> → Home → Services
+              <code>/services/</code> â†’ Home â†’ Services
             </li>
             <li>
-              <code>/services/web-design/</code> → Home → Services → Web Design
+              <code>/services/web-design/</code> â†’ Home â†’ Services â†’ Web
+              Design
             </li>
           </ul>
         </div>

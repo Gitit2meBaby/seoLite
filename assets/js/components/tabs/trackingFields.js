@@ -12,6 +12,12 @@ export const trackingFields = [
         tooltip:
           "Your GA4 measurement ID (format: G-XXXXXXXXXX). Find this in Google Analytics → Admin → Data Streams → Web → Measurement ID. The plugin automatically includes the gtag.js script.",
         pattern: "^G-[A-Z0-9]{10}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "google_universal_analytics_id",
@@ -21,6 +27,12 @@ export const trackingFields = [
         tooltip:
           "Universal Analytics stopped processing data in July 2023. This field is only for legacy support. Please migrate to Google Analytics 4 (GA4) above.",
         pattern: "^UA-[0-9]+-[0-9]+$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "google_tag_manager_id",
@@ -30,6 +42,12 @@ export const trackingFields = [
         tooltip:
           "Your GTM container ID (format: GTM-XXXXXXX). Find this in Google Tag Manager → Admin → Container Settings. GTM lets you manage all tracking codes from one place. The plugin includes both head and body (noscript) implementations.",
         pattern: "^GTM-[A-Z0-9]{7}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "google_ads_conversion_id",
@@ -38,6 +56,12 @@ export const trackingFields = [
         placeholder: "AW-XXXXXXXXXX",
         tooltip:
           "Your Google Ads conversion tracking ID (format: AW-XXXXXXXXXX). Find this in Google Ads → Tools & Settings → Conversions. Used for tracking conversions and remarketing.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "google_adsense_id",
@@ -45,7 +69,13 @@ export const trackingFields = [
         type: "text",
         placeholder: "ca-pub-XXXXXXXXXXXXXXXX",
         tooltip:
-          "Your AdSense publisher ID (format: ca-pub-XXXXXXXXXXXXXXXX). Find this in AdSense → Account → Settings → Account Information. Used for ad monetization.",
+          "Your AdSense publisher ID (format: ca-pub-XXXXXXXXXXXXXXXX). Find this in AdSense → Account → Settings → Account Information. Used for ad monetisation.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
     ],
   },
@@ -62,6 +92,12 @@ export const trackingFields = [
         tooltip:
           "Your Facebook Pixel ID (15-16 digit number). Find this in Facebook Events Manager → Data Sources → Pixels. The plugin includes the full fbq() initialization code and noscript fallback for conversion tracking and remarketing.",
         pattern: "^[0-9]{15,16}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "linkedin_partner_id",
@@ -71,6 +107,12 @@ export const trackingFields = [
         tooltip:
           "Your LinkedIn Insight Tag partner ID (6-7 digits). Find this in LinkedIn Campaign Manager → Account Assets → Insight Tag. Used for conversion tracking and website demographics.",
         pattern: "^[0-9]{6,7}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "twitter_pixel_id",
@@ -79,6 +121,12 @@ export const trackingFields = [
         placeholder: "o1234",
         tooltip:
           "Your Twitter/X pixel ID (starts with 'o' followed by numbers). Find this in Twitter Ads → Tools → Conversion Tracking. Used for advertising conversion tracking.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "pinterest_tag_id",
@@ -88,6 +136,12 @@ export const trackingFields = [
         tooltip:
           "Your Pinterest Tag ID (13 digits). Find this in Pinterest Business → Ads → Conversions. Used for conversion tracking and audience building.",
         pattern: "^[0-9]{13}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
     ],
   },
@@ -103,6 +157,12 @@ export const trackingFields = [
         placeholder: "abcdefghij",
         tooltip:
           "Your Microsoft Clarity project ID (10 alphanumeric characters). Find this in Microsoft Clarity → Settings → Setup. Free tool for heatmaps, session recordings, and user behavior analytics.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "hotjar_site_id",
@@ -112,6 +172,12 @@ export const trackingFields = [
         tooltip:
           "Your Hotjar site ID (7 digits). Find this in Hotjar → Settings → Sites & Organizations. Used for heatmaps, session recordings, and user feedback.",
         pattern: "^[0-9]{7}$",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "mixpanel_token",
@@ -120,6 +186,12 @@ export const trackingFields = [
         placeholder: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
         tooltip:
           "Your Mixpanel project token (32 character alphanumeric string). Find this in Mixpanel → Settings → Project Settings. Used for advanced event tracking and product analytics.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "amplitude_api_key",
@@ -128,6 +200,12 @@ export const trackingFields = [
         placeholder: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
         tooltip:
           "Your Amplitude API key (32 character alphanumeric string). Find this in Amplitude → Settings → Projects. Used for product analytics and user behavior tracking.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
       {
         key: "fullstory_org_id",
@@ -136,6 +214,12 @@ export const trackingFields = [
         placeholder: "XXXXX",
         tooltip:
           "Your FullStory organization ID (5-6 characters). Find this in FullStory → Settings → FS Setup. Used for session replay and user experience analytics.",
+        hasScript: true,
+        scriptLoadingOptions: {
+          default: "async",
+          tooltip:
+            "Control how the Google Analytics script loads on your pages",
+        },
       },
     ],
   },

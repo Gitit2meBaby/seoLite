@@ -700,43 +700,252 @@
   }
 }
 
-// === RESPONSIVE DESIGN ===
-@media (max-width: 768px) {
-  .socialMedia {
-    padding: 1rem;
+// === TRACKING TAGS ====
+
+.controlHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.controlLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* FIXED CSS for Script Loading Control */
+
+/* Script Loading Control - Collapsible */
+.scriptLoadingControl {
+  margin-top: 0.5rem;
+  position: relative;
+  z-index: 10; /* Ensure it sits above other elements */
+}
+
+.scriptLoadingButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    border-color: #adb5bd;
+    background: #f8f9fa;
   }
 
-  .pageSelector {
-    padding: 1rem;
-  }
-
-  .sectionHeader {
-    padding: 1rem;
-
-    .sectionTitle h3 {
-      font-size: 1rem;
-    }
-
-    .sectionCount {
-      font-size: 0.75rem;
-    }
-  }
-
-  .sectionContent {
-    padding: 1rem;
-  }
-
-  .fieldsContainer {
-    gap: 1rem;
-  }
-
-  .field .label {
-    font-size: 0.9rem;
-  }
-
-  .input,
-  .textarea,
-  .select {
-    font-size: 0.9rem;
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
   }
 }
+
+.buttonLabel {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.buttonValue {
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  flex: 1;
+  text-align: left;
+}
+
+.buttonIcon {
+  font-size: 0.75rem;
+  color: #0073aa;
+  text-decoration: underline;
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.radioGroup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.5rem;
+  padding: 2.5rem 1rem 1rem 1rem; /* Extra top padding for close button */
+  background: white;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 9999; /* Very high z-index to sit above everything */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: slideDown 0.2s ease;
+  min-width: 100%;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  font-size: 1.1rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+
+  &:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+  }
+
+  &:focus {
+    outline: none;
+    background: #dc3545;
+    color: white;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+  }
+}
+
+.radioOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #adb5bd;
+    background: white;
+  }
+
+  // When radio is checked
+  &:has(input:checked) {
+    border-color: #007bff;
+    background: #e7f3ff;
+
+    .radioText {
+      color: #007bff;
+      font-weight: 600;
+    }
+  }
+}
+
+.radioInput {
+  margin-top: 0.25rem;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: #007bff;
+}
+
+.radioLabel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.radioText {
+  font-size: 0.9rem;
+  font-family: "Courier New", monospace;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.radioDescription {
+  font-size: 0.8rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* CRITICAL: Prevent parent containers from clipping the dropdown */
+.section {
+  overflow: visible !important;
+}
+
+.sectionContent {
+  overflow: visible !important;
+}
+
+.fieldsContainer {
+  overflow: visible !important;
+}
+
+.field {
+  overflow: visible !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .radioGroup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+}
+
+/* Alternative: If overflow:visible breaks layout, use this approach */
+/* Uncomment if you need to keep overflow:hidden on parent containers */
+/*
+.radioGroup {
+  position: fixed;
+  top: auto;
+  left: auto;
+  right: auto;
+  width: calc(100% - 2rem);
+  max-width: 600px;
+}
+*/

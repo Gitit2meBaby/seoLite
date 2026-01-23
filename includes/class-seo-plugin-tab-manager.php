@@ -4,7 +4,9 @@
  * 
  * This class handles:
  * - Registering all available tabs
+ * - Managing tab permissions
  * - Providing tab data to React components
+ * - Future-proofing for adding new tabs
  */
 
 class SEO_Plugin_Tab_Manager {
@@ -21,15 +23,13 @@ class SEO_Plugin_Tab_Manager {
     
     private function __construct() {
         $this->register_default_tabs();
+        
+        // Allow other plugins/themes to register tabs
+        add_action('init', [$this, 'allow_external_tab_registration'], 20);
     }
     
    /**
      * Register default plugin tabs
-     * Each tab has:
-     * - label: What shows in the navigation
-     * - description: Tooltip text
-     * - icon: WordPress dashicon class
-     * - component: React component name to load
      */
     private function register_default_tabs() {
         
@@ -37,42 +37,97 @@ class SEO_Plugin_Tab_Manager {
             'label' => __('Essential Meta Tags', 'seo-plugin'),
             'description' => __('These settings control the core information Google and other search engines see for your pages. A well-crafted title and description can significantly increase the click-through rate from search results.', 'seo-plugin'),
             'icon' => 'dashicons-admin-generic',
-            'component' => 'GeneralMeta'
+            'capability' => 'manage_options',
+            'priority' => 10,
+            'component' => 'GeneralMeta',
+            'php_handler' => 'SEO_Plugin_Tab_General',
+            'fields' => [
+                'meta_title',
+                'meta_description', 
+                'meta_keywords',
+                'robots_index',
+                'robots_follow'
+            ]
         ]);
         
         $this->register_tab('social', [
             'label' => __('Social Media', 'seo-plugin'),
             'description' => __('Control how your content appears when shared on social media platforms like Facebook and Twitter. Using Open Graph and Twitter Cards ensures your links have attractive images, titles, and descriptions, leading to more engagement.', 'seo-plugin'),
             'icon' => 'dashicons-share',
-            'component' => 'SocialMedia'
+            'capability' => 'manage_options',
+            'priority' => 20,
+            'component' => 'SocialMedia',
+            'php_handler' => 'SEO_Plugin_Tab_Social',
+            'fields' => [
+                'og_title',
+                'og_description',
+                'og_image',
+                'twitter_card_type',
+                'twitter_username'
+            ]
         ]);
         
         $this->register_tab('schema', [
             'label' => __('Schema Markup', 'seo-plugin'),
             'description' => __('Add structured data to help search engines understand the context of your content. Schema can power rich results like star ratings, product information, and event details directly in Google search, making your content stand out.', 'seo-plugin'),
             'icon' => 'dashicons-code-standards',
-            'component' => 'SchemaMarkup'
+            'capability' => 'manage_options',
+            'priority' => 30,
+            'component' => 'SchemaMarkup',
+            'php_handler' => 'SEO_Plugin_Tab_Schema',
+            'fields' => [
+                'schema_type',
+                'schema_data',
+                'enable_schema'
+            ]
         ]);
         
         $this->register_tab('analytics', [
-            'label' => __('Analytics & Tracking', 'seo-plugin'),
-            'description' => __('Connect your site to analytics platforms and add verification codes. Includes Google Analytics, Tag Manager, Facebook Pixel, and many other tracking services. Most codes work best when set globally.', 'seo-plugin'),
+            'label' => __('Tags & Analytics', 'seo-plugin'),
+            'description' => __('Connect your site to tools that measure visitor behavior. Google Analytics tracks who comes to your site and what they do, while Google Tag Manager helps you manage tracking scripts, ad conversions and much more. 3rd party integrations such as AHREFS, SemRush & Facebook also require direct code injection for authorisation', 'seo-plugin'),
             'icon' => 'dashicons-chart-line',
-            'component' => 'TrackingTags'
+            'capability' => 'manage_options',
+            'priority' => 40,
+            'component' => 'Analytics',
+            'php_handler' => 'SEO_Plugin_Tab_Analytics',
+            'fields' => [
+                'ga_measurement_id',
+                'gtm_container_id',
+                'enable_analytics'
+            ]
         ]);
-
+        
         $this->register_tab('sitemap', [
             'label' => __('Sitemap & Robots.txt', 'seo-plugin'),
-            'description' => __('Generate and manage your XML sitemap and robots.txt file. The sitemap helps search engines discover all your content, while robots.txt controls which parts of your site search engines can crawl. Both files can be automatically generated and deployed to your website by pressing the deploy button at the bottom of the page.', 'seo-plugin'),
+            'description' => __('Generate and manage your XML sitemap and robots.txt file. The sitemap helps search engines discover all your content, while robots.txt controls which parts of your site search engines can crawl. Both files can be automatically generated and deployed to your website.', 'seo-plugin'),
             'icon' => 'dashicons-admin-site-alt3',
-            'component' => 'SitemapRobots'
+            'capability' => 'manage_options',
+            'priority' => 50,
+            'component' => 'SitemapRobots',
+            'php_handler' => 'SEO_Plugin_Tab_Sitemap',
+            'fields' => []
         ]);
         
         $this->register_tab('breadcrumbs', [
             'label' => __('Breadcrumbs', 'seo-plugin'),
             'description' => __('Configure structured breadcrumb navigation for your website. Breadcrumbs help users understand where they are in your site hierarchy and provide rich snippets in search results. This generates proper JSON-LD structured data that search engines love.', 'seo-plugin'),
             'icon' => 'dashicons-arrow-right-alt2',
-            'component' => 'Breadcrumbs'
+            'capability' => 'manage_options',
+            'priority' => 60,
+            'component' => 'Breadcrumbs',
+            'php_handler' => 'SEO_Plugin_Tab_Breadcrumbs',
+            'fields' => []
+        ]);
+        
+        $this->register_tab('publish', [
+            'label' => __('Review & Publish', 'seo-plugin'),
+            'description' => __('Review all your SEO settings in one place and publish changes to your live website. This shows the complete HTML output that will be added to your pages, including meta tags, tracking scripts, and structured data. When ready, click Publish to make all changes live.', 'seo-plugin'),
+            'icon' => 'dashicons-upload',
+            'capability' => 'manage_options',
+            'priority' => 999,
+            'component' => 'ReviewPublish',
+            'php_handler' => '',
+            'fields' => []
         ]);
     }
     
@@ -87,7 +142,11 @@ class SEO_Plugin_Tab_Manager {
             'label' => '',
             'description' => '',
             'icon' => 'dashicons-admin-generic',
+            'capability' => 'manage_options',
+            'priority' => 50,
             'component' => '',
+            'php_handler' => '',
+            'fields' => [],
             'enabled' => true
         ];
         
@@ -95,24 +154,101 @@ class SEO_Plugin_Tab_Manager {
     }
     
     /**
-     * Get all tabs for the frontend
-     * This formats the data that React will receive
+     * Get all registered tabs
+     * 
+     * @param bool $check_permissions Whether to filter by user capabilities
+     * @return array Sorted array of tabs
+     */
+    public function get_tabs($check_permissions = true) {
+        $tabs = $this->tabs;
+        
+        if ($check_permissions) {
+            $tabs = array_filter($tabs, function($tab) {
+                return current_user_can($tab['capability']) && $tab['enabled'];
+            });
+        }
+        
+        // Sort by priority
+        uasort($tabs, function($a, $b) {
+            return $a['priority'] - $b['priority'];
+        });
+        
+        return $tabs;
+    }
+    
+    /**
+     * Get specific tab configuration
+     * 
+     * @param string $tab_id
+     * @return array|null Tab configuration or null if not found
+     */
+    public function get_tab($tab_id) {
+        return isset($this->tabs[$tab_id]) ? $this->tabs[$tab_id] : null;
+    }
+    
+    /**
+     * Check if tab exists and user can access it
+     * 
+     * @param string $tab_id
+     * @return bool
+     */
+    public function can_access_tab($tab_id) {
+        $tab = $this->get_tab($tab_id);
+        return $tab && current_user_can($tab['capability']) && $tab['enabled'];
+    }
+    
+    /**
+     * Get tab data for React components
+     * 
+     * @return array Prepared data for frontend
      */
     public function get_tabs_for_frontend() {
+        $tabs = $this->get_tabs(true);
         $frontend_tabs = [];
         
-        foreach ($this->tabs as $id => $tab) {
-            if ($tab['enabled']) {
-                $frontend_tabs[$id] = [
-                    'id' => $id,
-                    'label' => $tab['label'],
-                    'description' => $tab['description'],
-                    'icon' => $tab['icon'],
-                    'component' => $tab['component']
-                ];
-            }
+        foreach ($tabs as $id => $tab) {
+            $frontend_tabs[$id] = [
+                'id' => $id,
+                'label' => $tab['label'],
+                'description' => $tab['description'],
+                'icon' => $tab['icon'],
+                'component' => $tab['component'],
+                'fields' => $tab['fields']
+            ];
         }
         
         return $frontend_tabs;
+    }
+    
+    /**
+     * Allow external tab registration after init
+     */
+    public function allow_external_tab_registration() {
+        /**
+         * Allow other plugins to register SEO tabs
+         * 
+         * @param SEO_Plugin_Tab_Manager $tab_manager
+         */
+        do_action('seo_plugin_register_tabs', $this);
+    }
+    
+    /**
+     * Remove a tab (useful for customization)
+     * 
+     * @param string $tab_id
+     */
+    public function remove_tab($tab_id) {
+        unset($this->tabs[$tab_id]);
+    }
+    
+    /**
+     * Disable a tab without removing it
+     * 
+     * @param string $tab_id
+     */
+    public function disable_tab($tab_id) {
+        if (isset($this->tabs[$tab_id])) {
+            $this->tabs[$tab_id]['enabled'] = false;
+        }
     }
 }

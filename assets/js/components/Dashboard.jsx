@@ -66,7 +66,11 @@ const Dashboard = () => {
 
       {/* Main content area below tabs */}
       <main className={styles.mainContent}>
-        <TabContent activeTab={activeTab} tabConfig={tabs[activeTab]} />
+        <TabContent
+          activeTab={activeTab}
+          tabConfig={tabs[activeTab]}
+          onNavigate={handleTabChange}
+        />
       </main>
     </div>
   );

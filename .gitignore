@@ -44,3 +44,5 @@ build/
 plugin-build/
 
 wp-config.php
+
+fix-emojis.ps1

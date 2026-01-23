@@ -5,10 +5,11 @@ import SocialMedia from "../tabs/SocialMedia";
 import TrackingTags from "../tabs/TrackingTags";
 import SitemapRobots from "../tabs/SitemapRobots";
 import Breadcrumbs from "../tabs/Breadcrumbs";
+import ReviewPublish from "../tabs/ReviewPublish";
 
 import styles from "@css/components/navigation/TabContent.module.scss";
 
-const TabContent = ({ activeTab, tabConfig }) => {
+const TabContent = ({ activeTab, tabConfig, onNavigate }) => {
   if (!activeTab || !tabConfig) {
     return (
       <div className={styles.noContent}>
@@ -22,23 +23,68 @@ const TabContent = ({ activeTab, tabConfig }) => {
   const getTabComponent = (componentName) => {
     switch (componentName) {
       case "GeneralMeta":
-        return <GeneralMeta tabId={activeTab} config={tabConfig} />;
+        return (
+          <GeneralMeta
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       case "SocialMedia":
-        return <SocialMedia tabId={activeTab} config={tabConfig} />;
+        return (
+          <SocialMedia
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       case "SchemaMarkup":
-        return <SchemaTab tabId={activeTab} config={tabConfig} />;
+        return (
+          <SchemaTab
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       case "Analytics":
       case "TrackingTags":
-        return <TrackingTags tabId={activeTab} config={tabConfig} />;
+        return (
+          <TrackingTags
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       case "SitemapRobots":
-        return <SitemapRobots tabId={activeTab} config={tabConfig} />;
+        return (
+          <SitemapRobots
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       case "Breadcrumbs":
-        return <Breadcrumbs tabId={activeTab} config={tabConfig} />;
+        return (
+          <Breadcrumbs
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
+
+      case "ReviewPublish":
+        return (
+          <ReviewPublish
+            tabId={activeTab}
+            config={tabConfig}
+            onNavigate={onNavigate}
+          />
+        );
 
       default:
         return (
