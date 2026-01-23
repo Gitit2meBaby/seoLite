@@ -696,7 +696,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
         </div>
 
         <div className={styles.robotsPreview}>
-          <h4>Current robots.txt URL</h4>
+          <h4>Test your URL's</h4>
           <p>
             After deployment, your robots.txt will be available at:
             <a
@@ -705,6 +705,16 @@ Sitemap: ${siteUrl}/sitemap.xml`;
               rel="noopener noreferrer"
             >
               {siteUrl}/robots.txt
+            </a>
+          </p>
+          <p>
+            Review your sitemap at:
+            <a
+              href={`${siteUrl}/sitemap.xml`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {siteUrl}/sitemap.xml
             </a>
           </p>
         </div>

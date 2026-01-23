@@ -389,7 +389,7 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>âœ“</span>
+            <span className={styles.alertIcon}>✓</span>
             <span className={styles.alertText}>
               Schema {editingSchemaId ? "updated" : "saved"} successfully!
             </span>
@@ -397,7 +397,7 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              X
+              ×
             </button>
           </div>
         </div>
@@ -413,12 +413,12 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">ðŸŒ Global Defaults (All Pages)</option>
+          <option value="global">🌐 Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (
               <option key={page.id} value={page.id}>
-                ðŸ“„ {page.title}
+                📄 {page.title}
                 {page.url ? ` (${page.url})` : ""}
               </option>
             ))}
@@ -479,8 +479,8 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
         {currentSchemaConfig?.allowMultiple && !editingSchemaId && (
           <div className={styles.inheritanceInfo} style={{ marginTop: "1rem" }}>
             <p style={{ fontSize: "0.9rem", margin: 0 }}>
-              ðŸ’¡ <strong>Multiple schemas allowed:</strong> You can add as
-              many {currentSchemaConfig.label} schemas as needed.
+              💡 <strong>Multiple schemas allowed:</strong> You can add as many{" "}
+              {currentSchemaConfig.label} schemas as needed.
             </p>
           </div>
         )}
@@ -549,7 +549,7 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
                   <div className={styles.sectionTitle}>
                     <h3>{schemaConfig?.label || schema.type}</h3>
                     <span className={styles.sectionCount}>
-                      {schemaName} â€¢ {scopeLabel}
+                      {schemaName} • {scopeLabel}
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -667,10 +667,10 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
               <strong>What you're seeing:</strong>
               <ul style={{ margin: "0.5rem 0 0 1.5rem", paddingLeft: 0 }}>
                 <li>
-                  âœ… <strong>Global schemas</strong> that apply to all pages
+                  ✅ <strong>Global schemas</strong> that apply to all pages
                 </li>
                 <li>
-                  âœ… <strong>Page-specific schemas</strong> for this page
+                  ✅ <strong>Page-specific schemas</strong> for this page
                 </li>
                 <li>All schemas will be combined in the output</li>
               </ul>

@@ -527,9 +527,8 @@ input[type="checkbox"]:focus {
   font-weight: 600;
 }
 .robotsPreview p {
-  margin: 0;
+  margin: 0 !important;
   color: #666;
-  line-height: 1.5;
 }
 .robotsPreview a {
   color: #0073aa;

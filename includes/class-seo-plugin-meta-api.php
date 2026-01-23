@@ -154,21 +154,30 @@ class SEO_Plugin_Meta_API {
     
     /**
      * Save meta settings for a specific page
+     * FIXED: Now MERGES with existing settings instead of overwriting them
      */
     public function save_meta_settings($request) {
         $page_id = $request['page_id'];
-        $settings = $request->get_json_params();
+        $new_settings = $request->get_json_params();
         
         error_log("SEO Plugin: === SAVE DEBUG START ===");
         error_log("SEO Plugin: Saving settings for page: {$page_id}");
-        error_log("SEO Plugin: Raw input data: " . print_r($settings, true));
+        error_log("SEO Plugin: New settings to merge: " . print_r($new_settings, true));
+        
+        // CRITICAL FIX: Get existing settings first
+        $option_name = "seo_plugin_page_{$page_id}";
+        $existing_settings = get_option($option_name, []);
+        error_log("SEO Plugin: Existing settings from DB: " . print_r($existing_settings, true));
+        
+        // Merge new settings with existing ones (new settings take precedence)
+        $merged_settings = array_merge($existing_settings, $new_settings);
+        error_log("SEO Plugin: Merged settings: " . print_r($merged_settings, true));
         
         // Enhanced sanitization that preserves all fields including tracking
-        $clean_settings = $this->sanitize_all_settings($settings);
+        $clean_settings = $this->sanitize_all_settings($merged_settings);
         error_log("SEO Plugin: Clean settings after sanitization: " . print_r($clean_settings, true));
         
-        // Save to WordPress options table
-        $option_name = "seo_plugin_page_{$page_id}";
+        // Save merged settings to WordPress options table
         $result = update_option($option_name, $clean_settings);
         
         error_log("SEO Plugin: update_option({$option_name}) result: " . ($result ? 'true' : 'false'));

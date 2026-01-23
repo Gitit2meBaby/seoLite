@@ -237,11 +237,14 @@ ${JSON.stringify(jsonLd, null, 2)}
 
     // Auto-save the settings
     try {
-      const settings = {
+      // CRITICAL: Merge with existing settings to avoid overwriting other data
+      const existingSettings = settings["page_global"] || {};
+      const mergedSettings = {
+        ...existingSettings,
         breadcrumb_config: autoConfig,
       };
 
-      const result = await savePageSettings("global", settings);
+      const result = await savePageSettings("global", mergedSettings);
 
       if (result.success) {
         setHasChanges(false);
@@ -257,11 +260,14 @@ ${JSON.stringify(jsonLd, null, 2)}
 
   const handleSave = async () => {
     try {
-      const settingsToSave = {
-        breadcrumb_config: breadcrumbConfig, // From local state
+      // CRITICAL: Merge with existing settings to avoid overwriting other data
+      const existingSettings = settings["page_global"] || {};
+      const mergedSettings = {
+        ...existingSettings,
+        breadcrumb_config: breadcrumbConfig,
       };
 
-      const result = await savePageSettings("global", settingsToSave);
+      const result = await savePageSettings("global", mergedSettings);
 
       if (result.success) {
         setHasChanges(false);
@@ -297,7 +303,7 @@ ${JSON.stringify(jsonLd, null, 2)}
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              X
+              ×
             </button>
           </div>
         </div>
@@ -347,7 +353,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       {/* Global Settings */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>ðŸ”§ Advanced Configuration</h3>
+          <h3>🔧 Advanced Configuration</h3>
           <p>
             Fine-tune your breadcrumb settings. Most sites work great with the
             default settings above.
@@ -385,10 +391,10 @@ ${JSON.stringify(jsonLd, null, 2)}
             >
               <option value="/">/</option>
               <option value=">">{">"}</option>
-              <option value="â†’">â†’</option>
-              <option value="Â»">Â»</option>
+              <option value="→">→</option>
+              <option value="»">»</option>
               <option value="|">|</option>
-              <option value="Â·">Â·</option>
+              <option value="·">·</option>
             </select>
           </div>
 
@@ -412,7 +418,7 @@ ${JSON.stringify(jsonLd, null, 2)}
 
       {/* Live Preview */}
       <div className={styles.previewSection}>
-        <h4>ðŸ” Live Preview</h4>
+        <h4>🔍 Live Preview</h4>
 
         <div className={styles.previewControls}>
           <label>Preview for page:</label>
@@ -426,11 +432,11 @@ ${JSON.stringify(jsonLd, null, 2)}
               .map((page) => (
                 <option key={page.id} value={page.id}>
                   {page.type === "special"
-                    ? "ðŸ  Home Page"
+                    ? "🏠 Home Page"
                     : page.type === "page"
-                      ? `ðŸ“„ ${page.title}`
+                      ? `📄 ${page.title}`
                       : page.type === "post"
-                        ? `ðŸ“ ${page.title}`
+                        ? `📝 ${page.title}`
                         : page.title}
                 </option>
               ))}
@@ -446,7 +452,7 @@ ${JSON.stringify(jsonLd, null, 2)}
             className={styles.copyButton}
             onClick={() => navigator.clipboard.writeText(breadcrumbPreview)}
           >
-            ðŸ“‹ Copy Code
+            📋 Copy Code
           </button>
         </div>
       </div>
@@ -454,7 +460,7 @@ ${JSON.stringify(jsonLd, null, 2)}
       {/* Page-specific Settings */}
       <div className={styles.fieldsContainer}>
         <div className={styles.sectionHeader}>
-          <h3>ðŸ“ Page-Specific Settings</h3>
+          <h3>📃 Page-Specific Settings</h3>
           <p>
             Customize breadcrumb labels or exclude specific pages from
             breadcrumb generation.
@@ -469,11 +475,11 @@ ${JSON.stringify(jsonLd, null, 2)}
                 <div className={styles.pageInfo}>
                   <div className={styles.pageTitle}>
                     {page.type === "special"
-                      ? "ðŸ  Home Page"
+                      ? "🏠 Home Page"
                       : page.type === "page"
-                        ? `ðŸ“„ ${page.title}`
+                        ? `📄 ${page.title}`
                         : page.type === "post"
-                          ? `ðŸ“ ${page.title}`
+                          ? `📝 ${page.title}`
                           : page.title}
                   </div>
                   <div className={styles.pageUrl}>{page.url}</div>
@@ -527,7 +533,7 @@ ${JSON.stringify(jsonLd, null, 2)}
 
       {/* Help Section */}
       <div className={styles.helpSection}>
-        <h4>â„¹ï¸ How Breadcrumbs Work</h4>
+        <h4>ℹ️ How Breadcrumbs Work</h4>
         <ul>
           <li>
             <strong>Automatic Detection:</strong> Page hierarchy is determined
@@ -551,14 +557,13 @@ ${JSON.stringify(jsonLd, null, 2)}
           <strong>Example URL Structure:</strong>
           <ul>
             <li>
-              <code>/</code> â†’ Home
+              <code>/</code> → Home
             </li>
             <li>
-              <code>/services/</code> â†’ Home â†’ Services
+              <code>/services/</code> → Home → Services
             </li>
             <li>
-              <code>/services/web-design/</code> â†’ Home â†’ Services â†’ Web
-              Design
+              <code>/services/web-design/</code> → Home → Services → Web Design
             </li>
           </ul>
         </div>

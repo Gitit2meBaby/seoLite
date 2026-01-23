@@ -692,3 +692,168 @@
     background: #218838;
   }
 }
+
+// Tooltip System
+.tooltipWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltipTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6c757d;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: help;
+  transition: background-color 0.2s ease;
+  margin-left: 0.5rem;
+
+  &:hover {
+    background: #495057;
+  }
+
+  &::before {
+    content: "?";
+  }
+}
+
+.tooltip {
+  position: absolute; // This is now absolute to the body due to portal
+  padding: 12px 16px;
+  background: #333;
+  color: white;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  white-space: normal;
+  z-index: 999999; // Very high z-index since it's on document.body
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: auto; // Changed to auto so hover works
+  max-width: 350px;
+  min-width: 220px;
+  width: max-content;
+  text-align: left;
+  line-height: 1.5;
+  font-weight: 500;
+  animation: tooltipFadeIn 0.2s ease;
+
+  // Base arrow styles (will be overridden by placement modifiers)
+  &::after {
+    content: "";
+    position: absolute;
+    border: 8px solid transparent;
+  }
+
+  // TOP PLACEMENT (default - tooltip above trigger)
+  &--top {
+    transform: translate(-50%, -100%);
+
+    &::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #333;
+    }
+  }
+
+  // BOTTOM PLACEMENT (tooltip below trigger)
+  &--bottom {
+    transform: translate(-50%, 0);
+
+    &::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #333;
+    }
+  }
+
+  // LEFT PLACEMENT (tooltip to the left of trigger)
+  &--left {
+    transform: translate(-100%, -50%);
+
+    &::after {
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left-color: #333;
+    }
+  }
+
+  // RIGHT PLACEMENT (tooltip to the right of trigger)
+  &--right {
+    transform: translate(0, -50%);
+
+    &::after {
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      border-right-color: #333;
+    }
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 5px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+// Variant for bottom placement animation
+.tooltip--bottom {
+  animation: tooltipFadeInBottom 0.2s ease;
+}
+
+@keyframes tooltipFadeInBottom {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+// Variant for left placement animation
+.tooltip--left {
+  animation: tooltipFadeInLeft 0.2s ease;
+}
+
+@keyframes tooltipFadeInLeft {
+  from {
+    opacity: 0;
+    transform: translate(calc(-100% - 5px), -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-100%, -50%);
+  }
+}
+
+// Variant for right placement animation
+.tooltip--right {
+  animation: tooltipFadeInRight 0.2s ease;
+}
+
+@keyframes tooltipFadeInRight {
+  from {
+    opacity: 0;
+    transform: translate(-5px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}

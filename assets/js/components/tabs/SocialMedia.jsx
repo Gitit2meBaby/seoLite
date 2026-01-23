@@ -138,7 +138,7 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
         throw new Error(result.message || "Save failed");
       }
     } catch (error) {
-      console.error("❌ SocialMedia: Save failed:", error);
+      console.error("âŒ SocialMedia: Save failed:", error);
       setApiError(`Save failed: ${error.message}`);
     }
   };
@@ -248,39 +248,33 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
       );
     }
 
-    // Social profile URLs (these go in Organization schema, but we'll show them as comments)
-    if (effectiveValues.social_facebook_url) {
+    // Social profile URLs as Schema.org Organization sameAs
+    // This creates a fallback Organization schema if social profiles are filled out
+    // They can still be overridden by specific schemas (Person, LocalBusiness, etc.)
+    const socialUrls = [
+      effectiveValues.social_facebook_url,
+      effectiveValues.social_twitter_url,
+      effectiveValues.social_instagram_url,
+      effectiveValues.social_linkedin_url,
+      effectiveValues.social_youtube_url,
+      effectiveValues.social_tiktok_url,
+    ].filter(Boolean); // Remove empty values
+
+    if (socialUrls.length > 0) {
+      const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: effectiveValues.og_site_name || "Organization",
+        url: typeof window !== "undefined" ? window.location.origin : "",
+        sameAs: socialUrls,
+      };
+
       metaTags.push(
-        `<!-- Facebook Profile: ${effectiveValues.social_facebook_url} -->`,
-      );
-    }
-    if (effectiveValues.social_twitter_url) {
-      metaTags.push(
-        `<!-- Twitter Profile: ${effectiveValues.social_twitter_url} -->`,
-      );
-    }
-    if (effectiveValues.social_instagram_url) {
-      metaTags.push(
-        `<!-- Instagram Profile: ${effectiveValues.social_instagram_url} -->`,
-      );
-    }
-    if (effectiveValues.social_linkedin_url) {
-      metaTags.push(
-        `<!-- LinkedIn Profile: ${effectiveValues.social_linkedin_url} -->`,
-      );
-    }
-    if (effectiveValues.social_youtube_url) {
-      metaTags.push(
-        `<!-- YouTube Profile: ${effectiveValues.social_youtube_url} -->`,
-      );
-    }
-    if (effectiveValues.social_tiktok_url) {
-      metaTags.push(
-        `<!-- TikTok Profile: ${effectiveValues.social_tiktok_url} -->`,
+        `<script type="application/ld+json">\n${JSON.stringify(organizationSchema, null, 2)}\n</script>`,
       );
     }
 
-    // Default social images (used as fallbacks, shown as comments)
+    // Default social images (used as fallbacks, shown as comments for reference)
     if (effectiveValues.social_default_image) {
       metaTags.push(
         `<!-- Default Social Image: ${effectiveValues.social_default_image} -->`,
@@ -398,9 +392,7 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
           type="button"
         >
           <div className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>
-              {isExpanded ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
-            </span>
+            <span className={styles.sectionIcon}>{isExpanded ? "▼" : "▶"}</span>
             <h3>{sectionName}</h3>
           </div>
           <div className={styles.sectionCount}>
@@ -430,7 +422,7 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>Ã¢Å“â€¦</span>
+            <span className={styles.alertIcon}>✓</span>
             <span className={styles.alertText}>
               Settings saved successfully!
             </span>
@@ -438,7 +430,7 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              Ãƒâ€”
+              ×
             </button>
           </div>
         </div>
@@ -454,12 +446,12 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">Ã°Å¸Å’Â Global Defaults (All Pages)</option>
+          <option value="global">🌐 Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (
               <option key={page.id} value={page.id}>
-                Ã°Å¸â€œâ€ž {page.title}
+                📄 {page.title}
                 {page.url ? ` (${page.url})` : ""}
               </option>
             ))}
@@ -468,8 +460,8 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
         {selectedPage !== "global" && (
           <div className={styles.inheritanceInfo}>
             <small>
-              Ã°Å¸â€™Â¡ This page inherits social media settings from Global.
-              Override any field to customize it specifically for this page.
+              💡 This page inherits social media settings from Global. Override
+              any field to customize it specifically for this page.
             </small>
           </div>
         )}
@@ -478,7 +470,7 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
       {/* Error Display */}
       {apiError && (
         <div className={styles.errorAlert}>
-          <p>Ã¢Å¡Â Ã¯Â¸Â {apiError}</p>
+          <p>⚠️ {apiError}</p>
         </div>
       )}
 
@@ -544,10 +536,10 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
                 <strong>What you're seeing:</strong>
                 <ul style={{ margin: "0.5rem 0 0 1.5rem", paddingLeft: 0 }}>
                   <li>
-                    ✅ <strong>Global values</strong> that apply to all pages
+                    âœ… <strong>Global values</strong> that apply to all pages
                   </li>
                   <li>
-                    ✅ <strong>Page-specific overrides</strong> for this page
+                    âœ… <strong>Page-specific overrides</strong> for this page
                     (take precedence)
                   </li>
                   <li>

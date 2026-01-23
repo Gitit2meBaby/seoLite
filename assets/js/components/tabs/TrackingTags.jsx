@@ -758,7 +758,7 @@ ${customFooter}`);
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">🌐 Global Defaults (All Pages)</option>
+          <option value="global">🌐Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (

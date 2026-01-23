@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSettings } from "../../providers/SettingsProvider";
 import LoadingSpinner from "../common/LoadingSpinner";
 import ReviewPublishButton from "../common/ReviewPublishButton";
+import Tooltip from "../schemaTypes/Tooltip";
 
 import styles from "@css/components/tabs/GeneralMeta.module.scss";
 
@@ -24,14 +25,15 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
   const [apiError, setApiError] = useState(null);
   const [showSaveAlert, setShowSaveAlert] = useState(false);
 
-  // Meta fields configuration with FIXED defaults
+  // Meta fields configuration with tooltips instead of descriptions
   const metaFields = [
     {
       key: "meta_title",
       label: "Page Title",
       type: "text",
       placeholder: "Enter page title (recommended: 50-60 characters)",
-      description: "The title that appears in search results and browser tabs",
+      tooltip:
+        "The title that appears in search results and browser tabs. Keep it concise and descriptive for better SEO.",
       maxLength: 60,
     },
     {
@@ -39,8 +41,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       label: "Meta Description",
       type: "textarea",
       placeholder: "Write a compelling description for search results",
-      description:
-        "Brief summary shown in search results (recommended: 150-160 characters)",
+      tooltip:
+        "Brief summary shown in search results (recommended: 150-160 characters). Should be compelling and include target keywords.",
       maxLength: 160,
     },
     {
@@ -48,8 +50,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       label: "Meta Keywords",
       type: "text",
       placeholder: "keyword1, keyword2, keyword3",
-      description:
-        "Comma-separated keywords (mostly ignored by modern search engines)",
+      tooltip:
+        "Comma-separated keywords. Note: Mostly ignored by modern search engines like Google, but may be used by some smaller engines.",
     },
     {
       key: "charset",
@@ -60,7 +62,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "ISO-8859-1", label: "ISO-8859-1" },
         { value: "UTF-16", label: "UTF-16" },
       ],
-      description: "Character encoding for the webpage",
+      tooltip:
+        "Character encoding for the webpage. UTF-8 is recommended as it supports all languages and special characters.",
       defaultValue: "UTF-8",
       global: true,
     },
@@ -80,7 +83,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "width=1024", label: "Fixed width (1024px)" },
         { value: "", label: "No viewport tag" },
       ],
-      description: "Controls layout on mobile browsers",
+      tooltip:
+        "Controls how your page displays on mobile devices. Responsive is recommended for modern mobile-friendly sites.",
       defaultValue: "width=device-width, initial-scale=1",
       global: true,
     },
@@ -89,22 +93,24 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       label: "Canonical URL",
       type: "url",
       placeholder: "https://example.com/canonical-page",
-      description:
-        "Preferred URL for this content to avoid duplicate content issues",
+      tooltip:
+        "Tells search engines the preferred URL for this content to avoid duplicate content issues. Use when the same content is accessible via multiple URLs.",
     },
     {
       key: "meta_author",
       label: "Author",
       type: "text",
       placeholder: "Author name",
-      description: "Content author or site owner",
+      tooltip:
+        "Content author or site owner. Can be a person's name or organization name.",
     },
     {
       key: "meta_copyright",
       label: "Copyright",
       type: "text",
-      placeholder: "Ã‚Â© 2025 Your Company Name",
-      description: "Copyright information",
+      placeholder: "© 2025 Your Company Name",
+      tooltip:
+        "Copyright information for your content. Include the year and rights holder.",
     },
     {
       key: "robots_index",
@@ -114,7 +120,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "index", label: "Index (allow search engines)" },
         { value: "noindex", label: "No Index (hide from search engines)" },
       ],
-      description: "Whether search engines should index this page",
+      tooltip:
+        "Controls whether search engines should index this page. Use 'noindex' for private pages, thank you pages, or duplicate content.",
       defaultValue: "index",
     },
     {
@@ -125,7 +132,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "follow", label: "Follow (crawl links)" },
         { value: "nofollow", label: "No Follow (don't crawl links)" },
       ],
-      description: "Whether search engines should follow links on this page",
+      tooltip:
+        "Controls whether search engines should follow links on this page. 'Follow' is standard; use 'nofollow' for paid links or untrusted content.",
       defaultValue: "follow",
     },
     {
@@ -141,7 +149,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "max-snippet:-1", label: "No Snippet Limit" },
         { value: "max-image-preview:large", label: "Large Image Preview" },
       ],
-      description: "Additional robots directives for search engines",
+      tooltip:
+        "Additional robots directives. 'noarchive' prevents cached versions, 'nosnippet' prevents description in results, 'noimageindex' blocks images from search.",
     },
     {
       key: "hreflang",
@@ -161,33 +170,37 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         { value: "ko", label: "Korean" },
         { value: "zh", label: "Chinese" },
       ],
-      description: "Language and region targeting for international SEO",
+      tooltip:
+        "Language and region targeting for international SEO. Helps search engines serve the correct language version to users.",
     },
     {
       key: "refresh_redirect",
       label: "Refresh/Redirect",
       type: "text",
-      placeholder: "5;url=https://example.com",
-      description: "Auto-refresh or redirect (format: seconds;url=destination)",
+      placeholder: "https://example.com",
+      tooltip:
+        "Auto-refresh or redirect after specified seconds. Format: seconds;url=destination. Example: '5;url=https://example.com' redirects after 5 seconds.",
     },
     {
       key: "date_published",
       label: "Date Published",
       type: "datetime-local",
-      description:
-        "When this content was first published (used for articles/news)",
+      tooltip:
+        "When this content was first published. Important for news articles and time-sensitive content. Helps search engines understand content freshness.",
     },
     {
       key: "date_modified",
       label: "Date Modified",
       type: "datetime-local",
-      description: "When this content was last updated",
+      tooltip:
+        "When this content was last updated. Signals to search engines that content is current and maintained.",
     },
     {
       key: "theme_color",
       label: "Theme Color",
       type: "color",
-      description: "Browser theme color for mobile devices",
+      tooltip:
+        "Browser theme color for mobile devices. Colors the browser UI (address bar) on Android and some mobile browsers.",
       global: true,
     },
     {
@@ -195,7 +208,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       label: "Generator",
       type: "text",
       placeholder: "WordPress, Custom CMS, etc.",
-      description: "What software generated this page",
+      tooltip:
+        "What software generated this page. Optional metadata that identifies your CMS or publishing platform.",
       global: true,
     },
   ];
@@ -495,6 +509,7 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       <div key={field.key} className={styles.field}>
         <label className={styles.label}>
           {field.label}
+          {field.tooltip && <Tooltip text={field.tooltip} />}
           {field.global && (
             <span className={styles.globalBadge}>Global Only</span>
           )}
@@ -509,9 +524,6 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
           )}
           {isUnique && (
             <span className={styles.uniqueBadge}>Unique to {pageSlug}</span>
-          )}
-          {field.description && (
-            <span className={styles.description}>{field.description}</span>
           )}
         </label>
 
@@ -612,7 +624,7 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>Ã¢Å“â€¦</span>
+            <span className={styles.alertIcon}>✓</span>
             <span className={styles.alertText}>
               Changes saved successfully!
             </span>
@@ -620,7 +632,7 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
               className={styles.alertClose}
               onClick={() => setShowSaveAlert(false)}
             >
-              Ãƒâ€”
+              ×
             </button>
           </div>
         </div>
@@ -628,14 +640,14 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
 
       {apiError && (
         <div className={styles.apiError}>
-          <h4>Ã¢Å¡Â Ã¯Â¸Â API Connection Issue</h4>
+          <h4>⚠️ API Connection Issue</h4>
           <p>{apiError}</p>
           <p>Only Global settings are available until this is resolved.</p>
           <button
             onClick={loadPagesFromWordPress}
             style={{ padding: "5px 10px", marginTop: "10px" }}
           >
-            Ã°Å¸â€â€ž Retry Loading Pages
+            🔄 Retry Loading Pages
           </button>
         </div>
       )}
@@ -655,22 +667,22 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
             let prefix = "";
 
             if (page.type === "global") {
-              icon = "Ã°Å¸Å’Â";
+              icon = "🌐";
               prefix = "Global";
             } else if (page.type === "page") {
-              icon = "Ã°Å¸â€œâ€ž";
+              icon = "📄";
               prefix = "Page";
             } else if (page.type === "post") {
-              icon = "Ã°Å¸â€œÂ";
+              icon = "📝";
               prefix = "Post";
             } else if (page.type === "special") {
-              icon = "Ã¢Â­Â";
+              icon = "⭐";
               prefix = "Special";
             }
 
             return (
               <option key={page.id} value={page.id}>
-                {icon} {prefix}: {page.title.replace(/^Ã°Å¸Å’Â\s*/, "")}
+                {icon} {prefix}: {page.title.replace(/^🌐\s*/, "")}
                 {page.url && page.url !== "/" ? ` (${page.url})` : ""}
               </option>
             );
@@ -680,10 +692,10 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         {selectedPage !== "global" && (
           <div className={styles.inheritanceInfo}>
             <small>
-              Ã°Å¸â€™Â¡ This page inherits settings from Global. Override any
-              field to customize it specifically for this page. Global-only
-              settings (Character Encoding, Viewport, Theme Color, Generator)
-              are managed in the Global section.
+              💡 This page inherits settings from Global. Override any field to
+              customize it specifically for this page. Global-only settings
+              (Character Encoding, Viewport, Theme Color, Generator) are managed
+              in the Global section.
             </small>
           </div>
         )}
@@ -691,9 +703,8 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         {selectedPage === "global" && (
           <div className={styles.inheritanceInfo}>
             <small>
-              Ã°Å¸Å’Â These are your global default settings. Individual pages
-              will inherit these values unless you override them on specific
-              pages.
+              🌐 These are your global default settings. Individual pages will
+              inherit these values unless you override them on specific pages.
             </small>
           </div>
         )}
@@ -723,7 +734,7 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
               navigator.clipboard.writeText(generateMetaTagsCode());
             }}
           >
-            Ã°Å¸â€œâ€¹ Copy Code
+            📋 Copy Code
           </button>
         </div>
       </div>
