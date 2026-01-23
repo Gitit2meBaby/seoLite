@@ -55,7 +55,6 @@ const Breadcrumbs = ({ tabId, config, onNavigate }) => {
       // Load pages
       const fetchedPages = await loadPages();
       if (fetchedPages && fetchedPages.length > 0) {
-        console.log("ðŸž Pages for breadcrumbs:", fetchedPages);
         setPages(fetchedPages);
 
         // Set default preview to first non-home page
@@ -258,21 +257,22 @@ ${JSON.stringify(jsonLd, null, 2)}
 
   const handleSave = async () => {
     try {
-      const settings = {
-        breadcrumb_config: breadcrumbConfig,
+      const settingsToSave = {
+        breadcrumb_config: breadcrumbConfig, // From local state
       };
 
-      const result = await savePageSettings("global", settings);
+      const result = await savePageSettings("global", settingsToSave);
 
       if (result.success) {
         setHasChanges(false);
         setShowSaveAlert(true);
         setTimeout(() => setShowSaveAlert(false), 3000);
       } else {
-        alert(`Failed to save settings: ${result.message}`);
+        throw new Error(result.message || "Save failed");
       }
     } catch (error) {
-      alert(`Error during save: ${error.message}`);
+      console.error("❌ Breadcrumbs: Save failed:", error);
+      alert(`Save failed: ${error.message}`);
     }
   };
 
@@ -511,14 +511,6 @@ ${JSON.stringify(jsonLd, null, 2)}
 
       {/* Actions */}
       <div className={styles.actions}>
-        <button
-          className={styles.saveButton}
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? "Saving..." : "Save Breadcrumb Settings"}
-        </button>
-
         {hasChanges && (
           <span className={styles.unsavedChanges}>
             You have unsaved changes

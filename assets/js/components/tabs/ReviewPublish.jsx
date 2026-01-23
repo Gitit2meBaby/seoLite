@@ -6,6 +6,27 @@ import { socialFields } from "./socialFields";
 import { trackingFields } from "./trackingFields";
 import styles from "@css/components/tabs/SocialMedia.module.scss";
 
+// Import schema builders for proper JSON-LD generation
+import { buildOrganizationJson } from "../schemaTypes/OrganizationSchema";
+import { buildLocalBusinessJson } from "../schemaTypes/LocalBusinessSchema";
+import { buildArticleJson } from "../schemaTypes/ArticleSchema";
+import { buildProductJson } from "../schemaTypes/ProductSchema";
+import { buildPersonJson } from "../schemaTypes/PersonSchema";
+import { buildWebSiteJson } from "../schemaTypes/WebSiteSchema";
+import { buildWebPageJson } from "../schemaTypes/WebPageSchema";
+import { buildEventJson } from "../schemaTypes/EventSchema";
+import { buildRecipeJson } from "../schemaTypes/RecipeSchema";
+import { buildVideoObjectJson } from "../schemaTypes/VideoObjectSchema";
+import { buildHowToJson } from "../schemaTypes/HowToSchema";
+import { buildFaqPageJson } from "../schemaTypes/FaqPageSchema";
+import { buildReviewJson } from "../schemaTypes/ReviewSchema";
+import { buildCourseJson } from "../schemaTypes/CourseSchema";
+import { buildServiceJson } from "../schemaTypes/ServiceSchema";
+import { buildJobPostingJson } from "../schemaTypes/JobPostingSchema";
+import { buildNonProfitOrganizationJson } from "../schemaTypes/NonProfitOrganizationSchema";
+import { buildOnlineMarketplaceJson } from "../schemaTypes/OnlineMarketplaceSchema";
+import { buildCustomJson } from "../schemaTypes/CustomSchema";
+
 const ReviewPublish = ({ tabId, config }) => {
   const {
     settings,
@@ -216,9 +237,9 @@ const ReviewPublish = ({ tabId, config }) => {
     const values = getAllEffectiveValues();
     const output = [];
 
-    console.log("🔍 Generating head output with values:", values);
-    console.log("📊 Settings object:", settings);
-    console.log("📄 Selected page:", selectedPage);
+    console.log("Ã°Å¸â€Â Generating head output with values:", values);
+    console.log("Ã°Å¸â€œÅ  Settings object:", settings);
+    console.log("Ã°Å¸â€œâ€ž Selected page:", selectedPage);
 
     // Helper function to generate script tag with loading attribute
     const getScriptAttr = (fieldKey) => {
@@ -581,25 +602,252 @@ const ReviewPublish = ({ tabId, config }) => {
       output.push("");
     }
 
+    // Universal Analytics (Legacy)
+    if (values.google_universal_analytics_id) {
+      const scriptAttr = getScriptAttr("google_universal_analytics_id");
+      output.push("<!-- Google Universal Analytics (Legacy) -->");
+      output.push(
+        `<script${scriptAttr} src="https://www.google-analytics.com/analytics.js"></script>`,
+      );
+      output.push("<script>");
+      output.push(
+        "  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;",
+      );
+      output.push(
+        `  ga('create', '${values.google_universal_analytics_id}', 'auto');`,
+      );
+      output.push("  ga('send', 'pageview');");
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Google Ads Conversion
+    if (values.google_ads_conversion_id) {
+      const scriptAttr = getScriptAttr("google_ads_conversion_id");
+      output.push("<!-- Google Ads Conversion Tracking -->");
+      output.push(
+        `<script${scriptAttr} src="https://www.googletagmanager.com/gtag/js?id=${values.google_ads_conversion_id}"></script>`,
+      );
+      output.push("<script>");
+      output.push("  window.dataLayer = window.dataLayer || [];");
+      output.push("  function gtag(){dataLayer.push(arguments);}");
+      output.push("  gtag('js', new Date());");
+      output.push(`  gtag('config', '${values.google_ads_conversion_id}');`);
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Google AdSense
+    if (values.google_adsense_id) {
+      const scriptAttr = getScriptAttr("google_adsense_id");
+      output.push("<!-- Google AdSense -->");
+      output.push(
+        `<script${scriptAttr} src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${values.google_adsense_id}"`,
+      );
+      output.push('     crossorigin="anonymous"></script>');
+      output.push("");
+    }
+
+    // Twitter/X Pixel
+    if (values.twitter_pixel_id) {
+      const scriptAttr = getScriptAttr("twitter_pixel_id");
+      output.push("<!-- Twitter/X Pixel -->");
+      output.push(`<script${scriptAttr}>`);
+      output.push(
+        "!function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);",
+      );
+      output.push(
+        "},s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',",
+      );
+      output.push(
+        "a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');",
+      );
+      output.push(`twq('config','${values.twitter_pixel_id}');`);
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Pinterest Tag
+    if (values.pinterest_tag_id) {
+      const scriptAttr = getScriptAttr("pinterest_tag_id");
+      output.push("<!-- Pinterest Tag -->");
+      output.push(`<script${scriptAttr}>`);
+      output.push(
+        "!function(e){if(!window.pintrk){window.pintrk = function () {",
+      );
+      output.push(
+        "window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var",
+      );
+      output.push('  n=window.pintrk;n.queue=[],n.version="3.0";var');
+      output.push(
+        '  t=document.createElement("script");t.async=!0,t.src=e;var',
+      );
+      output.push('  r=document.getElementsByTagName("script")[0];');
+      output.push(
+        '  r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");',
+      );
+      output.push(
+        `pintrk('load', '${values.pinterest_tag_id}', {em: '<user_email_address>'});`,
+      );
+      output.push("pintrk('page');");
+      output.push("</script>");
+      output.push("<noscript>");
+      output.push('<img height="1" width="1" style="display:none;" alt=""');
+      output.push(
+        `  src="https://ct.pinterest.com/v3/?event=init&tid=${values.pinterest_tag_id}&pd[em]=<hashed_email_address>&noscript=1" />`,
+      );
+      output.push("</noscript>");
+      output.push("");
+    }
+
+    // Hotjar
+    if (values.hotjar_site_id) {
+      const scriptAttr = getScriptAttr("hotjar_site_id");
+      output.push("<!-- Hotjar Tracking Code -->");
+      output.push(`<script${scriptAttr}>`);
+      output.push("    (function(h,o,t,j,a,r){");
+      output.push(
+        "        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};",
+      );
+      output.push(
+        `        h._hjSettings={hjid:${values.hotjar_site_id},hjsv:6};`,
+      );
+      output.push("        a=o.getElementsByTagName('head')[0];");
+      output.push("        r=o.createElement('script');r.async=1;");
+      output.push("        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;");
+      output.push("        a.appendChild(r);");
+      output.push(
+        "    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');",
+      );
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Mixpanel (abbreviated for space)
+    if (values.mixpanel_token) {
+      const scriptAttr = getScriptAttr("mixpanel_token");
+      output.push("<!-- Mixpanel -->");
+      output.push(`<script${scriptAttr} type="text/javascript">`);
+      output.push("/* Mixpanel loader code */");
+      output.push(`mixpanel.init("${values.mixpanel_token}");`);
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Amplitude (abbreviated)
+    if (values.amplitude_api_key) {
+      const scriptAttr = getScriptAttr("amplitude_api_key");
+      output.push("<!-- Amplitude -->");
+      output.push(`<script${scriptAttr} type="text/javascript">`);
+      output.push("/* Amplitude loader code */");
+      output.push(
+        `amplitude.getInstance().init("${values.amplitude_api_key}");`,
+      );
+      output.push("</script>");
+      output.push("");
+    }
+
+    // FullStory (abbreviated)
+    if (values.fullstory_org_id) {
+      const scriptAttr = getScriptAttr("fullstory_org_id");
+      output.push("<!-- FullStory -->");
+      output.push(`<script${scriptAttr}>`);
+      output.push(`window['_fs_org'] = '${values.fullstory_org_id}';`);
+      output.push("/* FullStory loader code */");
+      output.push("</script>");
+      output.push("");
+    }
+
+    // Verification Meta Tags
+    if (values.google_site_verification) {
+      output.push("<!-- Google Search Console Verification -->");
+      output.push(
+        `<meta name="google-site-verification" content="${values.google_site_verification}" />`,
+      );
+      output.push("");
+    }
+
+    if (values.bing_site_verification) {
+      output.push("<!-- Bing Webmaster Tools Verification -->");
+      output.push(
+        `<meta name="msvalidate.01" content="${values.bing_site_verification}" />`,
+      );
+      output.push("");
+    }
+
+    if (values.yandex_verification) {
+      output.push("<!-- Yandex Webmaster Verification -->");
+      output.push(
+        `<meta name="yandex-verification" content="${values.yandex_verification}" />`,
+      );
+      output.push("");
+    }
+
+    if (values.pinterest_verification) {
+      output.push("<!-- Pinterest Site Verification -->");
+      output.push(
+        `<meta name="p:domain_verify" content="${values.pinterest_verification}" />`,
+      );
+      output.push("");
+    }
+
+    // Custom Head Scripts
+    if (values.custom_head_scripts) {
+      output.push("<!-- Custom Head Scripts -->");
+      output.push(values.custom_head_scripts);
+      output.push("");
+    }
+
     // JSON-LD Schemas
     if (values.schemas && values.schemas.length > 0) {
       output.push("<!-- Structured Data (JSON-LD) -->");
       output.push('<script async type="application/ld+json">');
 
-      // Import schema builders to generate proper JSON with @type
+      // Map schema types to their builder functions
+      const schemaBuilders = {
+        Organization: buildOrganizationJson,
+        LocalBusiness: buildLocalBusinessJson,
+        Article: buildArticleJson,
+        Product: buildProductJson,
+        Person: buildPersonJson,
+        WebSite: buildWebSiteJson,
+        WebPage: buildWebPageJson,
+        Event: buildEventJson,
+        Recipe: buildRecipeJson,
+        VideoObject: buildVideoObjectJson,
+        HowTo: buildHowToJson,
+        FAQPage: buildFaqPageJson,
+        Review: buildReviewJson,
+        Course: buildCourseJson,
+        Service: buildServiceJson,
+        JobPosting: buildJobPostingJson,
+        NonprofitOrganization: buildNonProfitOrganizationJson,
+        OnlineMarketplace: buildOnlineMarketplaceJson,
+        Custom: buildCustomJson,
+      };
+
+      // Build schemas using proper builder functions
       const builtSchemas = values.schemas
         .map((schema) => {
-          // Each schema has: { id, type, data }
-          // We need to build the proper JSON using the type
-          // For now, just ensure we have @type in the data
-          if (schema.data && !schema.data["@type"] && schema.type) {
-            // Add @type based on schema type
-            return {
-              "@type": schema.type,
-              ...schema.data,
-            };
+          const builder = schemaBuilders[schema.type];
+          if (builder) {
+            // Use the proper builder function
+            const built = builder(schema.data);
+            if (built) {
+              // Remove @context if present (we'll add it at the @graph level)
+              if (built["@context"]) {
+                const { "@context": _, ...rest } = built;
+                return rest;
+              }
+              return built;
+            }
           }
-          return schema.data;
+          // Fallback for unknown types - just add @type
+          console.warn(`No builder found for schema type: ${schema.type}`);
+          return {
+            "@type": schema.type,
+            ...schema.data,
+          };
         })
         .filter(Boolean);
 
@@ -686,6 +934,13 @@ const ReviewPublish = ({ tabId, config }) => {
       output.push("<!-- End Google Tag Manager (noscript) -->");
     }
 
+    // Custom Body Scripts
+    if (values.custom_body_scripts) {
+      output.push("<!-- Custom Body Scripts -->");
+      output.push(values.custom_body_scripts);
+      output.push("");
+    }
+
     return output.join("\n");
   };
 
@@ -695,9 +950,9 @@ const ReviewPublish = ({ tabId, config }) => {
     const output = [];
 
     // Custom footer scripts
-    if (values.custom_footer_code) {
+    if (values.custom_footer_scripts) {
       output.push("<!-- Custom Footer Code -->");
-      output.push(values.custom_footer_code);
+      output.push(values.custom_footer_scripts);
       output.push("");
     }
 
@@ -751,7 +1006,7 @@ const ReviewPublish = ({ tabId, config }) => {
         }}
       >
         <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.2rem" }}>
-          📋 Review & Publish Your SEO Configuration
+          Ã°Å¸â€œâ€¹ Review & Publish Your SEO Configuration
         </h3>
         <p style={{ margin: "0 0 0.75rem 0", lineHeight: "1.6" }}>
           This page shows exactly what will be added to your website's HTML.
@@ -760,9 +1015,9 @@ const ReviewPublish = ({ tabId, config }) => {
           it live.
         </p>
         <p style={{ margin: 0, lineHeight: "1.6", fontWeight: 500 }}>
-          💡 The preview combines all your settings: meta tags, social media,
-          tracking codes, and schemas. Page-specific settings override global
-          settings.
+          Ã°Å¸â€™Â¡ The preview combines all your settings: meta tags, social
+          media, tracking codes, and schemas. Page-specific settings override
+          global settings.
         </p>
       </div>
 
@@ -774,12 +1029,12 @@ const ReviewPublish = ({ tabId, config }) => {
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">🌐 Global Defaults (All Pages)</option>
+          <option value="global">Ã°Å¸Å’Â Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (
               <option key={page.id} value={page.id}>
-                📄 {page.title}
+                Ã°Å¸â€œâ€ž {page.title}
                 {page.url ? ` (${page.url})` : ""}
               </option>
             ))}
@@ -791,7 +1046,7 @@ const ReviewPublish = ({ tabId, config }) => {
             style={{ marginTop: "0.75rem" }}
           >
             <small>
-              🔗 <strong>Viewing:</strong> {currentPageInfo.title}
+              Ã°Å¸â€â€” <strong>Viewing:</strong> {currentPageInfo.title}
               {currentPageInfo.url && ` (${currentPageInfo.url})`}
             </small>
           </div>
@@ -801,7 +1056,7 @@ const ReviewPublish = ({ tabId, config }) => {
       {/* Error Display */}
       {apiError && (
         <div className={styles.errorAlert}>
-          <p>⚠️ {apiError}</p>
+          <p>Ã¢Å¡Â Ã¯Â¸Â {apiError}</p>
         </div>
       )}
 
@@ -817,7 +1072,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showHeadSection ? "▼" : "▶"}
+                {showHeadSection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
               </span>
               <h3>&lt;head&gt; Section Output</h3>
             </div>
@@ -865,7 +1120,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showBodySection ? "▼" : "▶"}
+                {showBodySection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
               </span>
               <h3>&lt;body&gt; Section Output</h3>
             </div>
@@ -913,7 +1168,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showFooterSection ? "▼" : "▶"}
+                {showFooterSection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
               </span>
               <h3>Footer Section Output</h3>
             </div>
@@ -977,7 +1232,7 @@ const ReviewPublish = ({ tabId, config }) => {
                 textAlign: "center",
               }}
             >
-              ✅ <strong>Changes Published Successfully!</strong> Your SEO
+              âœ… <strong>Changes Published Successfully!</strong> Your SEO
               updates are now live on your website.
             </p>
           </div>
@@ -995,7 +1250,7 @@ const ReviewPublish = ({ tabId, config }) => {
             }}
           >
             <p style={{ margin: 0, fontSize: "1rem", color: "#721c24" }}>
-              ❌ {apiError}
+              Ã¢ÂÅ’ {apiError}
             </p>
           </div>
         )}
@@ -1012,7 +1267,7 @@ const ReviewPublish = ({ tabId, config }) => {
               }}
             >
               <p style={{ margin: 0, fontSize: "1rem", color: "#856404" }}>
-                ⚠️ <strong>Review your changes above</strong>
+                Ã¢Å¡Â Ã¯Â¸Â <strong>Review your changes above</strong>
               </p>
               <p
                 style={{
@@ -1036,8 +1291,8 @@ const ReviewPublish = ({ tabId, config }) => {
               }}
             >
               <p style={{ margin: 0, fontSize: "1rem", color: "#155724" }}>
-                ✅ <strong>All changes are live</strong> - Your website is up to
-                date
+                âœ… <strong>All changes are live</strong> - Your website is up
+                to date
               </p>
             </div>
           )}
@@ -1056,10 +1311,10 @@ const ReviewPublish = ({ tabId, config }) => {
             }}
           >
             {isPublishing
-              ? "🔄 Publishing..."
+              ? "Ã°Å¸â€â€ž Publishing..."
               : hasChanges
-                ? "🚀 Publish All Changes"
-                : "✅ Everything Published"}
+                ? "ðŸš€ Publish All Changes"
+                : "âœ… Everything Published"}
           </button>
         </div>
 

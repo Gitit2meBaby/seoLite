@@ -21,10 +21,6 @@ const SettingsProvider = ({ children }) => {
   const apiUrl = wpData.apiUrl;
   const nonce = wpData.nonce;
 
-  // useEffect(() => {
-  //   loadSettings();
-  // }, []);
-
   useEffect(() => {
     loadSettings();
 
@@ -126,9 +122,6 @@ const SettingsProvider = ({ children }) => {
    */
   const loadPages = async () => {
     try {
-      console.log("🌐 SettingsProvider: Loading pages from API...");
-      console.log("🔗 API URL:", apiUrl);
-
       if (!apiUrl) {
         console.warn("⚠️ No API URL available, returning minimal pages");
         return [{ id: "global", title: "Global Defaults", type: "global" }];
@@ -142,14 +135,10 @@ const SettingsProvider = ({ children }) => {
         },
       });
 
-      console.log("📡 API Response status:", response.status);
-
       if (response.ok) {
         const data = await response.json();
-        console.log("📦 Raw API data:", data);
 
         if (data.success && data.data) {
-          console.log("✅ Successfully fetched pages:", data.data);
           return data.data;
         } else {
           console.warn("⚠️ API returned unsuccessful response:", data);
@@ -159,7 +148,7 @@ const SettingsProvider = ({ children }) => {
         console.error(
           "❌ API request failed:",
           response.status,
-          response.statusText
+          response.statusText,
         );
         return [{ id: "global", title: "Global Defaults", type: "global" }];
       }
@@ -175,10 +164,8 @@ const SettingsProvider = ({ children }) => {
   const savePageSettings = async (pageId, pageSettings) => {
     try {
       setIsSaving(true);
-      console.log("🔄 Saving page settings:", { pageId, pageSettings });
 
       if (!apiUrl) {
-        console.log("📝 Mock save (no API URL)");
         // Mock save for development
         setSettings((prev) => ({
           ...prev,
@@ -186,9 +173,6 @@ const SettingsProvider = ({ children }) => {
         }));
         return { success: true };
       }
-
-      console.log("📡 Making API request to:", `${apiUrl}meta/${pageId}`);
-      console.log("📦 Request payload:", JSON.stringify(pageSettings, null, 2));
 
       const response = await fetch(`${apiUrl}meta/${pageId}`, {
         method: "POST",
@@ -198,9 +182,6 @@ const SettingsProvider = ({ children }) => {
         },
         body: JSON.stringify(pageSettings),
       });
-
-      console.log("📡 Response status:", response.status);
-      console.log("📡 Response headers:", response.headers);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -213,7 +194,6 @@ const SettingsProvider = ({ children }) => {
       }
 
       const result = await response.json();
-      console.log("✅ API Response:", result);
 
       if (result.success) {
         // Update local state
@@ -221,7 +201,6 @@ const SettingsProvider = ({ children }) => {
           ...prev,
           [`page_${pageId}`]: pageSettings,
         }));
-        console.log("✅ Local state updated");
       } else {
         console.error("❌ API returned error:", result);
       }

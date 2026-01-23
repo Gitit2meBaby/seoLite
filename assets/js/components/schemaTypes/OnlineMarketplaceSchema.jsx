@@ -53,6 +53,7 @@ export default function OnlineMarketplaceSchema({ value, onChange }) {
           onChange={(e) => update("name", e.target.value)}
           placeholder="My Marketplace"
           required
+          autoComplete="organization"
         />
       </div>
 
@@ -68,6 +69,7 @@ export default function OnlineMarketplaceSchema({ value, onChange }) {
           onChange={(e) => update("url", e.target.value)}
           placeholder="https://example.com"
           required
+          autoComplete="organization-url"
         />
       </div>
 
@@ -169,6 +171,7 @@ export default function OnlineMarketplaceSchema({ value, onChange }) {
           value={data.email}
           onChange={(e) => update("email", e.target.value)}
           placeholder="contact@example.com"
+          autoComplete="email"
         />
       </div>
 
@@ -180,6 +183,7 @@ export default function OnlineMarketplaceSchema({ value, onChange }) {
           value={data.telephone}
           onChange={(e) => update("telephone", e.target.value)}
           placeholder="+1-555-555-5555"
+          autoComplete="tel"
         />
       </div>
     </div>

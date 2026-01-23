@@ -148,12 +148,20 @@ const TrackingTags = ({ tabId, config, onNavigate }) => {
 
   const handleSave = async () => {
     try {
-      await savePageSettings(selectedPage);
-      setHasChanges(false);
-      setShowSaveAlert(true);
-      setTimeout(() => setShowSaveAlert(false), 3000);
+      const pageKey = `page_${selectedPage}`;
+      const pageSettingsToSave = settings[pageKey] || {};
+
+      const result = await savePageSettings(selectedPage, pageSettingsToSave);
+
+      if (result.success) {
+        setHasChanges(false);
+        setShowSaveAlert(true);
+        setTimeout(() => setShowSaveAlert(false), 3000);
+      } else {
+        throw new Error(result.message || "Save failed");
+      }
     } catch (error) {
-      console.error("Save failed:", error);
+      console.error("❌ TrackingTags: Save failed:", error);
       setApiError(`Save failed: ${error.message}`);
     }
   };
@@ -783,16 +791,8 @@ ${customFooter}`);
         {trackingFields.map(renderSection)}
       </div>
 
-      {/* Save Button */}
+      {/* Save Button - Only ReviewPublishButton */}
       <div className={styles.saveSection}>
-        <button
-          className={`${styles.saveButton} ${hasChanges ? styles.hasChanges : ""}`}
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? "Saving..." : hasChanges ? "Save Changes" : "No Changes"}
-        </button>
-
         <ReviewPublishButton
           onSave={handleSave}
           hasChanges={hasChanges}
@@ -809,7 +809,7 @@ ${customFooter}`);
           onClick={() => setShowPreview(!showPreview)}
           style={{ marginRight: "1rem" }}
         >
-          {showPreview ? "Hide Preview" : "Show Preview"}
+          {showPreview ? "Hide Preview" : "Show All Tracking Codes Preview"}
         </button>
 
         {selectedPage !== "global" && (

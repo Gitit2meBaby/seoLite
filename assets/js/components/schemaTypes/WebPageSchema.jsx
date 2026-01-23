@@ -60,6 +60,7 @@ export default function WebPageSchema({ value, onChange }) {
           onChange={(e) => update("url", e.target.value)}
           placeholder="https://example.com/about"
           required
+          autoComplete="url"
         />
       </div>
 
@@ -142,6 +143,11 @@ export default function WebPageSchema({ value, onChange }) {
             className={styles.input}
             value={data.datePublished || ""}
             onChange={(e) => update("datePublished", e.target.value)}
+            onFocus={() => {
+              if (!data.datePublished) {
+                update("datePublished", new Date().toISOString().slice(0, 16));
+              }
+            }}
           />
         </div>
 
@@ -155,6 +161,11 @@ export default function WebPageSchema({ value, onChange }) {
             className={styles.input}
             value={data.dateModified || ""}
             onChange={(e) => update("dateModified", e.target.value)}
+            onFocus={() => {
+              if (!data.datePublished) {
+                update("dateModified", new Date().toISOString().slice(0, 16));
+              }
+            }}
           />
         </div>
       </div>
@@ -175,6 +186,7 @@ export default function WebPageSchema({ value, onChange }) {
               value={data.author || ""}
               onChange={(e) => update("author", e.target.value)}
               placeholder="Jane Doe"
+              autoComplete="name"
             />
           </div>
 

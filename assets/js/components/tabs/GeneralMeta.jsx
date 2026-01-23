@@ -309,10 +309,11 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
   };
 
   const handleSave = async () => {
-    const pageSettings = settings[`page_${selectedPage}`] || {};
-
     try {
-      const result = await savePageSettings(selectedPage, pageSettings);
+      const pageKey = `page_${selectedPage}`;
+      const pageSettingsToSave = settings[pageKey] || {};
+
+      const result = await savePageSettings(selectedPage, pageSettingsToSave);
 
       if (result.success) {
         setHasChanges(false);
@@ -320,10 +321,11 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => setShowSaveAlert(false), 3000);
       } else {
-        alert(`Failed to save settings: ${result.message}`);
+        throw new Error(result.message || "Save failed");
       }
     } catch (error) {
-      alert(`Error during save: ${error.message}`);
+      console.error("❌ GeneralMeta: Save failed:", error);
+      setApiError(`Save failed: ${error.message}`);
     }
   };
 
@@ -739,14 +741,6 @@ const GeneralMeta = ({ tabId, config, onNavigate }) => {
       </div>
 
       <div className={styles.actions}>
-        <button
-          className={styles.saveButton}
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? "Saving..." : "Save Changes"}
-        </button>
-
         <ReviewPublishButton
           onSave={handleSave}
           hasChanges={hasChanges}

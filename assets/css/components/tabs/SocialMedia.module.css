@@ -167,6 +167,7 @@
   transition: transform 0.2s ease;
   width: 16px;
   text-align: center;
+  margin-left: 0.5rem;
 }
 .sectionHeader.expanded .sectionIcon {
   transform: rotate(0deg);

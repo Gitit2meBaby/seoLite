@@ -73,6 +73,7 @@ export default function PersonSchema({ value, onChange }) {
           onChange={(e) => update("name", e.target.value)}
           placeholder="John Doe"
           required
+          autoComplete="name"
         />
       </div>
 
@@ -83,6 +84,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.givenName}
           onChange={(e) => update("givenName", e.target.value)}
+          autoComplete="given-name"
         />
       </div>
 
@@ -93,6 +95,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.familyName}
           onChange={(e) => update("familyName", e.target.value)}
+          autoComplete="family-name"
         />
       </div>
 
@@ -135,6 +138,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.jobTitle}
           onChange={(e) => update("jobTitle", e.target.value)}
+          autoComplete="organization-title"
         />
       </div>
 
@@ -175,6 +179,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.email}
           onChange={(e) => update("email", e.target.value)}
+          autoComplete="email"
         />
       </div>
 
@@ -185,6 +190,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.telephone}
           onChange={(e) => update("telephone", e.target.value)}
+          autoComplete="tel"
         />
       </div>
 
@@ -195,6 +201,7 @@ export default function PersonSchema({ value, onChange }) {
           className={styles.input}
           value={data.url}
           onChange={(e) => update("url", e.target.value)}
+          autoComplete="url"
         />
       </div>
 
@@ -207,6 +214,7 @@ export default function PersonSchema({ value, onChange }) {
           value={data.address.addressLocality}
           onChange={(e) => updateAddress("addressLocality", e.target.value)}
           placeholder="City"
+          autoComplete="address-level2"
         />
         <input
           type="text"
@@ -214,6 +222,7 @@ export default function PersonSchema({ value, onChange }) {
           value={data.address.addressRegion}
           onChange={(e) => updateAddress("addressRegion", e.target.value)}
           placeholder="Region/State"
+          autoComplete="address-level1"
         />
         <input
           type="text"
@@ -221,6 +230,7 @@ export default function PersonSchema({ value, onChange }) {
           value={data.address.addressCountry}
           onChange={(e) => updateAddress("addressCountry", e.target.value)}
           placeholder="Country"
+          autoComplete="country"
         />
       </div>
 

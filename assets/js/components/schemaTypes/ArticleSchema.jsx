@@ -65,6 +65,7 @@ export default function ArticleSchema({ value, onChange }) {
             value={data.url || ""}
             onChange={(e) => update("url", e.target.value)}
             placeholder="https://example.com/article"
+            autoComplete="url"
             required
           />
         </div>
@@ -98,6 +99,7 @@ export default function ArticleSchema({ value, onChange }) {
             value={data.author || ""}
             onChange={(e) => update("author", e.target.value)}
             placeholder="Author name"
+            autoComplete="name"
           />
         </div>
 
@@ -112,6 +114,7 @@ export default function ArticleSchema({ value, onChange }) {
             value={data.authorUrl || ""}
             onChange={(e) => update("authorUrl", e.target.value)}
             placeholder="https://example.com/author"
+            autoComplete="url"
           />
         </div>
 
@@ -171,6 +174,11 @@ export default function ArticleSchema({ value, onChange }) {
             type="datetime-local"
             className={styles.input}
             value={data.datePublished || ""}
+            onFocus={() => {
+              if (!data.datePublished) {
+                update("datePublished", new Date().toISOString().slice(0, 16));
+              }
+            }}
             onChange={(e) => update("datePublished", e.target.value)}
           />
         </div>
@@ -184,6 +192,11 @@ export default function ArticleSchema({ value, onChange }) {
             type="datetime-local"
             className={styles.input}
             value={data.dateModified || ""}
+            onFocus={() => {
+              if (!data.datePublished) {
+                update("dateModified", new Date().toISOString().slice(0, 16));
+              }
+            }}
             onChange={(e) => update("dateModified", e.target.value)}
           />
         </div>

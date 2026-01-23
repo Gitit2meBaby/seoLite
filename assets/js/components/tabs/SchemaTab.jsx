@@ -156,8 +156,9 @@ const SCHEMA_TYPES = {
   },
 };
 
-const SchemaTab = ({ tabId, config }) => {
-  const { settings, updateSetting, loadPages } = useSettings();
+const SchemaTab = ({ tabId, config, onNavigate }) => {
+  const { settings, updateSetting, savePageSettings, loadPages, isSaving } =
+    useSettings();
 
   // UI State
   const [selectedPage, setSelectedPage] = useState("global");
@@ -165,16 +166,15 @@ const SchemaTab = ({ tabId, config }) => {
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   const [apiError, setApiError] = useState(null);
   const [showSaveAlert, setShowSaveAlert] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Schema Form State
+  // Schema Form State (for the current form being filled out)
   const [selectedSchemaType, setSelectedSchemaType] = useState("");
   const [currentSchemaData, setCurrentSchemaData] = useState({});
   const [editingSchemaId, setEditingSchemaId] = useState(null);
 
-  // Saved Schemas - directly from settings, no separate loading
-  const pageKey = `page_${selectedPage}`;
-  const pageSettings = settings[pageKey] || {};
-  const savedSchemas = pageSettings.schemas || [];
+  // LOCAL STATE for saved schemas list - THIS IS THE KEY!
+  const [savedSchemas, setSavedSchemas] = useState([]);
 
   // Preview State
   const [previewSchemaId, setPreviewSchemaId] = useState(null);
@@ -204,6 +204,16 @@ const SchemaTab = ({ tabId, config }) => {
     loadPagesOnce();
   }, []); // Only run once!
 
+  // Load schemas from settings when page changes
+  useEffect(() => {
+    const pageKey = `page_${selectedPage}`;
+    const pageSettings = settings[pageKey] || {};
+    const schemasFromSettings = pageSettings.schemas || [];
+
+    setSavedSchemas(schemasFromSettings);
+    setHasChanges(false);
+  }, [selectedPage, settings]);
+
   const handlePageChange = (pageId) => {
     setSelectedPage(pageId);
     setSelectedSchemaType("");
@@ -230,10 +240,6 @@ const SchemaTab = ({ tabId, config }) => {
   };
 
   const handleSchemaSave = () => {
-    console.log("=== SAVE CLICKED ===");
-    console.log("Selected Type:", selectedSchemaType);
-    console.log("Current Data:", currentSchemaData);
-
     if (!selectedSchemaType) {
       alert("Please select a schema type");
       return;
@@ -254,8 +260,7 @@ const SchemaTab = ({ tabId, config }) => {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log("Creating schema entry:", schemaEntry);
-
+    // Update local state
     let updatedSchemas;
     if (editingSchemaId) {
       updatedSchemas = savedSchemas.map((schema) =>
@@ -265,16 +270,9 @@ const SchemaTab = ({ tabId, config }) => {
       updatedSchemas = [...savedSchemas, schemaEntry];
     }
 
-    console.log("Updated schemas array:", updatedSchemas);
-
-    // Save to WordPress settings
-    const updatedPageSettings = {
-      ...pageSettings,
-      schemas: updatedSchemas,
-    };
-
-    console.log("Saving to settings:", pageKey, updatedPageSettings);
-    updateSetting(pageKey, updatedPageSettings);
+    // Update LOCAL state
+    setSavedSchemas(updatedSchemas);
+    setHasChanges(true);
 
     // Reset form
     setSelectedSchemaType("");
@@ -286,8 +284,31 @@ const SchemaTab = ({ tabId, config }) => {
     setTimeout(() => setShowSaveAlert(false), 3000);
   };
 
+  // Save all schemas from LOCAL STATE to WordPress database
+  const handleSave = async () => {
+    try {
+      // Build settings object with schemas from LOCAL STATE
+      const settingsToSave = {
+        schemas: savedSchemas, // From local state, NOT from form!
+      };
+
+      // Save to WordPress
+      const result = await savePageSettings(selectedPage, settingsToSave);
+
+      if (result.success) {
+        setHasChanges(false);
+      } else {
+        throw new Error(result.message || "Save failed");
+      }
+    } catch (error) {
+      console.error("❌ SchemaTab: Save failed:", error);
+      if (setApiError) {
+        setApiError(`Save failed: ${error.message}`);
+      }
+    }
+  };
+
   const handleEditSchema = (schema) => {
-    console.log("Editing schema:", schema);
     setSelectedSchemaType(schema.type);
     setCurrentSchemaData({ ...schema.data });
     setEditingSchemaId(schema.id);
@@ -300,23 +321,17 @@ const SchemaTab = ({ tabId, config }) => {
       return;
     }
 
+    // Update LOCAL state
     const updatedSchemas = savedSchemas.filter((s) => s.id !== schemaId);
+    setSavedSchemas(updatedSchemas);
+    setHasChanges(true);
 
-    const updatedPageSettings = {
-      ...pageSettings,
-      schemas: updatedSchemas,
-    };
-
-    updateSetting(pageKey, updatedPageSettings);
-
+    // If we're editing the deleted schema, reset the form
     if (editingSchemaId === schemaId) {
       setSelectedSchemaType("");
       setCurrentSchemaData({});
       setEditingSchemaId(null);
     }
-
-    setShowSaveAlert(true);
-    setTimeout(() => setShowSaveAlert(false), 3000);
   };
 
   const toggleSchemaPreview = (schemaId) => {
@@ -368,17 +383,13 @@ const SchemaTab = ({ tabId, config }) => {
     return <LoadingSpinner message="Loading schema settings..." />;
   }
 
-  console.log("=== RENDER ===");
-  console.log("Saved Schemas:", savedSchemas);
-  console.log("Saved Schemas Length:", savedSchemas.length);
-
   return (
     <div className={styles.socialMedia}>
       {/* Success Alert */}
       {showSaveAlert && (
         <div className={styles.successAlert}>
           <div className={styles.alertContent}>
-            <span className={styles.alertIcon}>✓</span>
+            <span className={styles.alertIcon}>âœ“</span>
             <span className={styles.alertText}>
               Schema {editingSchemaId ? "updated" : "saved"} successfully!
             </span>
@@ -402,12 +413,12 @@ const SchemaTab = ({ tabId, config }) => {
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">🌍 Global Defaults (All Pages)</option>
+          <option value="global">ðŸŒ Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (
               <option key={page.id} value={page.id}>
-                📄 {page.title}
+                ðŸ“„ {page.title}
                 {page.url ? ` (${page.url})` : ""}
               </option>
             ))}
@@ -468,8 +479,8 @@ const SchemaTab = ({ tabId, config }) => {
         {currentSchemaConfig?.allowMultiple && !editingSchemaId && (
           <div className={styles.inheritanceInfo} style={{ marginTop: "1rem" }}>
             <p style={{ fontSize: "0.9rem", margin: 0 }}>
-              💡 <strong>Multiple schemas allowed:</strong> You can add as many{" "}
-              {currentSchemaConfig.label} schemas as needed.
+              ðŸ’¡ <strong>Multiple schemas allowed:</strong> You can add as
+              many {currentSchemaConfig.label} schemas as needed.
             </p>
           </div>
         )}
@@ -538,7 +549,7 @@ const SchemaTab = ({ tabId, config }) => {
                   <div className={styles.sectionTitle}>
                     <h3>{schemaConfig?.label || schema.type}</h3>
                     <span className={styles.sectionCount}>
-                      {schemaName} • {scopeLabel}
+                      {schemaName} â€¢ {scopeLabel}
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -656,10 +667,10 @@ const SchemaTab = ({ tabId, config }) => {
               <strong>What you're seeing:</strong>
               <ul style={{ margin: "0.5rem 0 0 1.5rem", paddingLeft: 0 }}>
                 <li>
-                  ✅ <strong>Global schemas</strong> that apply to all pages
+                  âœ… <strong>Global schemas</strong> that apply to all pages
                 </li>
                 <li>
-                  ✅ <strong>Page-specific schemas</strong> for this page
+                  âœ… <strong>Page-specific schemas</strong> for this page
                 </li>
                 <li>All schemas will be combined in the output</li>
               </ul>
@@ -683,11 +694,12 @@ const SchemaTab = ({ tabId, config }) => {
         </div>
       )}
 
-      {/* ADD THIS: */}
+      {/* Save & Review Button */}
       <ReviewPublishButton
-        onSave={handleSchemaSave}
-        hasChanges={true}
-        isSaving={false}
+        onSave={handleSave}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        onNavigate={onNavigate}
       />
     </div>
   );

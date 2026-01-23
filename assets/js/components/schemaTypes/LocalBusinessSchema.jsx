@@ -103,6 +103,7 @@ export default function LocalBusinessSchema({ value, onChange }) {
           className={styles.input}
           value={data.name || ""}
           onChange={(e) => update("name", e.target.value)}
+          autoComplete="organization"
         />
       </div>
 
@@ -123,16 +124,33 @@ export default function LocalBusinessSchema({ value, onChange }) {
       <div className={styles.fieldGroup}>
         <h4>Address</h4>
         {[
-          { field: "streetAddress", label: "Street Address" },
-          { field: "addressLocality", label: "City" },
-          { field: "addressRegion", label: "State / Region" },
-          { field: "postalCode", label: "Postal Code" },
+          {
+            field: "streetAddress",
+            label: "Street Address",
+            autoComplete: "street-address",
+          },
+          {
+            field: "addressLocality",
+            label: "City",
+            autoComplete: "address-level2",
+          },
+          {
+            field: "addressRegion",
+            label: "State / Region",
+            autoComplete: "address-level1",
+          },
+          {
+            field: "postalCode",
+            label: "Postal Code",
+            autoComplete: "postal-code",
+          },
           {
             field: "addressCountry",
             label: "Country",
             placeholder: "Australia",
+            autoComplete: "country",
           },
-        ].map(({ field, label, placeholder }) => (
+        ].map(({ field, label, placeholder, autoComplete }) => (
           <div className={styles.formGroup} key={field}>
             <label className={styles.label}>{label}</label>
             <input
@@ -141,6 +159,7 @@ export default function LocalBusinessSchema({ value, onChange }) {
               placeholder={placeholder || ""}
               value={data.address[field] || ""}
               onChange={(e) => updateAddress(field, e.target.value)}
+              autoComplete={autoComplete}
             />
           </div>
         ))}
@@ -176,6 +195,7 @@ export default function LocalBusinessSchema({ value, onChange }) {
           placeholder="Telephone"
           value={data.telephone || ""}
           onChange={(e) => update("telephone", e.target.value)}
+          autoComplete="tel"
         />
         <input
           type="url"
@@ -183,6 +203,7 @@ export default function LocalBusinessSchema({ value, onChange }) {
           placeholder="Website URL"
           value={data.url || ""}
           onChange={(e) => update("url", e.target.value)}
+          autoComplete="organization-url"
         />
         <input
           type="text"

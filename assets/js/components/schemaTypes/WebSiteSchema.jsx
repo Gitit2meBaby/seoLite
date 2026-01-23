@@ -57,6 +57,7 @@ export default function WebSiteSchema({ value, onChange }) {
               onChange={(e) => update("url", e.target.value)}
               placeholder="https://example.com"
               required
+              autoComplete="url"
             />
           </div>
         </div>

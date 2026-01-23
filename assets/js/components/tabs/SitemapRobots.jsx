@@ -243,33 +243,35 @@ Sitemap: ${siteUrl}/sitemap.xml`;
     setSitemap(updatedSitemap);
     generateSitemapXML(updatedSitemap);
     setHasChanges(true);
+    setDeploymentStatus(null);
   };
 
   const handleRobotsTxtChange = (value) => {
     setRobotsTxt(value);
     setHasChanges(true);
+    setDeploymentStatus(null);
   };
 
   const handleSave = async () => {
     try {
-      // Save sitemap, videos, and robots.txt settings to global
-      const settings = {
-        sitemap_data: sitemap,
-        video_data: videos,
-        robots_txt: robotsTxt,
+      const settingsToSave = {
+        sitemap_data: sitemap, // From local state
+        video_data: videos, // From local state
+        robots_txt: robotsTxt, // From local state
       };
 
-      const result = await savePageSettings("global", settings);
+      const result = await savePageSettings("global", settingsToSave);
 
       if (result.success) {
         setHasChanges(false);
         setShowSaveAlert(true);
         setTimeout(() => setShowSaveAlert(false), 3000);
       } else {
-        alert(`Failed to save settings: ${result.message}`);
+        throw new Error(result.message || "Save failed");
       }
     } catch (error) {
-      alert(`Error during save: ${error.message}`);
+      console.error("❌ SitemapRobots: Save failed:", error);
+      alert(`Save failed: ${error.message}`);
     }
   };
 
@@ -462,7 +464,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       )}
 
       {/* XML Sitemap Section */}
-      <div className={styles.fieldsContainer}>
+      <div className={styles.fieldsContainer} style={{ marginTop: "1rem" }}>
         <div className={styles.sectionHeader}>
           <h3>XML Sitemap</h3>
           <p>
@@ -888,14 +890,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {/* Actions */}
       <div className={styles.actions}>
         <button
-          className={styles.saveButton}
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? "Saving..." : "Save Settings"}
-        </button>
-
-        <button
           className={styles.deployButton}
           onClick={deployFiles}
           disabled={deploymentStatus === "deploying" || hasChanges}
@@ -903,6 +897,11 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           {deploymentStatus === "deploying"
             ? "Deploying..."
             : "Deploy Files to Website"}
+          {deploymentStatus === "success"
+            ? "Deployment Complete"
+            : deploymentStatus === "error"
+              ? "Error During Deployment"
+              : ""}
         </button>
 
         {hasChanges && (
@@ -911,12 +910,17 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           </span>
         )}
 
-        <ReviewPublishButton
-          onSave={handleSave}
-          hasChanges={hasChanges}
-          isSaving={isSaving}
-          onNavigate={onNavigate}
-        />
+        <div
+          style={{ display: deploymentStatus !== "success" ? "none" : "flex" }}
+        >
+          <ReviewPublishButton
+            onSave={handleSave}
+            hasChanges={hasChanges}
+            isSaving={isSaving}
+            onNavigate={onNavigate}
+            disabled={deploymentStatus !== "success"}
+          />
+        </div>
       </div>
 
       {/* Help Section */}

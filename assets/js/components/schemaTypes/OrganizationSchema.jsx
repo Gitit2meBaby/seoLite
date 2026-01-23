@@ -58,6 +58,7 @@ export default function OrganizationSchema({ value, onChange }) {
             onChange={(e) => update("name", e.target.value)}
             placeholder="Excel Experts Australia"
             required
+            autoComplete="organization"
           />
         </div>
 
@@ -108,6 +109,7 @@ export default function OrganizationSchema({ value, onChange }) {
             onChange={(e) => update("url", e.target.value)}
             placeholder="https://example.com"
             required
+            autoComplete="organization-url"
           />
         </div>
       </div>
@@ -134,23 +136,42 @@ export default function OrganizationSchema({ value, onChange }) {
       <div className={styles.fieldGroup}>
         <h4>Address</h4>
         {[
-          "streetAddress",
-          "addressLocality",
-          "addressRegion",
-          "postalCode",
-          "addressCountry",
-        ].map((field) => (
+          {
+            field: "streetAddress",
+            label: "Street Address",
+            autoComplete: "street-address",
+          },
+          {
+            field: "addressLocality",
+            label: "City",
+            autoComplete: "address-level2",
+          },
+          {
+            field: "addressRegion",
+            label: "State / Region",
+            autoComplete: "address-level1",
+          },
+          {
+            field: "postalCode",
+            label: "Postal Code",
+            autoComplete: "postal-code",
+          },
+          {
+            field: "addressCountry",
+            label: "Country",
+            placeholder: "Australia",
+            autoComplete: "country",
+          },
+        ].map(({ field, label, placeholder, autoComplete }) => (
           <div className={styles.formGroup} key={field}>
-            <label className={styles.label}>
-              {field}
-              <Tooltip content={`Address field: ${field}`} />
-            </label>
+            <label className={styles.label}>{label}</label>
             <input
               type="text"
               className={styles.input}
+              placeholder={placeholder || ""}
               value={data.address[field] || ""}
               onChange={(e) => updateAddress(field, e.target.value)}
-              placeholder={field === "addressCountry" ? "AU" : ""}
+              autoComplete={autoComplete}
             />
           </div>
         ))}

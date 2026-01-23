@@ -89,6 +89,7 @@ export default function JobPostingSchema({ value, onChange }) {
           value={data.hiringOrganizationName || ""}
           onChange={(e) => update("hiringOrganizationName", e.target.value)}
           placeholder="Example Corp"
+          autoComplete="organization"
           required
         />
       </div>
@@ -104,6 +105,7 @@ export default function JobPostingSchema({ value, onChange }) {
           value={data.hiringOrganizationLogo || ""}
           onChange={(e) => update("hiringOrganizationLogo", e.target.value)}
           placeholder="https://example.com/logo.png"
+          autoComplete="organization-url"
         />
       </div>
 
@@ -164,6 +166,7 @@ export default function JobPostingSchema({ value, onChange }) {
                   updateJobLocation("postalCode", e.target.value)
                 }
                 placeholder="3000"
+                autoComplete="postal-code"
               />
             </label>
           </div>
@@ -179,6 +182,7 @@ export default function JobPostingSchema({ value, onChange }) {
                 updateJobLocation("addressCountry", e.target.value)
               }
               placeholder="Australia"
+              autoComplete="country"
             />
           </label>
         </div>
@@ -224,6 +228,11 @@ export default function JobPostingSchema({ value, onChange }) {
               className={styles.input}
               value={data.datePosted || ""}
               onChange={(e) => update("datePosted", e.target.value)}
+              onFocus={() => {
+                if (!data.datePublished) {
+                  update("datePosted", new Date().toISOString().slice(0, 16));
+                }
+              }}
             />
           </label>
         </div>

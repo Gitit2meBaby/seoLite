@@ -124,20 +124,21 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
   };
 
   const handleSave = async () => {
-    const pageSettings = settings[`page_${selectedPage}`] || {};
-
     try {
-      const result = await savePageSettings(selectedPage, pageSettings);
+      const pageKey = `page_${selectedPage}`;
+      const pageSettingsToSave = settings[pageKey] || {};
+
+      const result = await savePageSettings(selectedPage, pageSettingsToSave);
 
       if (result.success) {
         setHasChanges(false);
         setShowSaveAlert(true);
         setTimeout(() => setShowSaveAlert(false), 3000);
       } else {
-        setApiError(`Failed to save settings: ${result.message}`);
+        throw new Error(result.message || "Save failed");
       }
     } catch (error) {
-      console.error("Save failed:", error);
+      console.error("❌ SocialMedia: Save failed:", error);
       setApiError(`Save failed: ${error.message}`);
     }
   };
@@ -488,16 +489,6 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
 
       {/* Save Button */}
       <div className={styles.saveSection}>
-        <button
-          className={`${styles.saveButton} ${
-            hasChanges ? styles.hasChanges : ""
-          }`}
-          onClick={handleSave}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? "Saving..." : hasChanges ? "Save Changes" : "No Changes"}
-        </button>
-
         <ReviewPublishButton
           onSave={handleSave}
           hasChanges={hasChanges}

@@ -2,7 +2,13 @@
 import { useState } from "react";
 import styles from "@css/components/tabs/SocialMedia.module.scss";
 
-const ReviewPublishButton = ({ onSave, hasChanges, isSaving, onNavigate }) => {
+const ReviewPublishButton = ({
+  onSave,
+  hasChanges,
+  isSaving,
+  onNavigate,
+  disabled,
+}) => {
   const [isNavigating, setIsNavigating] = useState(false);
 
   const handleClick = async () => {
@@ -43,7 +49,7 @@ const ReviewPublishButton = ({ onSave, hasChanges, isSaving, onNavigate }) => {
       type="button"
       className={styles.saveButton}
       onClick={handleClick}
-      disabled={isSaving || isNavigating}
+      disabled={isSaving || isNavigating || disabled}
       style={{
         marginLeft: "1rem",
         background: hasChanges ? "#ffc107" : "#2196f3",

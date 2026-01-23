@@ -160,6 +160,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           value={data.name}
           onChange={(e) => update("name", e.target.value)}
           required
+          autoComplete="organization"
         />
       </div>
 
@@ -173,6 +174,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           className={styles.input}
           value={data.url}
           onChange={(e) => update("url", e.target.value)}
+          autoComplete="organization-url"
         />
       </div>
 
@@ -209,6 +211,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="info@example.org"
           value={data.email}
           onChange={(e) => update("email", e.target.value)}
+          autoComplete="email"
         />
         <input
           type="tel"
@@ -216,6 +219,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="+1-555-555-5555"
           value={data.telephone}
           onChange={(e) => update("telephone", e.target.value)}
+          autoComplete="tel"
         />
       </div>
 
@@ -228,6 +232,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="123 Main Street"
           value={data.address.streetAddress}
           onChange={(e) => updateAddress("streetAddress", e.target.value)}
+          autoComplete="street-address"
         />
         <input
           type="text"
@@ -235,6 +240,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="City"
           value={data.address.addressLocality}
           onChange={(e) => updateAddress("addressLocality", e.target.value)}
+          autoComplete="address-level2"
         />
         <input
           type="text"
@@ -242,6 +248,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="State/Region"
           value={data.address.addressRegion}
           onChange={(e) => updateAddress("addressRegion", e.target.value)}
+          autoComplete="address-level1"
         />
         <input
           type="text"
@@ -249,6 +256,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="Postal Code"
           value={data.address.postalCode}
           onChange={(e) => updateAddress("postalCode", e.target.value)}
+          autoComplete="postal-code"
         />
         <input
           type="text"
@@ -256,6 +264,7 @@ export default function NonprofitOrganizationSchema({ value, onChange }) {
           placeholder="Country"
           value={data.address.addressCountry}
           onChange={(e) => updateAddress("addressCountry", e.target.value)}
+          autoComplete="country"
         />
       </div>
 
