@@ -25,7 +25,7 @@ class SEO_Plugin_Meta_Injector {
      */
     public function inject_meta_tags() {
         // Add a comment so we know our plugin is working
-        echo "<!-- SEO Plugin Active -->\n";
+        echo "<!-- SEO Lite Active -->\n";
         
         // Get current page title
         $title = get_the_title();

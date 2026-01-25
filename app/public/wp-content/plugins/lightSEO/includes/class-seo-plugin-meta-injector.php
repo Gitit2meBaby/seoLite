@@ -14,7 +14,7 @@ class SEO_Plugin_Meta_Injector {
     }
     
     public function inject_meta_tags() {
-        echo "<!-- SEO Plugin Active -->\n";
+        echo "<!-- SEO Lite Active -->\n";
         $title = get_the_title();
         if ($title) {
             echo "<meta property=\"og:title\" content=\"" . esc_attr($title) . "\">\n";

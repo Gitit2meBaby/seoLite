@@ -1017,7 +1017,7 @@ ${customFooter}`);
       {/* Important Notes Section - Moved to Bottom */}
       <div className={styles.importantNotes}>
         <div className={styles.notesSection}>
-          <h4>⚠️ Important Notes:</h4>
+          <h4>⚠️ Important Notes:</h4>
           <ul>
             <li>
               Most tracking codes work best when placed globally rather than on
@@ -1077,7 +1077,7 @@ ${customFooter}`);
             </li>
             <li>
               <strong>General Debugging:</strong> Use browser developer tools
-              (F12) â†’ Network tab to verify scripts are loading
+              (Fn + F12) - Network tab to verify scripts are loading
             </li>
           </ul>
         </div>

@@ -110,7 +110,7 @@ const ReviewPublish = ({ tabId, config }) => {
       }
 
       // Call a publish endpoint that will regenerate all meta tags
-      const response = await fetch(`${apiUrl}/publish`, {
+      const response = await fetch(`${apiUrl}publish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -216,12 +216,38 @@ const ReviewPublish = ({ tabId, config }) => {
       }
     });
 
-    // Get schemas
-    if (pageSettings.schemas || globalSettings.schemas) {
-      effectiveValues.schemas = [
-        ...(globalSettings.schemas || []),
-        ...(pageSettings.schemas || []),
-      ];
+    // Get schemas - DEDUPLICATE by schema ID
+    const allSchemas = [];
+    const seenSchemaIds = new Set();
+
+    // Add global schemas first
+    const globalSchemas = globalSettings.schemas || [];
+    globalSchemas.forEach((schema) => {
+      if (schema.id && !seenSchemaIds.has(schema.id)) {
+        seenSchemaIds.add(schema.id);
+        allSchemas.push({ ...schema, source: "global" });
+      }
+    });
+
+    // Add page-specific schemas (skip if ID already exists from global)
+    if (selectedPage !== "global") {
+      const pageSchemas = pageSettings.schemas || [];
+      pageSchemas.forEach((schema) => {
+        if (schema.id && !seenSchemaIds.has(schema.id)) {
+          seenSchemaIds.add(schema.id);
+          allSchemas.push({ ...schema, source: "page" });
+        }
+      });
+    }
+
+    if (allSchemas.length > 0) {
+      effectiveValues.schemas = allSchemas;
+      console.log("📊 ReviewPublish: Deduplicated schemas:", {
+        total: allSchemas.length,
+        global: allSchemas.filter((s) => s.source === "global").length,
+        page: allSchemas.filter((s) => s.source === "page").length,
+        uniqueIds: Array.from(seenSchemaIds),
+      });
     }
 
     // Get breadcrumb configuration
@@ -237,9 +263,9 @@ const ReviewPublish = ({ tabId, config }) => {
     const values = getAllEffectiveValues();
     const output = [];
 
-    console.log("Ã°Å¸â€Â Generating head output with values:", values);
-    console.log("Ã°Å¸â€œÅ  Settings object:", settings);
-    console.log("Ã°Å¸â€œâ€ž Selected page:", selectedPage);
+    console.log("🎯 Generating head output with values:", values);
+    console.log("📝 Settings object:", settings);
+    console.log("📄 Selected page:", selectedPage);
 
     // Helper function to generate script tag with loading attribute
     const getScriptAttr = (fieldKey) => {
@@ -559,7 +585,7 @@ const ReviewPublish = ({ tabId, config }) => {
       output.push(
         `  })(window, document, "clarity", "script", "${values.microsoft_clarity_id}");`,
       );
-      output.push("</script$>");
+      output.push("</script>");
       output.push("<!-- End Microsoft Clarity -->");
       output.push("");
     }
@@ -801,7 +827,19 @@ const ReviewPublish = ({ tabId, config }) => {
     // JSON-LD Schemas
     if (values.schemas && values.schemas.length > 0) {
       output.push("<!-- Structured Data (JSON-LD) -->");
-      output.push('<script async type="application/ld+json">');
+
+      // Add comment showing schema sources for debugging
+      const globalCount = values.schemas.filter(
+        (s) => s.source === "global",
+      ).length;
+      const pageCount = values.schemas.filter(
+        (s) => s.source === "page",
+      ).length;
+      output.push(
+        `<!-- Total Schemas: ${values.schemas.length} (${globalCount} global, ${pageCount} page-specific) -->`,
+      );
+
+      output.push('<script type="application/ld+json">');
 
       // Map schema types to their builder functions
       const schemaBuilders = {
@@ -816,12 +854,12 @@ const ReviewPublish = ({ tabId, config }) => {
         Recipe: buildRecipeJson,
         VideoObject: buildVideoObjectJson,
         HowTo: buildHowToJson,
-        FAQPage: buildFaqPageJson,
+        FaqPage: buildFaqPageJson,
         Review: buildReviewJson,
         Course: buildCourseJson,
         Service: buildServiceJson,
         JobPosting: buildJobPostingJson,
-        NonprofitOrganization: buildNonProfitOrganizationJson,
+        NonProfit: buildNonProfitOrganizationJson,
         OnlineMarketplace: buildOnlineMarketplaceJson,
         Custom: buildCustomJson,
       };
@@ -897,7 +935,7 @@ const ReviewPublish = ({ tabId, config }) => {
 
       if (breadcrumbItems.length > 1) {
         output.push("<!-- Breadcrumb Navigation (JSON-LD) -->");
-        output.push('<script async type="application/ld+json">');
+        output.push('<script type="application/ld+json">');
         output.push(
           JSON.stringify(
             {
@@ -949,9 +987,12 @@ const ReviewPublish = ({ tabId, config }) => {
     const values = getAllEffectiveValues();
     const output = [];
 
-    // Custom footer scripts
+    console.log("🦶 Generating footer output");
+    console.log("  custom_footer_scripts value:", values.custom_footer_scripts);
+
+    // Custom footer scripts - CRITICAL: This must come first!
     if (values.custom_footer_scripts) {
-      output.push("<!-- Custom Footer Code -->");
+      output.push("<!-- Custom Footer Scripts -->");
       output.push(values.custom_footer_scripts);
       output.push("");
     }
@@ -985,6 +1026,9 @@ const ReviewPublish = ({ tabId, config }) => {
       }
     }
 
+    console.log("  Footer output length:", output.length);
+    console.log("  Footer output:", output.join("\n"));
+
     return output.join("\n");
   };
 
@@ -1006,7 +1050,7 @@ const ReviewPublish = ({ tabId, config }) => {
         }}
       >
         <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.2rem" }}>
-          Ã°Å¸â€œâ€¹ Review & Publish Your SEO Configuration
+          📋 Review & Publish Your SEO Configuration
         </h3>
         <p style={{ margin: "0 0 0.75rem 0", lineHeight: "1.6" }}>
           This page shows exactly what will be added to your website's HTML.
@@ -1015,9 +1059,9 @@ const ReviewPublish = ({ tabId, config }) => {
           it live.
         </p>
         <p style={{ margin: 0, lineHeight: "1.6", fontWeight: 500 }}>
-          Ã°Å¸â€™Â¡ The preview combines all your settings: meta tags, social
-          media, tracking codes, and schemas. Page-specific settings override
-          global settings.
+          💡 The preview combines all your settings: meta tags, social media,
+          tracking codes, and schemas. Page-specific settings override global
+          settings.
         </p>
       </div>
 
@@ -1029,12 +1073,12 @@ const ReviewPublish = ({ tabId, config }) => {
           value={selectedPage}
           onChange={(e) => handlePageChange(e.target.value)}
         >
-          <option value="global">Ã°Å¸Å’Â Global Defaults (All Pages)</option>
+          <option value="global">🌐 Global Defaults (All Pages)</option>
           {pages
             .filter((page) => page.id !== "global")
             .map((page) => (
               <option key={page.id} value={page.id}>
-                Ã°Å¸â€œâ€ž {page.title}
+                📄 {page.title}
                 {page.url ? ` (${page.url})` : ""}
               </option>
             ))}
@@ -1046,7 +1090,7 @@ const ReviewPublish = ({ tabId, config }) => {
             style={{ marginTop: "0.75rem" }}
           >
             <small>
-              Ã°Å¸â€â€” <strong>Viewing:</strong> {currentPageInfo.title}
+              👁️ <strong>Viewing:</strong> {currentPageInfo.title}
               {currentPageInfo.url && ` (${currentPageInfo.url})`}
             </small>
           </div>
@@ -1056,7 +1100,7 @@ const ReviewPublish = ({ tabId, config }) => {
       {/* Error Display */}
       {apiError && (
         <div className={styles.errorAlert}>
-          <p>Ã¢Å¡Â Ã¯Â¸Â {apiError}</p>
+          <p>⚠️ {apiError}</p>
         </div>
       )}
 
@@ -1072,7 +1116,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showHeadSection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
+                {showHeadSection ? "▼" : "▶"}
               </span>
               <h3>&lt;head&gt; Section Output</h3>
             </div>
@@ -1120,7 +1164,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showBodySection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
+                {showBodySection ? "▼" : "▶"}
               </span>
               <h3>&lt;body&gt; Section Output</h3>
             </div>
@@ -1168,7 +1212,7 @@ const ReviewPublish = ({ tabId, config }) => {
           >
             <div className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>
-                {showFooterSection ? "Ã¢â€“Â¼" : "Ã¢â€“Â¶"}
+                {showFooterSection ? "▼" : "▶"}
               </span>
               <h3>Footer Section Output</h3>
             </div>
@@ -1232,7 +1276,7 @@ const ReviewPublish = ({ tabId, config }) => {
                 textAlign: "center",
               }}
             >
-              âœ… <strong>Changes Published Successfully!</strong> Your SEO
+              ✅ <strong>Changes Published Successfully!</strong> Your SEO
               updates are now live on your website.
             </p>
           </div>
@@ -1250,7 +1294,7 @@ const ReviewPublish = ({ tabId, config }) => {
             }}
           >
             <p style={{ margin: 0, fontSize: "1rem", color: "#721c24" }}>
-              Ã¢ÂÅ’ {apiError}
+              ❌ {apiError}
             </p>
           </div>
         )}
@@ -1267,7 +1311,7 @@ const ReviewPublish = ({ tabId, config }) => {
               }}
             >
               <p style={{ margin: 0, fontSize: "1rem", color: "#856404" }}>
-                Ã¢Å¡Â Ã¯Â¸Â <strong>Review your changes above</strong>
+                ⚠️ <strong>Review your changes above</strong>
               </p>
               <p
                 style={{
@@ -1291,8 +1335,8 @@ const ReviewPublish = ({ tabId, config }) => {
               }}
             >
               <p style={{ margin: 0, fontSize: "1rem", color: "#155724" }}>
-                âœ… <strong>All changes are live</strong> - Your website is up
-                to date
+                ✅ <strong>All changes are live</strong> - Your website is up to
+                date
               </p>
             </div>
           )}
@@ -1311,10 +1355,10 @@ const ReviewPublish = ({ tabId, config }) => {
             }}
           >
             {isPublishing
-              ? "Ã°Å¸â€â€ž Publishing..."
+              ? "⏳ Publishing..."
               : hasChanges
-                ? "ðŸš€ Publish All Changes"
-                : "âœ… Everything Published"}
+                ? "🚀 Publish All Changes"
+                : "✅ Everything Published"}
           </button>
         </div>
 

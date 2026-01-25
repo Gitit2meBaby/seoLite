@@ -536,10 +536,10 @@ const SocialMedia = ({ tabId, config, onNavigate }) => {
                 <strong>What you're seeing:</strong>
                 <ul style={{ margin: "0.5rem 0 0 1.5rem", paddingLeft: 0 }}>
                   <li>
-                    âœ… <strong>Global values</strong> that apply to all pages
+                    🌐 <strong>Global values</strong> that apply to all pages
                   </li>
                   <li>
-                    âœ… <strong>Page-specific overrides</strong> for this page
+                    📝 <strong>Page-specific overrides</strong> for this page
                     (take precedence)
                   </li>
                   <li>

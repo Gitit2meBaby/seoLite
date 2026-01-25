@@ -441,7 +441,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
           <div className={styles.alertContent}>
             {deploymentStatus === "deploying" && (
               <>
-                <span className={styles.alertText}>Deploying files...</span>
+                <span className={styles.alertText}>🔨 Deploying files...</span>
               </>
             )}
             {deploymentStatus === "success" && (
@@ -591,7 +591,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             className={styles.copyButton}
             onClick={() => navigator.clipboard.writeText(sitemapPreview)}
           >
-            Copy XML
+            📁 Copy XML
           </button>
         </div>
       </div>
@@ -630,7 +630,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             className={styles.advancedToggle}
             onClick={() => setShowRobotsAdvanced(!showRobotsAdvanced)}
           >
-            {showRobotsAdvanced ? "▼" : "â–º"} Advanced Options - Add Predefined
+            {showRobotsAdvanced ? "▼" : "▶"} Advanced Options - Add Predefined
             Rules
           </button>
 
@@ -643,7 +643,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Block Search Engines */}
               <div className={styles.ruleCategory}>
-                <h5>ðŸ” Block Search Engines</h5>
+                <h5>❌ Block Search Engines</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.searchEngines.map((item, index) => (
                     <button
@@ -660,7 +660,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Block File Types */}
               <div className={styles.ruleCategory}>
-                <h5>ðŸ“ Block File Types</h5>
+                <h5>❌ Block File Types</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.fileTypes.map((item, index) => (
                     <button
@@ -677,7 +677,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 
               {/* Common Patterns */}
               <div className={styles.ruleCategory}>
-                <h5>âš™ï¸ Common Patterns</h5>
+                <h5>❌ Common Patterns</h5>
                 <div className={styles.ruleButtons}>
                   {robotsRules.commonPatterns.map((item, index) => (
                     <button
@@ -723,7 +723,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       {/* Video Sitemap Section */}
       <div className={styles.fieldsContainer} style={{ marginTop: "3rem" }}>
         <div className={styles.sectionHeader}>
-          <h3>ðŸŽ¥ Video Sitemap (Optional)</h3>
+          <h3>📝 Video Sitemap (Optional)</h3>
           <p>
             Add videos to your sitemap to help search engines discover and index
             video content on your site. This will create a separate video
@@ -736,7 +736,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
             >
               {showVideoSection
                 ? "▼ Hide Video Sitemap"
-                : "â–º Show Video Sitemap"}
+                : "▶ Show Video Sitemap"}
             </button>
           </div>
         </div>
@@ -750,8 +750,8 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                 disabled={isLoadingVideos}
               >
                 {isLoadingVideos
-                  ? "ðŸ” Detecting..."
-                  : "ðŸ” Detect Videos from Site"}
+                  ? "🔍 Detecting..."
+                  : "🔍 Detect Videos from Site"}
               </button>
               <p className={styles.detectDescription}>
                 This will scan your WordPress media library and post content for
@@ -867,7 +867,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                 </div>
 
                 <div className={styles.videoPreview}>
-                  <h4>ðŸ“„ Generated Video Sitemap XML</h4>
+                  <h4>🔨 Generated Video Sitemap XML</h4>
                   <div className={styles.codePreview}>
                     <pre className={styles.codeBlock}>
                       <code>{generateVideoSitemapXML()}</code>
@@ -878,7 +878,7 @@ Sitemap: ${siteUrl}/sitemap.xml`;
                         navigator.clipboard.writeText(generateVideoSitemapXML())
                       }
                     >
-                      ðŸ“‹ Copy XML
+                      📁 Copy XML
                     </button>
                   </div>
                 </div>

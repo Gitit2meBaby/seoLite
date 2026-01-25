@@ -1,11 +1,6 @@
 import React from "react";
 
 /**
- * Homepage Component
- *
- * This is the welcome/landing page users see when they first open the plugin.
- * It provides an overview and guides them to the main dashboard.
- *
  * PROPS:
  * - onGetStarted: Function to call when user clicks "Get Started"
  */
@@ -13,10 +8,6 @@ const Homepage = ({ onGetStarted }) => {
   // Get data passed from WordPress PHP
   const data = window.seoPluginData || {};
 
-  /**
-   * Handle "Get Started" button click
-   * Calls the parent function to navigate to dashboard
-   */
   const handleGetStarted = () => {
     if (onGetStarted) {
       onGetStarted();
@@ -34,7 +25,6 @@ const Homepage = ({ onGetStarted }) => {
 
   return (
     <div className="homepage-container">
-      {/* Hero Section - Logo, Title, Description */}
       <div className="homepage-hero">
         {/* Logo Placeholder */}
         <div className="homepage-logo">
@@ -60,9 +50,10 @@ const Homepage = ({ onGetStarted }) => {
 
         {/* Description */}
         <p className="homepage-description">
-          The complete SEO toolkit without the bloat. Enterprise-level features
-          in a lightweight package. Optimize your site's metadata, schema
-          markup, and technical SEO - all from one powerful dashboard.
+          SEO & custom fields toolkit without the hassle, hefty bloat or
+          pricetag. Indie developed plugin to allow you full control over
+          metadata, schemas and any script you can imagine. Super lightweight
+          package with all the important features in a simple to use dashboard.
         </p>
       </div>
 

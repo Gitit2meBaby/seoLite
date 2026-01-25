@@ -210,11 +210,17 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
     const pageSettings = settings[pageKey] || {};
     const schemasFromSettings = pageSettings.schemas || [];
 
+    console.log("📥 SchemaTab: Loading schemas from settings");
+    console.log("  Page:", selectedPage);
+    console.log("  Page settings:", pageSettings);
+    console.log("  Schemas from DB:", schemasFromSettings);
+
     setSavedSchemas(schemasFromSettings);
     setHasChanges(false);
   }, [selectedPage, settings]);
 
   const handlePageChange = (pageId) => {
+    console.log("🔄 SchemaTab: Changing page to:", pageId);
     setSelectedPage(pageId);
     setSelectedSchemaType("");
     setCurrentSchemaData({});
@@ -260,15 +266,22 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
       updatedAt: new Date().toISOString(),
     };
 
+    console.log("💾 SchemaTab: Saving schema to local state");
+    console.log("  Schema entry:", schemaEntry);
+
     // Update local state
     let updatedSchemas;
     if (editingSchemaId) {
       updatedSchemas = savedSchemas.map((schema) =>
         schema.id === editingSchemaId ? schemaEntry : schema,
       );
+      console.log("  Action: Updated existing schema");
     } else {
       updatedSchemas = [...savedSchemas, schemaEntry];
+      console.log("  Action: Added new schema");
     }
+
+    console.log("  Updated schemas array:", updatedSchemas);
 
     // Update LOCAL state
     setSavedSchemas(updatedSchemas);
@@ -287,16 +300,28 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
   // Save all schemas from LOCAL STATE to WordPress database
   const handleSave = async () => {
     try {
-      // Build settings object with schemas from LOCAL STATE
+      // Get existing settings for this page
+      const pageKey = `page_${selectedPage}`;
+      const existingSettings = settings[pageKey] || {};
+
+      // Merge schemas with existing settings (don't overwrite other fields!)
       const settingsToSave = {
-        schemas: savedSchemas, // From local state, NOT from form!
+        ...existingSettings, // Keep existing meta_title, meta_description, etc.
+        schemas: savedSchemas, // Update only the schemas
       };
+
+      console.log("💾 SchemaTab: Saving schemas to WordPress...");
+      console.log("  Page:", selectedPage);
+      console.log("  Existing settings:", existingSettings);
+      console.log("  Schemas to save:", savedSchemas);
+      console.log("  Merged settings:", settingsToSave);
 
       // Save to WordPress
       const result = await savePageSettings(selectedPage, settingsToSave);
 
       if (result.success) {
         setHasChanges(false);
+        console.log("✅ SchemaTab: Save successful");
       } else {
         throw new Error(result.message || "Save failed");
       }
@@ -309,6 +334,7 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
   };
 
   const handleEditSchema = (schema) => {
+    console.log("✏️ SchemaTab: Editing schema:", schema);
     setSelectedSchemaType(schema.type);
     setCurrentSchemaData({ ...schema.data });
     setEditingSchemaId(schema.id);
@@ -321,10 +347,14 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
       return;
     }
 
+    console.log("🗑️ SchemaTab: Deleting schema:", schemaId);
+
     // Update LOCAL state
     const updatedSchemas = savedSchemas.filter((s) => s.id !== schemaId);
     setSavedSchemas(updatedSchemas);
     setHasChanges(true);
+
+    console.log("  Remaining schemas:", updatedSchemas);
 
     // If we're editing the deleted schema, reset the form
     if (editingSchemaId === schemaId) {
@@ -391,7 +421,8 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
           <div className={styles.alertContent}>
             <span className={styles.alertIcon}>✓</span>
             <span className={styles.alertText}>
-              Schema {editingSchemaId ? "updated" : "saved"} successfully!
+              Schema {editingSchemaId ? "updated" : "added to list"}{" "}
+              successfully! Click "Save & Go to Review" to save to WordPress.
             </span>
             <button
               className={styles.alertClose}
@@ -400,6 +431,23 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Changes Warning */}
+      {hasChanges && (
+        <div
+          className={styles.errorAlert}
+          style={{
+            background: "#fff3cd",
+            borderColor: "#ffc107",
+            color: "#856404",
+          }}
+        >
+          <p>
+            ⚠️ <strong>Unsaved Changes:</strong> You have unsaved schemas. Click
+            "Save & Go to Review" below to save them to WordPress.
+          </p>
         </div>
       )}
 
@@ -505,7 +553,7 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
               className={`${styles.saveButton} ${styles.hasChanges}`}
               onClick={handleSchemaSave}
             >
-              {editingSchemaId ? "Update Schema" : "Save Schema"}
+              {editingSchemaId ? "Update Schema" : "Add Schema to List"}
             </button>
 
             {editingSchemaId && (
@@ -517,6 +565,14 @@ const SchemaTab = ({ tabId, config, onNavigate }) => {
                 Cancel
               </button>
             )}
+
+            <p
+              style={{ fontSize: "0.9rem", color: "#666", marginTop: "0.5rem" }}
+            >
+              This will add the schema to your list below. Don't forget to click
+              "Save & Go to Review" at the bottom to save all schemas to
+              WordPress.
+            </p>
           </div>
         </div>
       )}

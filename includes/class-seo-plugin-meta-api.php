@@ -66,6 +66,13 @@ class SEO_Plugin_Meta_API {
             'callback' => [$this, 'deploy_files'],
             'permission_callback' => [$this, 'check_permissions']
         ]);
+        
+        // Publish all changes - this endpoint confirms all saved settings are active
+        register_rest_route('seo-plugin/v1', '/publish', [
+            'methods' => 'POST',
+            'callback' => [$this, 'publish_changes'],
+            'permission_callback' => [$this, 'check_permissions']
+        ]);
     }
     
     /**
@@ -154,30 +161,21 @@ class SEO_Plugin_Meta_API {
     
     /**
      * Save meta settings for a specific page
-     * FIXED: Now MERGES with existing settings instead of overwriting them
      */
     public function save_meta_settings($request) {
         $page_id = $request['page_id'];
-        $new_settings = $request->get_json_params();
+        $settings = $request->get_json_params();
         
         error_log("SEO Plugin: === SAVE DEBUG START ===");
         error_log("SEO Plugin: Saving settings for page: {$page_id}");
-        error_log("SEO Plugin: New settings to merge: " . print_r($new_settings, true));
-        
-        // CRITICAL FIX: Get existing settings first
-        $option_name = "seo_plugin_page_{$page_id}";
-        $existing_settings = get_option($option_name, []);
-        error_log("SEO Plugin: Existing settings from DB: " . print_r($existing_settings, true));
-        
-        // Merge new settings with existing ones (new settings take precedence)
-        $merged_settings = array_merge($existing_settings, $new_settings);
-        error_log("SEO Plugin: Merged settings: " . print_r($merged_settings, true));
+        error_log("SEO Plugin: Raw input data: " . print_r($settings, true));
         
         // Enhanced sanitization that preserves all fields including tracking
-        $clean_settings = $this->sanitize_all_settings($merged_settings);
+        $clean_settings = $this->sanitize_all_settings($settings);
         error_log("SEO Plugin: Clean settings after sanitization: " . print_r($clean_settings, true));
         
-        // Save merged settings to WordPress options table
+        // Save to WordPress options table
+        $option_name = "seo_plugin_page_{$page_id}";
         $result = update_option($option_name, $clean_settings);
         
         error_log("SEO Plugin: update_option({$option_name}) result: " . ($result ? 'true' : 'false'));
@@ -225,7 +223,7 @@ class SEO_Plugin_Meta_API {
      */
     private function sanitize_field($key, $value) {
         // Handle custom scripts specially
-        if ($key === 'custom_head_scripts' || $key === 'custom_body_scripts') {
+        if ($key === 'custom_head_scripts' || $key === 'custom_body_scripts' || $key === 'custom_footer_scripts') {
             // For custom scripts, we need to be very permissive
             // but still safe for admin users
             
@@ -471,6 +469,37 @@ class SEO_Plugin_Meta_API {
                     return array_map('sanitize_text_field', array_filter($items));
                 }
                 return [];
+            
+            // Schemas array - preserve structure without sanitizing keys
+            case 'schemas':
+                if (!is_array($value)) {
+                    return [];
+                }
+                
+                $clean_schemas = [];
+                foreach ($value as $schema) {
+                    if (!is_array($schema)) {
+                        continue;
+                    }
+                    
+                    $clean_schema = [];
+                    foreach ($schema as $schema_key => $schema_value) {
+                        // Preserve the original key names (don't use sanitize_key)
+                        // Just sanitize the values recursively
+                        if (is_string($schema_value)) {
+                            $clean_schema[$schema_key] = sanitize_text_field($schema_value);
+                        } elseif (is_array($schema_value)) {
+                            $clean_schema[$schema_key] = $this->sanitize_schema_data($schema_value);
+                        } else {
+                            // Preserve booleans, numbers, etc.
+                            $clean_schema[$schema_key] = $schema_value;
+                        }
+                    }
+                    
+                    $clean_schemas[] = $clean_schema;
+                }
+                
+                return $clean_schemas;
                 
             // Default
             default:
@@ -499,6 +528,34 @@ class SEO_Plugin_Meta_API {
                 $clean[sanitize_key($key)] = $this->sanitize_object_field($value);
             } else {
                 $clean[sanitize_key($key)] = $value;
+            }
+        }
+        
+        return $clean;
+    }
+    
+    /**
+     * Sanitize schema data recursively WITHOUT modifying keys
+     * This is important for schema data where camelCase keys must be preserved
+     */
+    private function sanitize_schema_data($data) {
+        if (!is_array($data)) {
+            if (is_string($data)) {
+                return sanitize_text_field($data);
+            }
+            return $data; // Preserve numbers, booleans, etc.
+        }
+        
+        $clean = [];
+        foreach ($data as $key => $value) {
+            // DO NOT use sanitize_key() - preserve original key names!
+            if (is_string($value)) {
+                $clean[$key] = sanitize_text_field($value);
+            } elseif (is_array($value)) {
+                $clean[$key] = $this->sanitize_schema_data($value);
+            } else {
+                // Preserve numbers, booleans, null, etc.
+                $clean[$key] = $value;
             }
         }
         
@@ -554,5 +611,81 @@ class SEO_Plugin_Meta_API {
         }
         
         return '/page-url';
+    }
+    
+    /**
+     * Publish all changes
+     * 
+     * This endpoint is called when the user clicks "Publish All Changes".
+     * Since our plugin automatically injects meta tags on page load from saved settings,
+     * we don't need to do any special "publishing" - the settings are already active!
+     * 
+     * However, we should:
+     * 1. Clear any WordPress caches so changes appear immediately
+     * 2. Return a success message to confirm everything is published
+     * 
+     * @param WP_REST_Request $request The request object
+     * @return WP_REST_Response Success response
+     */
+    public function publish_changes($request) {
+        error_log("SEO Plugin: === PUBLISH START ===");
+        
+        // Flush WordPress object cache (if caching is enabled)
+        // This ensures our settings are read fresh from the database
+        wp_cache_flush();
+        
+        // Clear any transients that might cache page output
+        delete_transient('seo_plugin_output_cache');
+        
+        // If the site uses a caching plugin, try to clear those caches too
+        // This is optional but helpful for immediate visibility of changes
+        $this->clear_common_caches();
+        
+        error_log("SEO Plugin: Caches cleared, changes are now live");
+        error_log("SEO Plugin: === PUBLISH END ===");
+        
+        return rest_ensure_response([
+            'success' => true,
+            'message' => 'All changes have been published successfully! Your meta tags, tracking codes, and schema markup are now live on your website.'
+        ]);
+    }
+    
+    /**
+     * Clear caches from popular caching plugins
+     * 
+     * This is a helper function that attempts to clear caches from
+     * commonly used WordPress caching plugins. It fails silently if
+     * the plugins aren't installed.
+     */
+    private function clear_common_caches() {
+        // WP Super Cache
+        if (function_exists('wp_cache_clear_cache')) {
+            wp_cache_clear_cache();
+            error_log("SEO Plugin: Cleared WP Super Cache");
+        }
+        
+        // W3 Total Cache
+        if (function_exists('w3tc_flush_all')) {
+            w3tc_flush_all();
+            error_log("SEO Plugin: Cleared W3 Total Cache");
+        }
+        
+        // WP Rocket
+        if (function_exists('rocket_clean_domain')) {
+            rocket_clean_domain();
+            error_log("SEO Plugin: Cleared WP Rocket cache");
+        }
+        
+        // LiteSpeed Cache
+        if (class_exists('LiteSpeed_Cache_API') && method_exists('LiteSpeed_Cache_API', 'purge_all')) {
+            LiteSpeed_Cache_API::purge_all();
+            error_log("SEO Plugin: Cleared LiteSpeed cache");
+        }
+        
+        // Autoptimize
+        if (class_exists('autoptimizeCache')) {
+            autoptimizeCache::clearall();
+            error_log("SEO Plugin: Cleared Autoptimize cache");
+        }
     }
 }
