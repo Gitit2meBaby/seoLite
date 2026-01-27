@@ -32,13 +32,12 @@ export default defineConfig({
         },
         // Tell Vite to use WordPress's global React
         globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
-          "react/jsx-runtime": "ReactJSXRuntime",
+          react: "wp.element",
+          "react-dom": "wp.element",
         },
       },
       // CRITICAL: Don't bundle React - WordPress provides it
-      external: ["react", "react-dom", "react/jsx-runtime"],
+      external: ["react", "react-dom"],
     },
   },
 });

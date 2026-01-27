@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
+import styles from "../../css/components/Homepage.module.scss";
 
-/**
- * PROPS:
- * - onGetStarted: Function to call when user clicks "Get Started"
- */
+import PurchaseModal from "./common/PurchaseModal";
+
 const Homepage = ({ onGetStarted }) => {
-  // Get data passed from WordPress PHP
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const data = window.seoPluginData || {};
+  const pluginUrl = data.pluginUrl || "";
 
   const handleGetStarted = () => {
     if (onGetStarted) {
@@ -14,145 +14,134 @@ const Homepage = ({ onGetStarted }) => {
     }
   };
 
-  /**
-   * Handle "Import Meta Data" button click
-   * TODO: This will eventually open a modal or navigate to import page
-   */
   const handleImportMeta = () => {
     console.log("Import Meta Data clicked - to be implemented");
-    // You can add functionality here when offline
   };
 
   return (
-    <div className="homepage-container">
-      <div className="homepage-hero">
-        {/* Logo Placeholder */}
-        <div className="homepage-logo">
-          <div className="logo-placeholder">
-            {/* TODO: Replace with actual logo */}
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-              <rect width="80" height="80" rx="16" fill="#0073aa" />
-              <path
-                d="M25 40L35 50L55 30"
-                stroke="white"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+    <section className={styles.homeContainer}>
+      <div className={styles.homeHero}>
+        <div className={styles.imgContainer}>
+          <img
+            src={`${pluginUrl}dist/images/logo.webp`}
+            alt="SEOLite logo"
+            height={300}
+            width={400}
+            className={styles.logo}
+          />
         </div>
 
-        {/* Title */}
-        <h1 className="homepage-title">
-          {data.strings?.welcome || "Welcome to SEOLite"}
-        </h1>
-
-        {/* Description */}
-        <p className="homepage-description">
-          SEO & custom fields toolkit without the hassle, hefty bloat or
-          pricetag. Indie developed plugin to allow you full control over
-          metadata, schemas and any script you can imagine. Super lightweight
-          package with all the important features in a simple to use dashboard.
+        <p>
+          Complete SEO & custom fields toolkit without the subscription hassle,
+          hefty useless bloat features and painful price-tag. Indie developed
+          plugin for the people. Take full control over metadata, schemas and
+          any script you can imagine. Super lightweight package with all the
+          important features in a simple to use dashboard.
         </p>
       </div>
 
-      {/* Feature Grid with Image Placeholders */}
-      <div className="homepage-features">
-        {/* Feature 1 */}
-        <div className="feature-card">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <span>📊</span>
-            </div>
-          </div>
-          <h3>Complete SEO Control</h3>
-          <p>
-            Manage meta tags, Open Graph, Twitter Cards, and more in one place.
-          </p>
+      <div className={styles.homeContent}>
+        <h2>Learn More...</h2>
+        <p>
+          I built this plugin because I was sick of seeing people paying too
+          much for slop they do not need. It was not long ago I started out in
+          web development and I hope this tool helps people in the same position
+          I was.
+        </p>
+        <p>
+          Don't forget - <strong>THIS IS A DEMO VERSION!</strong> In order to
+          pay the fees, maintain the codebase and continue upgrading I ask for a
+          small one-off payment. You will be restricted to using the admin only
+          on the free version.
+        </p>
+        <p>
+          For more information, troubleshooting and the community forum please
+          head to the{" "}
+          <a href="https://www.seoliteplugin.com">SeoLite Official Website</a>
+        </p>
+      </div>
+
+      <div className={styles.grid}>
+        <div className={styles.listItems}>
+          <h2>Quick Tips...</h2>
+          <ul>
+            <li>
+              <strong>Download Existing Metadata - </strong>
+              If you have an SEO plugin installed already, try the 'Import Meta
+              Data' button to pre-populate fields.
+            </li>
+            <li>
+              <strong>Hover over the ? buttons - </strong>
+              If your unsure about an input these might help as a quick
+              reference
+            </li>
+            <li>
+              <strong>Insert as much info as you can! - </strong>
+              You should be able to fill multiple schemas for any website, these
+              not only help Search Engines, but also GEO - Be seen by AI.
+            </li>
+            <li>
+              <strong>Plan your keywords - </strong>
+              Choose a strategy and run with it, don't stuff keywords in your
+              content needlessly, but target one per page and monitor your
+              results with FREE resources like{" "}
+              <a href="https://search.google.com/search-console">
+                Google Search Console
+              </a>
+              .
+            </li>
+            <li>
+              <strong>Build sitemap, robots.txt & breadcrumbs - </strong>
+              Don't forget to generate these! Just press the generate button on
+              each tab to initialise defaults (this is 100% fine in 99% of use
+              cases)
+            </li>
+            <li>
+              <strong>Remove useless plugins! - </strong>
+              You no longer need any other SEO plugins, no custom script
+              inserters, forget about custom fields and improve your page speed
+              by reducing plugins.
+            </li>
+          </ul>
         </div>
 
-        {/* Feature 2 */}
-        <div className="feature-card">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <span>🚀</span>
-            </div>
-          </div>
-          <h3>Lightning Fast</h3>
-          <p>
-            40x smaller than leading SEO plugins. Zero impact on your site
-            speed.
-          </p>
-        </div>
+        {/* Action Buttons Section */}
+        <div className={styles.btns}>
+          <button
+            className={`${styles.btn} ${styles.importBtn}`}
+            onClick={() => handleImportMeta()}
+            type="button"
+          >
+            Import Meta Data
+            <span>→</span>
+          </button>
 
-        {/* Feature 3 */}
-        <div className="feature-card">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <span>🎯</span>
-            </div>
-          </div>
-          <h3>Schema Markup</h3>
-          <p>
-            Rich snippets for better search visibility with comprehensive schema
-            support.
-          </p>
-        </div>
+          <button
+            className={`${styles.btn} ${styles.purchaseBtn}`}
+            onClick={() => setShowPurchaseModal(true)}
+          >
+            Purchase
+            <span>→</span>
+          </button>
 
-        {/* Feature 4 */}
-        <div className="feature-card">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <span>🔧</span>
-            </div>
-          </div>
-          <h3>Easy to Use</h3>
-          <p>
-            Intuitive interface designed for both beginners and SEO
-            professionals.
-          </p>
+          <button
+            className={`${styles.btn} ${styles.startBtn}`}
+            onClick={() => handleGetStarted()}
+            type="button"
+          >
+            Get Started
+            <span>→</span>
+          </button>
         </div>
       </div>
 
-      {/* Action Buttons Section */}
-      <div className="homepage-actions">
-        {/* Import Button (smaller, secondary) */}
-        <button
-          className="import-button"
-          onClick={handleImportMeta}
-          type="button"
-        >
-          {data.strings?.importMeta || "Import Meta Data"}
-        </button>
-
-        {/* Get Started Button (primary, larger) */}
-        <button
-          className="get-started-button"
-          onClick={handleGetStarted}
-          type="button"
-        >
-          {data.strings?.getStarted || "Get Started"}
-          <span className="button-icon">→</span>
-        </button>
-      </div>
-
-      {/* Quick Stats Section (Optional) */}
-      <div className="homepage-stats">
-        <div className="stat-item">
-          <div className="stat-number">15+</div>
-          <div className="stat-label">Schema Types</div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-number">40x</div>
-          <div className="stat-label">Lighter</div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-number">100%</div>
-          <div className="stat-label">Free</div>
-        </div>
-      </div>
-    </div>
+      {showPurchaseModal && (
+        <PurchaseModal
+          handleGetStarted={handleGetStarted}
+          setShowPurchaseModal={setShowPurchaseModal}
+        />
+      )}
+    </section>
   );
 };
 

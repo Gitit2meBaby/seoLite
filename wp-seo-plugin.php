@@ -156,9 +156,8 @@ class WP_SEO_Plugin {
         echo '<div class="wrap">';
         echo '<div style="display: flex; align-items: center; margin-bottom: 1rem;">';
         echo '<h1 style="margin: 0; margin-right: 1rem;">' . __('SEOLite Dashboard', 'seolite') . '</h1>';
-        echo '<span style="background: linear-gradient(135deg, #0073aa 0%, #005a87 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,115,170,0.3);">' . __('40x Lighter', 'seolite') . '</span>';
         echo '</div>';
-        echo '<p style="color: #666; margin-bottom: 2rem; font-size: 1.1rem;">' . __('The complete SEO toolkit without the bloat. Enterprise-level features in a lightweight package.', 'seolite') . '</p>';
+        echo '<p style="color: #666; margin-bottom: 2rem; font-size: 1.1rem;">' . __('Technical SEO covered... Metadata, tracking tags, custom script injection and schema creation all stripped bare to speed up your site.', 'seolite') . '</p>';
         
         // React container
         echo '<div id="seo-plugin-admin">';
@@ -213,6 +212,7 @@ class WP_SEO_Plugin {
             'nonce' => wp_create_nonce('wp_rest'),
             'siteUrl' => home_url(),
             'siteName' => get_bloginfo('name'),
+            'pluginUrl' => SEO_PLUGIN_URL,
             'tabs' => $tab_data,
             'strings' => array(
                 'loading' => __('Loading...', 'seolite'),

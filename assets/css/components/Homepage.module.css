@@ -1,0 +1,82 @@
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+}
+.homeContainer a {
+  color: #005a87;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-underline-offset: 0.5px;
+}
+
+.imgContainer {
+  position: relative;
+}
+
+.homeContent p {
+  margin: 0 !important;
+}
+.homeContent strong {
+  color: rgb(209, 0, 0);
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 33%;
+  gap: 4vw;
+  margin-top: 1rem;
+}
+
+.listItems strong {
+  margin-top: 0.5rem;
+}
+.listItems strong:first-of-type {
+  margin-top: 0;
+}
+
+.btns {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: auto 5vw 2rem auto;
+  width: 100%;
+}
+.btns a {
+  text-decoration: none;
+}
+
+.btn {
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  width: -moz-fit-content;
+  width: fit-content;
+  border: none;
+  box-shadow: 0 2px 4px rgba(3, 3, 3, 0.3);
+  transition: all 0.5s ease-in-out;
+  cursor: pointer;
+  margin-left: auto;
+}
+.btn:hover {
+  scale: 1.1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+.btn span {
+  margin-left: 0.5rem;
+}
+
+.importBtn {
+  background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+}
+
+.purchaseBtn {
+  background: linear-gradient(135deg, #d10000 0%, #a50101 100%);
+  text-align: center;
+}
+
+.startBtn {
+  background: linear-gradient(135deg, #0dac32 0%, #00870d 100%);
+}/*# sourceMappingURL=Homepage.module.css.map */
